@@ -6,17 +6,17 @@ var ko = function (x) {
     assert.ok(!x);
 };
 
-var gpr = require('../gpr');
-var Nil = gpr.Nil;
-var Bool = gpr.Bool;
-var Num = gpr.Num;
-var Str = gpr.Str;
-var Arr = gpr.Arr;
-var Obj = gpr.Obj;
-var Func = gpr.Func;
-var struct = gpr.struct;
-var enums = gpr.enums;
-var union = gpr.union;
+var t = require('../tcomb');
+var Nil = t.Nil;
+var Bool = t.Bool;
+var Num = t.Num;
+var Str = t.Str;
+var Arr = t.Arr;
+var Obj = t.Obj;
+var Func = t.Func;
+var struct = t.struct;
+var enums = t.enums;
+var union = t.union;
 
 var Direction = enums({
     North: 0, 

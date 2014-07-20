@@ -1,4 +1,4 @@
-# General purpose runtime (gpr.js)
+# JavaScript types and combinators
 
 # Prerequisiti
 

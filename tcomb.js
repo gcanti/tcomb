@@ -4,7 +4,7 @@
     } else if (typeof exports === 'object') {
         module.exports = factory();
     } else {
-        root.gpr = factory();
+        root.tcomb = factory();
     }
 }(this, function () {
 

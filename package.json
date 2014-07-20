@@ -1,0 +1,22 @@
+{
+  "name": "tcomb",
+  "version": "0.0.1",
+  "description": "JavaScript types and combinators",
+  "main": "tcomb.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gcanti/tcomb.git"
+  },
+  "author": "Giulio Canti <giulio.canti@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gcanti/tcomb/issues"
+  },
+  "homepage": "https://github.com/gcanti/tcomb",
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
