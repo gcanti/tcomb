@@ -12,7 +12,7 @@ tcomb is a library which allows you to check the types of JavaScript values at r
 
 ## How
 
-This library provides several type combinators and a built-in `assert` function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. Since after a type error many others are expected, the debugger starts only once.
+This library provides several type combinators and a built-in `assert` function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. The debugger starts only once after the first failed assert.
 
 ## Quick example
 
@@ -115,17 +115,17 @@ on the project root.
 
 A `type` is a function `T` such that
 
-1. `T` has signature `T(values, [mut])` where the arg `values` is the set of values occurred to have an instance of `T` (depends on the nature of `T`) and the optional boolean arg `mut` makes the instance mutable (default `false`)
+1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean arg `mut` makes the instance mutable (default `false`)
 2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
 3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
 
-**Note**: 2. implies that `T` can be used as the default JSON decoder
+**Note**: 2. implies that `T` can be used as a default JSON decoder
 
 ## Api
 
 ### primitive(name, is)
 
-Is used internally to define JavaScript native types:
+Used internally to define JavaScript native types:
 
 - Nil: `null` and  `undefined`
 - Str: strings
@@ -305,8 +305,8 @@ is(x)
 Returns `true` if `x` belongs to the tuple.
 
     Args.is([1, 2]);      // => true
-    Args.is([1, 'a']);    // => false, il secondo elemento non è un Num
-    Args.is([1, 2, 3]);   // => false, troppi elementi
+    Args.is([1, 'a']);    // => false, second element is not a Num
+    Args.is([1, 2, 3]);   // => false, too many elements
 
 update(instance, index, element, [mut])
 
@@ -322,12 +322,12 @@ Defines a subtype of an existing type.
         return n === parseInt(n, 10);
     });
 
+    // points of the first quadrant
     var Q1Point = subtype(Point, function (p) {
-        // punti nel primo quadrante
         return p.x >= 0 && p.y >= 0;
     });
 
-    // uso del costruttore
+    // constructor usage
     var p = new Q1Point({x: -1, y: -2}); // => fail!
 
 Some meta informations are stored in a `meta` hash
@@ -352,7 +352,7 @@ Defines an array where all elements are of type `type`.
 
     var Path = list(Point);
 
-    // uso del costruttore
+    // costructor usage
     var path = new Path([
         {x: 0, y: 0}, 
         {x: 1, y: 1}

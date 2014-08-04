@@ -14,9 +14,6 @@
     // Utils
     // --------------------------------------------------------------
 
-    /* fa partire il debugger prima di lanciare un errore il debugger parte una 
-    volta sola perchè tipicamente dopo un fallimento ce ne possono essere 
-    molti altri e diventerebbe una noia */
     var failed = false;
     
     function fail(message) {
@@ -27,15 +24,12 @@
         throw new Error(message);
     }
 
-    /* se l'assert fallisce chiama fail(message) */
     function assert(guard, message) {
         if (guard !== true) { 
             fail(message || 'assert failed'); 
         }
     }
 
-    /* rende immutabili le proprietà dirette di un oggetto o un array 
-    a meno che unless sia = true */
     function freeze(obj_or_arr, unless) {
         if (unless !== true) {
             Object.freeze(obj_or_arr);
@@ -43,9 +37,6 @@
         return obj_or_arr;
     }
 
-    /* copia i campi di y in x. Se overwrite è falsy non è possibile 
-    sovrascrivere dei campi già presenti in x in modo da evitare 
-    fastidiosi bug */
     function mixin(x, y, overwrite) {
         for (var k in y) {
             if (y.hasOwnProperty(k)) {
@@ -115,7 +106,6 @@
 
     function primitive(name, is) {
 
-        /* ignora l'argomento mut perchè i tipi primitivi di JavaScript sono sempre immutabili */
         function Primitive(values) {
             assert(Primitive.is(values), 'bad ' + name);
             return values;
@@ -269,7 +259,6 @@
 
     function enums(map, name) {
 
-        /* ignora l'argomento mut perchè gli enum sono stringhe JavaScript e quindi sempre immutabili */
         function Enums(x) {
             assert(Enums.is(x), 'bad ' + (name || 'enum'));
             return x;
