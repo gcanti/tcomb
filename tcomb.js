@@ -4,7 +4,7 @@
     } else if (typeof exports === 'object') {
         module.exports = factory();
     } else {
-        root.tcomb = factory();
+        root.t = factory();
     }
 }(this, function () {
 
@@ -157,6 +157,10 @@
 
     var Func = primitive('Func', function (x) {
         return typeof x === 'function';
+    });
+
+    var Err = primitive('Err', function (x) {
+        return x instanceof Error;
     });
 
     // --------------------------------------------------------------
@@ -416,7 +420,6 @@
     }
 
     return {
-
         fail: fail,
         assert: assert,
         freeze: freeze,
@@ -434,6 +437,7 @@
         Arr: Arr,
         Obj: Obj,
         Func: Func,
+        Err: Err,
 
         primitive: primitive,        
         struct: struct,

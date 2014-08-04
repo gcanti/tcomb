@@ -1,74 +1,15 @@
-# tcomb
+# JavaScript types and combinators
 
-JavaScript types and combinators
+# Prerequisiti
 
-## Why?
+    array.forEach()
+    array.map()
+    array.some()
+    array.every()
+    Object.freeze()
+    Object.keys()
 
-tcomb is a library which allows you to check the types of JavaScript values at runtime with a simple syntax. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
-
-- easy debugging
-- encode/decode of your domain objects to/from JSON for free
-- instances are immutables by default
-
-## How
-
-This library provides several type combinators and a built-in `assert` function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. Since after a type error many others are expected, the debugger starts only once.
-
-## Quick example
-
-Let's build a product
-
-    var Product = struct({
-        name: Str,                  // a REQUIRED string
-        description: maybe(Str),    // an OPTIONAL string (can be `null`)
-        homepage: Url,              // a SUBTYPE string representing a URL
-        shippings: list(Shipping),  // a LIST of shipping methods
-        category: Category,         // a string in [Audio, Video] (ENUM)
-        price: union(Num, Price),   // price expressed in dollars OR in another currency (UNION)
-        dim: tuple([Num, Num])      // width x height (TUPLE)
-    });
-
-    var Url = subtype(Str, function (s) {
-        return s.indexOf('http://') === 0;
-    });
-
-    var Shipping = struct({
-        description: Str,
-        cost: Num
-    });
-
-    var Category = enums({
-        Audio: 0,
-        Video: 1
-    });
-
-    var Price = struct({
-        currency: Str,
-        amount: Num
-    });
-
-    var ipod = new Product({
-        name: 'iPod',
-        description: 'Engineered for maximum funness.',
-        homepage: 'http://www.apple.com/ipod/',
-        shippings: [{
-            description: 'Shipped to your door, free.',
-            cost: 0
-        }],
-        category: 'Audio',
-        price: {currency: 'EUR', amount: 100},
-        dim: [2.4, 4.1]
-    });
-
-## Setup
-
-Node
-
-    npm install tcomb
-
-    var t = require('tcomb');
-
-Browser
+Setup di riferimento
 
     <!DOCTYPE html>
     <html>
@@ -76,102 +17,68 @@ Browser
             <meta charset="utf-8" />
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>tcomb setup</title>
+            <title>gpr</title>
             <!--[if lt IE 9]>
             <script src="shims/json2.js"></script>
             <script src="shims/es5-shim.min.js"></script>
             <script src="shims/es5-sham.min.js"></script>
             <script src="shims/html5shiv.min.js"></script>
             <![endif]-->
-            <script type="text/javascript" src="tcomb.js"></script>
+            <script type="text/javascript" src="jquery.js"></script>
+            <script type="text/javascript" src="gpr.js"></script>
         </head>
         <body>
             <script type="text/javascript">
-                console.log(t);
             </script>
         </body>
     </html>
 
-## Requirements
 
-Some ES5 methods
+# Come sono fatti i tipi?
 
-    Array#forEach()
-    Array#map()
-    Array#some()
-    Array#every()
-    Object#freeze()
-    Object#keys()
+Una funzione `T` è un tipo se
 
-## Tests
+1. ha firma `T(values, [mut])` ove `values` è l'insieme di valori che occorrono per avere un'istanza di `T` (dipende da `T`) e `mut` indica se l'istanza è mutabile (default `false`)
+2. è strutturalmente idempotente: `new T(new T(values)) equals new T(values)`
+3. possiede una funzione statica `T.is(x)` che restituisce `true` se `x` è un'istanza di `T`
 
-Run
+da 2. deriva che `T` può essere usato come deserializzatore JSON di default
 
-    mocha
+# primitive(name, is)
 
-on the project root.
+- Nil
+- Str
+- Num
+- Bool
+- Arr
+- Obj
+- Func
 
-## What's a type?
+# struct(props, [name])
 
-A `type` is a function `T` such that
+L'opzione `name` è utile per facilitare il debug.
 
-1. `T` has signature `T(values, [mut])` where the arg `values` is the set of values occurred to have an instance of `T` (depends on the nature of `T`) and the optional boolean arg `mut` makes the instance mutable (default `false`)
-2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
-3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
-
-**Note**: 2. implies that `T` can be used as the default JSON decoder
-
-## Api
-
-### primitive(name, is)
-
-Is used internally to define JavaScript native types:
-
-- Nil: `null` and  `undefined`
-- Str: strings
-- Num: numbers
-- Bool: booleans
-- Arr: arrays
-- Obj: plain objects
-- Func: functions
-- Err: errors
-
-Example
-
-    Str.is('a'); // => true
-    Nil.is(0); // => false
-
-### struct(props, [name])
-
-Defines a struct like type.
-
-- `props` hash field name -> type
-- `name` optional string useful for debugging
-
-Example
-
-    // define a struct with two numerical props
     var Point = struct({
         x: Num,
         y: Num
     });
 
-Methods are defined as usual
-
+    // i metodi vengono definiti normalmente
     Point.prototype.toString = function () {
         return '(' + this.x + ', ' + this.y + ')';
     };
 
-Building an instance is simple as
+Come istanziare una struct
 
-    "use strict";
+    'use strict';
+
     var p = new Point({x: 1, y: 2});
-    p.x = 2; // => TypeError, p is immutable
-    
-    p = new Point({x: 1, y: 2}, true); // now p is mutable
-    p.x = 2; // ok
+    p.x = 2; // => TypeError, p è immutabile
 
-Some meta informations are stored in a `meta` hash
+    p = new Point({x: 1, y: 2}, true);
+    p.x = 2; // ok, p ora è mutabile
+
+Alcune meta informazioni
 
     Point.meta = {
         kind: 'struct',
@@ -179,26 +86,21 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
-is(x)
+### is(x)
 
-Returns `true` if `x` is an instance of `Point`.
+Restituisce `true` se `x` è un'istanza della struct.
 
     Point.is(p); // => true
 
-update(instance, updates, [mut])
+### update(instance, updates, [mut])
 
-Returns an instance with changed props, without modify the original.
+Restituisce un'istanza con le nuove proprietà senza modificare l'istanza originale.
 
     Point.update(p, {x: 3}); // => new Point({x: 3, y: 2})
 
-### union(types, [name])
+# union(types, [name])
 
-Defines a types union.
-
-- `types` array of types
-- `name` optional string useful for debugging
-
-Example
+Definisce un'unione di tipi.
 
     var Circle = struct({
         center: Point,
@@ -206,8 +108,8 @@ Example
     });
 
     var Rectangle = struct({
-        bl: Point, // bottom left vertex
-        tr: Point  // top right vertex
+        a: Point,
+        b: Point
     });
 
     var Shape = union([
@@ -215,8 +117,7 @@ Example
         Rectangle
     ]);
 
-    // in order to use Shape as constructor `dispatch(values) -> Type` 
-    // must be implemented
+    // per poter usare Shape come costruttore occorre implementare dispatch()
     Shape.dispatch = function (values) {
         assert(Obj.is(values));
         return values.hasOwnProperty('center') ?
@@ -226,7 +127,7 @@ Example
 
     var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
 
-Some meta informations are stored in a `meta` hash
+Alcune meta informazioni
 
     Shape.meta = {
         kind: 'union',
@@ -234,13 +135,13 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
-is(x)
+### is(x)
 
 Restituisce `true` se `x` appartiene all'unione.
 
     Shape.is(new Circle([p, 10])); // => true
 
-### maybe(type, [name])
+# maybe(type, [name])
 
 Analogo ad una `union` con `Nil` e `type`.
 
@@ -250,8 +151,7 @@ Analogo ad una `union` con `Nil` e `type`.
     MaybeStr.is(null);    // => true
     MaybeStr.is(1);       // => false
     
-
-Some meta informations are stored in a `meta` hash
+Alcune meta informazioni
 
     MaybeStr.meta = {
         kind: 'maybe',
@@ -259,7 +159,7 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
-### enums(map, [name])
+# enums(map, [name])
 
 Definisce una enumerazione (di stringhe).
 
@@ -270,7 +170,7 @@ Definisce una enumerazione (di stringhe).
         West: 3
     });
 
-Some meta informations are stored in a `meta` hash
+Alcune meta informazioni
 
     Direction.meta = {
         kind: 'enums',
@@ -278,13 +178,13 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
-is(x)
+### is(x)
 
 Restituisce `true` se `x` appartiene dell'enum.
 
     Direction.is('North'); // => true
 
-### tuple(types, [name])
+# tuple(types, [name])
 
 Definisce un array di dimensione fissa le cui coordinate hanno i tipi specificati.
 
@@ -292,7 +192,7 @@ Definisce un array di dimensione fissa le cui coordinate hanno i tipi specificat
 
     var a = new Args([1, 2]);
 
-Some meta informations are stored in a `meta` hash
+Alcune meta informazioni
 
     Args.meta = {
         kind: 'tuple',
@@ -300,7 +200,7 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
-is(x)
+### is(x)
 
 Restituisce `true` se `x` è una tupla corretta.
 
@@ -308,13 +208,13 @@ Restituisce `true` se `x` è una tupla corretta.
     Args.is([1, 'a']);    // => false, il secondo elemento non è un Num
     Args.is([1, 2, 3]);   // => false, troppi elementi
 
-update(instance, index, element, [mut])
+### update(instance, index, element, [mut])
 
 Restituisce un'istanza con le nuove proprietà senza modificare l'istanza originale.
     
     Args.update(a, 0, 2);    // => [2, 2]
 
-### subtype(type, predicate, [name])
+# subtype(type, predicate, [name])
 
 Definisce un sottotipo di un tipo già definito.
 
@@ -330,7 +230,7 @@ Definisce un sottotipo di un tipo già definito.
     // uso del costruttore
     var p = new Q1Point({x: -1, y: -2}); // => fail!
 
-Some meta informations are stored in a `meta` hash
+Alcune meta informazioni
 
     Int.meta = {
         kind: 'subtype',
@@ -339,14 +239,14 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
-is(x)
+### is(x)
 
 Restituisce `true` se `x` è un'istanza corretta.
 
     Int.is(2);      // => true
     Int.is(1.1);    // => false
 
-### list(type, [name])
+# list(type, [name])
 
 Definisce un array i cui elementi sono del tipo `type`.
 
@@ -358,7 +258,7 @@ Definisce un array i cui elementi sono del tipo `type`.
         {x: 1, y: 1}
     ]);
 
-Some meta informations are stored in a `meta` hash
+Alcune meta informazioni
     
     Path.meta = {
         kind: 'list',
@@ -366,7 +266,7 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
-**Useful methods**
+### Metodi utili
 
 Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza originale.
     
@@ -376,7 +276,7 @@ Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza orig
     Path.remove(path, index, [mut]);
     Path.move(path, from, to, [mut]);
 
-### Utils
+# Utils
 
     // fa partire il debugger prima di lanciare un errore
     // il debugger parte una volta sola perchè tipicamente dopo un fallimento 
@@ -402,9 +302,9 @@ Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza orig
     remove(arr, index);
     move(arr, from, to);
 
-## More examples
+# Esempi d'uso
 
-### How to extend a struct
+### Come estendere una struct
 
     var Point3D = struct(mixin(Point.meta.props, {
         z: Num
@@ -413,7 +313,7 @@ Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza orig
     var p = new Point3D({x: 1, y: 2, z: 3});
 
 
-### Deep update of a struct
+### Modifica in profondità di una struct
 
     var c = new Circle({center: {x: 1, y: 2}, radius: 10});
 
@@ -424,7 +324,7 @@ Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza orig
         })
     });
 
-### Write a general JSON Decoder
+### JSON Decoder
 
     // (json, T, mut) -> instance of T
     function decode(json, T, mut) {
@@ -463,7 +363,7 @@ Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza orig
         }
     };
 
-## Copyright & License
+# Copyright & License
 
 Copyright (C) 2014 Giulio Canti - Released under the MIT License.
 
