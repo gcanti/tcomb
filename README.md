@@ -236,13 +236,13 @@ Some meta informations are stored in a `meta` hash
 
 is(x)
 
-Restituisce `true` se `x` appartiene all'unione.
+Returns `true` if `x` belongs to the union.
 
     Shape.is(new Circle([p, 10])); // => true
 
 ### maybe(type, [name])
 
-Analogo ad una `union` con `Nil` e `type`.
+Same as `union([Nil, type])`.
 
     var MaybeStr = maybe(Str);
 
@@ -261,7 +261,7 @@ Some meta informations are stored in a `meta` hash
 
 ### enums(map, [name])
 
-Definisce una enumerazione (di stringhe).
+Defines an enum of strings.
 
     var Direction = enums({
         North: 0, 
@@ -280,13 +280,13 @@ Some meta informations are stored in a `meta` hash
 
 is(x)
 
-Restituisce `true` se `x` appartiene dell'enum.
+Returns `true` if `x` belongs to the enum.
 
     Direction.is('North'); // => true
 
 ### tuple(types, [name])
 
-Definisce un array di dimensione fissa le cui coordinate hanno i tipi specificati.
+Defines a tuple whose coordinates have the specified types.
 
     var Args = tuple([Num, Num]);
 
@@ -302,7 +302,7 @@ Some meta informations are stored in a `meta` hash
 
 is(x)
 
-Restituisce `true` se `x` è una tupla corretta.
+Returns `true` if `x` belongs to the tuple.
 
     Args.is([1, 2]);      // => true
     Args.is([1, 'a']);    // => false, il secondo elemento non è un Num
@@ -310,13 +310,13 @@ Restituisce `true` se `x` è una tupla corretta.
 
 update(instance, index, element, [mut])
 
-Restituisce un'istanza con le nuove proprietà senza modificare l'istanza originale.
+Returns an instance without modifying the original.
     
     Args.update(a, 0, 2);    // => [2, 2]
 
 ### subtype(type, predicate, [name])
 
-Definisce un sottotipo di un tipo già definito.
+Defines a subtype of an existing type.
 
     var Int = subtype(Num, function (n) {
         return n === parseInt(n, 10);
@@ -341,14 +341,14 @@ Some meta informations are stored in a `meta` hash
 
 is(x)
 
-Restituisce `true` se `x` è un'istanza corretta.
+Returns `true` if `x` belongs to the subtype.
 
     Int.is(2);      // => true
     Int.is(1.1);    // => false
 
 ### list(type, [name])
 
-Definisce un array i cui elementi sono del tipo `type`.
+Defines an array where all elements are of type `type`.
 
     var Path = list(Point);
 
@@ -366,9 +366,15 @@ Some meta informations are stored in a `meta` hash
         name: name
     };
 
+is(x)
+
+Returns `true` if `x` belongs to the list.
+
+    Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // => true
+
 **Useful methods**
 
-Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza originale.
+Return an instance without modifying the original.
     
     Path.append(path, element, [mut]);
     Path.prepend(path, element, [mut]);
@@ -378,24 +384,18 @@ Restituiscono un'istanza con le nuove proprietà senza modificare l'istanza orig
 
 ### Utils
 
-    // fa partire il debugger prima di lanciare un errore
-    // il debugger parte una volta sola perchè tipicamente dopo un fallimento 
-    // ce ne possono essere molti altri e diventerebbe una noia
     fail(message)
 
-    // se l'assert fallisce chiama fail(message)
     assert(guard, [message])
 
-    // rende immutabili le proprietà dirette di un oggetto o un array 
-    // a meno che unless sia = true
+    // make properties immutables unless `unless` is `true`
     freeze(obj_or_arr, [unless])
 
-    // copia i campi di y in x. Se overwrite è falsy non è possibile
-    // sovrascrivere dei campi già presenti in x in modo da evitare
-    // fastidiosi bug
+    // adds the properties of `y` to `x`. If `overwrite` is falsy
+    // and a property already exists, throws an error
     mixin(x, y, [overwrite])
 
-    // manipolazione degli array
+    // array manipulation
     append(arr, element);
     prepend(arr, element);
     update(arr, index, element);
