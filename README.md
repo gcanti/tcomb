@@ -4,15 +4,28 @@ JavaScript types and combinators
 
 ## Why?
 
-tcomb is a library which allows you to check the types of JavaScript values at runtime with a simple syntax. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
+tcomb is a library which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
 
 - easy debugging
 - encode/decode of your domain objects to/from JSON for free
-- instances are immutables by default
+- **instances are immutables** by default
 
-## How
+## How?
 
-This library provides several type combinators and a built-in `assert` function you can use. When an assertion fails in the browser this function starts the debugger so you can inspect the stack and find what's wrong. The debugger starts only once after the first failed assert.
+This library provides several type combinators and a built-in `assert` function you can use. When an **assertion fails this library starts the debugger** so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.
+
+## Overview
+
+You can define and check:
+
+- JavaScript native types
+- structs (i.e. classes)
+- unions
+- maybe
+- enums
+- tuples
+- subtypes
+- lists
 
 ## Quick example
 
@@ -21,7 +34,7 @@ Let's build a product
     var Product = struct({
         name: Str,                  // a REQUIRED string
         description: maybe(Str),    // an OPTIONAL string (can be `null`)
-        homepage: Url,              // a SUBTYPE string representing a URL
+        homepage: Url,              // a SUBTYPE of string representing an URL
         shippings: list(Shipping),  // a LIST of shipping methods
         category: Category,         // a string in [Audio, Video] (ENUM)
         price: union(Num, Price),   // price expressed in dollars OR in another currency (UNION)
@@ -47,6 +60,7 @@ Let's build a product
         amount: Num
     });
 
+    // get an immutable instance
     var ipod = new Product({
         name: 'iPod',
         description: 'Engineered for maximum funness.',
@@ -94,7 +108,7 @@ Browser
 
 ## Requirements
 
-Some ES5 methods
+A few ES5 methods
 
     Array#forEach()
     Array#map()
@@ -109,7 +123,7 @@ Run
 
     mocha
 
-on the project root.
+in the project root.
 
 ## What's a type?
 
@@ -139,6 +153,7 @@ Used internally to define JavaScript native types:
 Example
 
     Str.is('a'); // => true
+    Nil.is(undefined); // => true
     Nil.is(0); // => false
 
 ### struct(props, [name])
@@ -187,7 +202,7 @@ Returns `true` if `x` is an instance of `Point`.
 
 update(instance, updates, [mut])
 
-Returns an instance with changed props, without modify the original.
+Returns an instance with changed props, without modifying the original.
 
     Point.update(p, {x: 3}); // => new Point({x: 3, y: 2})
 
@@ -215,7 +230,7 @@ Example
         Rectangle
     ]);
 
-    // in order to use Shape as constructor `dispatch(values) -> Type` 
+    // in order to use Shape as a constructor the function `dispatch(values) -> Type` 
     // must be implemented
     Shape.dispatch = function (values) {
         assert(Obj.is(values));
@@ -238,7 +253,7 @@ is(x)
 
 Returns `true` if `x` belongs to the union.
 
-    Shape.is(new Circle([p, 10])); // => true
+    Shape.is(new Circle({center: p, radius: 10})); // => true
 
 ### maybe(type, [name])
 
