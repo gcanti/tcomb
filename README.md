@@ -2,21 +2,15 @@
 
 JavaScript types and combinators
 
-## Why?
-
-tcomb is a library which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
+*Why*. tcomb is a library which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
 
 - easy debugging
 - encode/decode of your domain objects to/from JSON for free
 - **instances are immutables** by default
 
-## How?
+*How*. This library provides several type combinators and a built-in `assert` function you can use. When an **assertion fails this library starts the debugger** so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.
 
-This library provides several type combinators and a built-in `assert` function you can use. When an **assertion fails this library starts the debugger** so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.
-
-## Overview
-
-You can define and check:
+*What*. You can define and check:
 
 - JavaScript native types
 - structs (i.e. classes)
@@ -26,6 +20,7 @@ You can define and check:
 - tuples
 - subtypes
 - lists
+- function types (experimental)
 
 ## Quick example
 
@@ -84,38 +79,23 @@ Node
 
 Browser
 
-    <!DOCTYPE html>
-    <html>
-        <head>
-            <meta charset="utf-8" />
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>tcomb setup</title>
-            <!--[if lt IE 9]>
-            <script src="shims/json2.js"></script>
-            <script src="shims/es5-shim.min.js"></script>
-            <script src="shims/es5-sham.min.js"></script>
-            <script src="shims/html5shiv.min.js"></script>
-            <![endif]-->
-            <script type="text/javascript" src="tcomb.js"></script>
-        </head>
-        <body>
-            <script type="text/javascript">
-                console.log(t);
-            </script>
-        </body>
-    </html>
+This library uses a few ES5 methods
 
-## Requirements
+- Array#forEach()
+- Array#map()
+- Array#some()
+- Array#every()
+- Object#keys()
 
-A few ES5 methods
+you can use `es5-shim` to support old browsers
 
-    Array#forEach()
-    Array#map()
-    Array#some()
-    Array#every()
-    Object#freeze()
-    Object#keys()
+    <!--[if lt IE 9]>
+    <script src="es5-shim.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="tcomb.js"></script>
+    <script type="text/javascript">
+        console.log(t);
+    </script>
 
 ## Tests
 
@@ -386,6 +366,17 @@ is(x)
 Returns `true` if `x` belongs to the list.
 
     Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // => true
+
+### func(Arguments, f, [Return], [name])
+
+Defines a function where the `arguments` and the return value are checked.
+
+    var sum = func(tuple([Num, Num]), function (a, b) {
+        return a + b;
+    }, Num);
+
+    sum(1, 2); // => 3
+    sum(1, 'a'); // => fail!
 
 **Useful methods**
 

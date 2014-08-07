@@ -1,12 +1,6 @@
 var assert = require('assert');
-var ok = function (x) {
-    assert.strictEqual(true, x);
-};
-var ko = function (x) {
-    assert.ok(!x);
-};
-
 var t = require('../tcomb');
+
 var Nil = t.Nil;
 var Bool = t.Bool;
 var Num = t.Num;
@@ -14,10 +8,30 @@ var Str = t.Str;
 var Arr = t.Arr;
 var Obj = t.Obj;
 var Func = t.Func;
+var Err = t.Err;
 var struct = t.struct;
 var enums = t.enums;
 var union = t.union;
+var tuple = t.tuple;
+var maybe = t.maybe;
+var subtype = t.subtype;
+var func = t.func;
 
+//
+// setup
+//
+
+var ok = function (x) { assert.strictEqual(true, x); };
+var ko = function (x) { assert.strictEqual(false, x); };
+var throws = assert.throws;
+
+// structs
+var Point = struct({
+    x: Num,
+    y: Num
+}, 'Point');
+
+// enums
 var Direction = enums({
     North: 0, 
     East: 1,
@@ -25,11 +39,7 @@ var Direction = enums({
     West: 3
 }, 'Direction');
 
-var Point = struct({
-    x: Num,
-    y: Num
-}, 'Point');
-
+// unions
 var Circle = struct({
     center: Point,
     radius: Num
@@ -41,6 +51,22 @@ var Rectangle = struct({
 });
 
 var Shape = union([Circle, Rectangle], 'Shape');
+
+Shape.dispatch = function (values) {
+    assert(Obj.is(values));
+    return values.hasOwnProperty('center') ?
+        Circle :
+        Rectangle;   
+};
+
+// tuples
+var Numbers = tuple([Num, Num]);
+
+// funcs
+var sum = func(tuple([Num, Num]), function (a, b) {
+    return a + b;
+}, Num);
+
 
 //
 // basic types specs
@@ -204,7 +230,7 @@ describe('Func', function(){
 describe('struct', function(){
     describe('#is(x)', function(){
 
-        it('should return true when x belongs to the struct', function() {
+        it('should return true when x is an instance of the struct', function() {
             var p = new Point({ x: 1, y: 2 });
             ok(Point.is(p));
         });
@@ -214,10 +240,10 @@ describe('struct', function(){
 
 describe('enum', function(){
     describe('#is(x)', function(){
-        it('should return true when x belongs to the enum', function() {
+        it('should return true when x is an instance of the enum', function() {
             ok(Direction.is('North'));
         });
-        it("should return false when x don't belongs to the enum", function() {
+        it("should return false when x is not an instance of the enum", function() {
             ko(Direction.is('North-East'));
         });
     });
@@ -225,11 +251,84 @@ describe('enum', function(){
 
 describe('union', function(){
     describe('#is(x)', function(){
-        it('should return true when x belongs to the enum', function() {
+        it('should return true when x is an instance of the union', function() {
             var p = new Circle({center: { x: 0, y: 0 }, radius: 10});
             ok(Shape.is(p));
         });
     });
+    describe('Shape constructor', function(){
+        it('should be used to buils instances', function() {
+            
+        });
+    });
 });
 
+describe('tuple', function(){
+    describe('#is(x)', function(){
+        it('should return true when x is an instance of the tuple', function() {
+            ok(Numbers.is([1, 2]));
+        });
+        it("should return false when x is not an instance of the tuple", function() {
+            ko(Numbers.is([1]));
+            ko(Numbers.is([1, 2, 3]));
+            ko(Numbers.is([1, 'a']));
+        });
+    });
+});
+
+describe('func', function(){
+    describe('#is(x)', function(){
+        it('should return true when x is the func', function() {
+            ok(sum.is(sum));
+            ok(sum(1, 2) === 3);
+        });
+        it("should return false when x is not the func", function() {
+            ko(sum.is(function () {}));
+        });
+        it("should throw with wrong arguments", function() {
+            throws(function () {
+                sum(1, 'a');
+            });
+        });
+        it("should throw with wrong return", function() {
+            var bad = func(tuple([Num, Num]), function (a, b) {
+                return a + String(b);
+            }, Num);
+            throws(function () {
+                bad(1, 2);
+            });
+        });
+        it("Return should be optional", function() {
+            var bad = func(tuple([Num, Num]), function (a, b) {
+                return a + String(b);
+            });
+            ok(bad(1, 2) === '12');
+        });
+        it("should handle optional arguments", function() {
+            var sum3 = func(tuple([Num, Num, maybe(Num)]), function (a, b, c) {
+                return a + b + (c || 0);
+            }, Num);
+            ok(sum3(1, 2, 3) === 6);
+            ok(sum3(1, 2) === 3);
+        });
+    });
+});
+
+describe('generics', function(){
+    // generic Either A B
+    var Either = function (A, B) {
+        return subtype(tuple([maybe(A), maybe(B)]), function (x) {
+            return Nil.is(x[0]) !== Nil.is(x[1]);
+        });
+    };
+    // node.js style callback
+    var CallbackArguments = Either(Err, Obj);
+    it('should return true when x is an instance of CallbackArguments', function() {
+        ok(CallbackArguments.is([null, {}]));
+        ok(CallbackArguments.is([new Error(), null]));
+    });
+    it('should return false when x is not an instance of CallbackArguments', function() {
+        ko(CallbackArguments.is([null, null]));
+    });
+});
 

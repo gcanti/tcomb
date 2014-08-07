@@ -31,7 +31,7 @@
     }
 
     function freeze(obj_or_arr, unless) {
-        if (unless !== true) {
+        if (unless !== true && Object.freeze) {
             Object.freeze(obj_or_arr);
         }
         return obj_or_arr;
@@ -50,7 +50,7 @@
     }
 
     // --------------------------------------------------------------
-    // Manipolazione degli array
+    // array manipulation
     // --------------------------------------------------------------
 
     function is_valid_index(index, from, to) {
@@ -408,6 +408,40 @@
         return List;
     }
 
+    // --------------------------------------------------------------
+    // func (experimental)
+    // --------------------------------------------------------------
+
+    var func = function (Arguments, f, Return, name) {
+        
+        function func() {
+            var args = Array.prototype.slice.call(arguments);
+            if (args.length < f.length) args.length = f.length; // handle optional arguments
+
+            args = Arguments.is(args) ? args : new Arguments(args);
+
+            var r = f.apply(this, new Arguments(args));
+
+            if (Return) {
+                r = Return.is(r) ? r : new Return(r);
+            }
+
+            return r;
+        }
+
+        func.is = function (x) { return x === func; };
+
+        func.meta = {
+            kind: 'func',
+            Arguments: Arguments,
+            f: f,
+            Return: Return,
+            name: name
+        };
+
+        return func;
+    };
+
     return {
         fail: fail,
         assert: assert,
@@ -435,6 +469,7 @@
         maybe: maybe,
         tuple: tuple,
         subtype: subtype,
-        list: list
+        list: list,
+        func: func
     };
 }));
