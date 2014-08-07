@@ -1,3 +1,8 @@
+//     tcomb.js 0.0.4
+//     https://github.com/gcanti/tcomb
+//     (c) 2014 Giulio Canti
+//     tcomb.js may be freely distributed under the MIT license.
+
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define([], factory);
