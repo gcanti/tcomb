@@ -151,7 +151,7 @@ A `type` is a function `T` such that
 
 Defines a struct like type.
 
-- `props` hash field name -> type
+- `props` hash name -> type
 - `name` optional string useful for debugging
 
 Example
@@ -233,6 +233,11 @@ Same as `union([Nil, type])`.
 
 Defines an enum of strings.
 
+- `map` hash enum -> value
+- `name` optional string useful for debugging
+
+Example
+
     var Direction = enums({
         North: 0, 
         East: 1,
@@ -249,6 +254,11 @@ Returns `true` if `x` belongs to the enum.
 ### tuple(types, [name])
 
 Defines a tuple whose coordinates have the specified types.
+
+- `types` array of coordinates types
+- `name` optional string useful for debugging
+
+Example
 
     var Args = tuple([Num, Num]);
 
@@ -271,6 +281,12 @@ Returns an instance without modifying the original.
 ### subtype(type, predicate, [name])
 
 Defines a subtype of an existing type.
+
+- `type` the supertype
+- `predicate`: a function with signature `(x) -> boolean`
+- `name` optional string useful for debugging
+
+Example
 
     var Int = subtype(Num, function (n) {
         return n === parseInt(n, 10);
@@ -295,6 +311,11 @@ Returns `true` if `x` belongs to the subtype.
 
 Defines an array where all elements are of type `type`.
 
+- `type` type of all the elements
+- `name` optional string useful for debugging
+
+Example
+
     var Path = list(Point);
 
     // costructor usage
@@ -311,10 +332,9 @@ Returns `true` if `x` belongs to the list.
     var p2 = new Point({x: 1, y: 2});
     Path.is([p1, p2]); // => true
 
-**Useful methods**
+Useful methods
 
-Return an instance without modifying the original.
-    
+    // all of these methods return an instance without modifying the original.
     Path.append(path, element, [mut]);
     Path.prepend(path, element, [mut]);
     Path.update(path, index, element, [mut]);
@@ -324,6 +344,13 @@ Return an instance without modifying the original.
 ### func(Arguments, f, [Return], [name])
 
 **Experimental**. Defines a function where the `arguments` and the return value are checked.
+
+- `Arguments` the type of `arguments`
+- `f` the function to execute
+- `Return` optional type of the return value
+- `name` optional string useful for debugging
+
+Example
 
     var sum = func(tuple([Num, Num]), function (a, b) {
         return a + b;
