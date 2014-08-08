@@ -1,18 +1,26 @@
 # tcomb
 
-JavaScript types and combinators
+tcomb is a library which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
 
-*Why*. tcomb is a library which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
-
+- write complex domain models in a breeze and with small code footprint
 - easy debugging
-- encode/decode of your domain objects to/from JSON for free
 - **instances are immutables** by default
+- encode/decode of domain objects to/from JSON for free
+- make your existing code safer gradually
 
-*How*. This library provides several type combinators and a built-in `assert` function you can use. When an **assertion fails this library starts the debugger** so you can inspect the stack and quickly find out what's wrong. The debugger starts only once after the first failed assert.
+The library provides several type combinators and a built-in `assert` function. When an assertion fails the library **starts the debugger** so you can inspect the stack and quickly find out what's wrong.
 
-*What*. You can define and check:
+You can check:
 
 - JavaScript native types
+    - Nil: `null` and  `undefined`
+    - Str: strings
+    - Num: numbers
+    - Bool: booleans
+    - Arr: arrays
+    - Obj: plain objects
+    - Func: functions
+    - Err: errors
 - structs (i.e. classes)
 - unions
 - maybe
@@ -26,28 +34,24 @@ JavaScript types and combinators
 
 Let's build a product
 
+    // a struct
     var Product = struct({
-        name: Str,                  // a REQUIRED string
-        description: maybe(Str),    // an OPTIONAL string (can be `null`)
-        homepage: Url,              // a SUBTYPE of string representing an URL
-        shippings: list(Shipping),  // a LIST of shipping methods
-        category: Category,         // a string in [Audio, Video] (ENUM)
-        price: union(Num, Price),   // price expressed in dollars OR in another currency (UNION)
-        dim: tuple([Num, Num])      // width x height (TUPLE)
+        name: Str,                  // required string
+        description: maybe(Str),    // optional string, can be `null` or `undefined`
+        homepage: Url,              // a subtype of a string
+        shippings: list(Shipping),  // a list of shipping methods
+        category: Category,         // an enumeration
+        price: union(Num, Price),   // a price expressed in dollars OR in another currency
+        dim: tuple([Num, Num])      // a tuple (width, height)
     });
 
     var Url = subtype(Str, function (s) {
         return s.indexOf('http://') === 0;
     });
 
-    var Shipping = struct({
-        description: Str,
-        cost: Num
-    });
-
     var Category = enums({
-        Audio: 0,
-        Video: 1
+        audio: 0,
+        video: 1
     });
 
     var Price = struct({
@@ -55,19 +59,19 @@ Let's build a product
         amount: Num
     });
 
-    // get an immutable instance
-    var ipod = new Product({
+    // JSON representation of a product
+    var json = {
         name: 'iPod',
         description: 'Engineered for maximum funness.',
         homepage: 'http://www.apple.com/ipod/',
-        shippings: [{
-            description: 'Shipped to your door, free.',
-            cost: 0
-        }],
-        category: 'Audio',
+        shippings: ['Same Day', 'Next Businness Day'],
+        category: 'audio',
         price: {currency: 'EUR', amount: 100},
         dim: [2.4, 4.1]
-    });
+    };
+
+    // get an immutable instance
+    var ipod = new Product(json);
 
 ## Setup
 
@@ -117,25 +121,6 @@ A `type` is a function `T` such that
 
 ## Api
 
-### primitive(name, is)
-
-Used internally to define JavaScript native types:
-
-- Nil: `null` and  `undefined`
-- Str: strings
-- Num: numbers
-- Bool: booleans
-- Arr: arrays
-- Obj: plain objects
-- Func: functions
-- Err: errors
-
-Example
-
-    Str.is('a'); // => true
-    Nil.is(undefined); // => true
-    Nil.is(0); // => false
-
 ### struct(props, [name])
 
 Defines a struct like type.
@@ -151,8 +136,7 @@ Example
         y: Num
     });
 
-Methods are defined as usual
-
+    // methods are defined as usual
     Point.prototype.toString = function () {
         return '(' + this.x + ', ' + this.y + ')';
     };
@@ -165,14 +149,6 @@ Building an instance is simple as
     
     p = new Point({x: 1, y: 2}, true); // now p is mutable
     p.x = 2; // ok
-
-Some meta informations are stored in a `meta` hash
-
-    Point.meta = {
-        kind: 'struct',
-        props: props,
-        name: name
-    };
 
 is(x)
 
@@ -210,25 +186,6 @@ Example
         Rectangle
     ]);
 
-    // in order to use Shape as a constructor the function `dispatch(values) -> Type` 
-    // must be implemented
-    Shape.dispatch = function (values) {
-        assert(Obj.is(values));
-        return values.hasOwnProperty('center') ?
-            Circle :
-            Rectangle;   
-    };
-
-    var shape = new Shape({center: {x: 1, y: 2}, radius: 10});
-
-Some meta informations are stored in a `meta` hash
-
-    Shape.meta = {
-        kind: 'union',
-        types: types,
-        name: name
-    };
-
 is(x)
 
 Returns `true` if `x` belongs to the union.
@@ -246,14 +203,6 @@ Same as `union([Nil, type])`.
     MaybeStr.is(1);       // => false
     
 
-Some meta informations are stored in a `meta` hash
-
-    MaybeStr.meta = {
-        kind: 'maybe',
-        type: type,
-        name: name
-    };
-
 ### enums(map, [name])
 
 Defines an enum of strings.
@@ -264,14 +213,6 @@ Defines an enum of strings.
         South: 2, 
         West: 3
     });
-
-Some meta informations are stored in a `meta` hash
-
-    Direction.meta = {
-        kind: 'enums',
-        map: map,
-        name: name
-    };
 
 is(x)
 
@@ -286,14 +227,6 @@ Defines a tuple whose coordinates have the specified types.
     var Args = tuple([Num, Num]);
 
     var a = new Args([1, 2]);
-
-Some meta informations are stored in a `meta` hash
-
-    Args.meta = {
-        kind: 'tuple',
-        types: types,
-        name: name
-    };
 
 is(x)
 
@@ -325,15 +258,6 @@ Defines a subtype of an existing type.
     // constructor usage
     var p = new Q1Point({x: -1, y: -2}); // => fail!
 
-Some meta informations are stored in a `meta` hash
-
-    Int.meta = {
-        kind: 'subtype',
-        type: type,
-        predicate: predicate,
-        name: name
-    };
-
 is(x)
 
 Returns `true` if `x` belongs to the subtype.
@@ -353,30 +277,11 @@ Defines an array where all elements are of type `type`.
         {x: 1, y: 1}
     ]);
 
-Some meta informations are stored in a `meta` hash
-    
-    Path.meta = {
-        kind: 'list',
-        type: type,
-        name: name
-    };
-
 is(x)
 
 Returns `true` if `x` belongs to the list.
 
     Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // => true
-
-### func(Arguments, f, [Return], [name])
-
-Defines a function where the `arguments` and the return value are checked.
-
-    var sum = func(tuple([Num, Num]), function (a, b) {
-        return a + b;
-    }, Num);
-
-    sum(1, 2); // => 3
-    sum(1, 'a'); // => fail!
 
 **Useful methods**
 
@@ -388,86 +293,21 @@ Return an instance without modifying the original.
     Path.remove(path, index, [mut]);
     Path.move(path, from, to, [mut]);
 
-### Utils
+### func(Arguments, f, [Return], [name])
 
-    fail(message)
+**Experimental**. Defines a function where the `arguments` and the return value are checked.
 
-    assert(guard, [message])
+    var sum = func(tuple([Num, Num]), function (a, b) {
+        return a + b;
+    }, Num);
 
-    // make properties immutables unless `unless` is `true`
-    freeze(obj_or_arr, [unless])
+    sum(1, 2); // => 3
+    sum(1, 'a'); // => fail!
 
-    // adds the properties of `y` to `x`. If `overwrite` is falsy
-    // and a property already exists, throws an error
-    mixin(x, y, [overwrite])
+## TODO
 
-    // array manipulation
-    append(arr, element);
-    prepend(arr, element);
-    update(arr, index, element);
-    remove(arr, index);
-    move(arr, from, to);
-
-## More examples
-
-### How to extend a struct
-
-    var Point3D = struct(mixin(Point.meta.props, {
-        z: Num
-    }));
-
-    var p = new Point3D({x: 1, y: 2, z: 3});
-
-
-### Deep update of a struct
-
-    var c = new Circle({center: {x: 1, y: 2}, radius: 10});
-
-    // translate x by 1
-    var c2 = Circle.update(c, {
-        center: Point.update(c.center, {
-            x: c.center.x + 1
-        })
-    });
-
-### Write a general JSON Decoder
-
-    // (json, T, mut) -> instance of T
-    function decode(json, T, mut) {
-        if (T.fromJSON) {
-            return T.fromJSON(json, mut);
-        }
-        switch (T.meta.kind) {
-            case 'struct' :
-                var values = {};
-                var props = T.meta.props;
-                for (var prop in props) {
-                    if (props.hasOwnProperty(prop)) {
-                        values[prop] = decode(json[prop], props[prop], mut);    
-                    }
-                }
-                return new T(values, mut);
-            case 'union' :
-                assert(Func.is(T.dispatch));
-                return decode(json, T.dispatch(json), mut);
-            case 'maybe' :
-                return Nil.is(json) ? undefined : decode(json, T.meta.type, mut);
-            case 'tuple' :
-                return freeze(json.map(function (x, i) {
-                    return decode(x, T.meta.types[i], mut);
-                }, mut));
-            case 'subtype' :
-                var x = decode(json, T.meta.type, mut); 
-                assert(T.meta.predicate(x));
-                return x;
-            case 'list' :
-                return freeze(json.map(function (x) {
-                    return decode(x, T.meta.type, mut);
-                }), mut);
-            default :
-                return json;
-        }
-    };
+- more tests
+- jsDoc comments
 
 ## Copyright & License
 
