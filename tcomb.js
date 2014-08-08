@@ -106,7 +106,7 @@
     }
 
     // --------------------------------------------------------------
-    // primitive
+    // primitives
     // --------------------------------------------------------------
 
     function primitive(name, is) {
@@ -215,6 +215,7 @@
     function union(types, name) {
 
         function Union(values, mut) {
+            assert(Func.is(Union.dispatch), 'tcomb: in order to use the constructor you must implement Union.dispatch()');
             var Type = Union.dispatch(values);
             return new Type(values, mut);
         }
