@@ -69,7 +69,7 @@ var sum = func(tuple([Num, Num]), function (a, b) {
 
 
 //
-// basic types specs
+// primitives types
 //
 
 describe('Nil', function(){
@@ -87,6 +87,7 @@ describe('Nil', function(){
             ko(Nil.is(function () {}));
             ko(Nil.is(/a/));
             ko(Nil.is(new RegExp('a')));
+            ko(Nil.is(new Error()));
         });
     });
 });
@@ -107,6 +108,7 @@ describe('Bool', function(){
             ko(Bool.is(function () {}));
             ko(Bool.is(/a/));
             ko(Bool.is(new RegExp('a')));
+            ko(Bool.is(new Error()));
         });
     });
 });
@@ -131,6 +133,7 @@ describe('Num', function(){
             ko(Num.is(function () {}));
             ko(Num.is(/a/));
             ko(Num.is(new RegExp('a')));
+            ko(Num.is(new Error()));
         });
     });
 });
@@ -155,6 +158,7 @@ describe('Str', function(){
             ko(Str.is(function () {}));
             ko(Str.is(/a/));
             ko(Str.is(new RegExp('a')));
+            ko(Str.is(new Error()));
         });
     });
 });
@@ -177,6 +181,7 @@ describe('Arr', function(){
             ko(Arr.is(function () {}));
             ko(Arr.is(/a/));
             ko(Arr.is(new RegExp('a')));
+            ko(Arr.is(new Error()));
         });
     });
 });
@@ -198,6 +203,7 @@ describe('Obj', function(){
             ko(Obj.is(new Boolean()));
             ko(Obj.is(/a/));
             ko(Obj.is(new RegExp('a')));
+            ko(Obj.is(new Error()));
         });
     });
 });
@@ -219,12 +225,33 @@ describe('Func', function(){
             ko(Func.is(new Boolean()));
             ko(Func.is(/a/));
             ko(Func.is(new RegExp('a')));
+            ko(Func.is(new Error()));
+        });
+    });
+});
+
+describe('Err', function(){
+    describe('#is(x)', function(){
+        it('should return true when x is a function', function() {
+            ok(Err.is(new Error()));
+        });
+        it('should return false when x is not a function', function() {
+            ko(Err.is(null));
+            ko(Err.is(undefined));
+            ko(Err.is(0));
+            ko(Err.is(''));
+            ko(Err.is([]));
+            ko(Err.is(new String('1')));
+            ko(Err.is(new Number(1)));
+            ko(Err.is(new Boolean()));
+            ko(Err.is(/a/));
+            ko(Err.is(new RegExp('a')));
         });
     });
 });
 
 //
-// type combinators specs
+// struct
 //
 
 describe('struct', function(){
@@ -238,6 +265,10 @@ describe('struct', function(){
     });
 });
 
+//
+// enum
+//
+
 describe('enum', function(){
     describe('#is(x)', function(){
         it('should return true when x is an instance of the enum', function() {
@@ -248,6 +279,10 @@ describe('enum', function(){
         });
     });
 });
+
+//
+// union
+//
 
 describe('union', function(){
     describe('#is(x)', function(){
@@ -263,6 +298,10 @@ describe('union', function(){
     });
 });
 
+//
+// tuple
+//
+
 describe('tuple', function(){
     describe('#is(x)', function(){
         it('should return true when x is an instance of the tuple', function() {
@@ -275,6 +314,10 @@ describe('tuple', function(){
         });
     });
 });
+
+//
+// func (experimental)
+//
 
 describe('func', function(){
     describe('#is(x)', function(){
