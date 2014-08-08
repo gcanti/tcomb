@@ -147,6 +147,13 @@ A `type` is a function `T` such that
 
 ## Api
 
+### assert(guard, [message]);
+
+If `guard !== true` the debugger kicks in.
+
+- `guard` boolean condition
+- `message` optional string useful for debugging
+
 ### struct(props, [name])
 
 Defines a struct like type.
