@@ -39,7 +39,7 @@ Let's build a product
         name: Str,                  // required string
         description: maybe(Str),    // optional string, can be `null` or `undefined`
         homepage: Url,              // a subtype of a string
-        shippings: list(Shipping),  // a list of shipping methods
+        shippings: list(Str),       // a list of shipping methods
         category: Category,         // an enumeration
         price: union(Num, Price),   // a price expressed in dollars OR in another currency
         dim: tuple([Num, Num])      // a tuple (width, height)
