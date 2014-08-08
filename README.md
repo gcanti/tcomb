@@ -30,9 +30,9 @@ You can check:
 - lists
 - function types (experimental)
 
-## Quick example
+## Quick examples
 
-Let's build a product
+### Let's build a new product model
 
     // a struct
     var Product = struct({
@@ -72,6 +72,32 @@ Let's build a product
 
     // get an immutable instance
     var ipod = new Product(json);
+
+### You have existing code and you want to add safety
+
+    // your code: plain old JavaScript class
+    function Point (x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    var p = new Point(1, 'a'); // silent error
+
+in order to "tcombify" your code you can simply add some assertion (and a `is()` method if you want to use the combinators)
+
+    // plain old JavaScript class
+    function Point (x, y) {
+        assert(Num.is(x));
+        assert(Num.is(y));
+        this.x = x;
+        this.y = y;
+    }
+
+    Point.is = function (x) {
+        return x instanceof Point;
+    };
+
+    var p = new Point(1, 'a'); // => fail! debugger kicks in
 
 ## Setup
 
