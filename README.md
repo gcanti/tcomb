@@ -281,7 +281,9 @@ is(x)
 
 Returns `true` if `x` belongs to the list.
 
-    Path.is([{x: 0, y: 0}, {x: 1, y: 1}]);      // => true
+    var p1 = new Point({x: 0, y: 0});
+    var p2 = new Point({x: 1, y: 2});
+    Path.is([p1, p2]); // => true
 
 **Useful methods**
 
