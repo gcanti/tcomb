@@ -34,70 +34,71 @@ You can check:
 
 ### Let's build a new product model
 
-    // a struct
-    var Product = struct({
-        name: Str,                  // required string
-        description: maybe(Str),    // optional string, can be `null` or `undefined`
-        homepage: Url,              // a subtype of a string
-        shippings: list(Str),       // a list of shipping methods
-        category: Category,         // an enumeration
-        price: union(Num, Price),   // a price expressed in dollars OR in another currency
-        dim: tuple([Num, Num])      // a tuple (width, height)
-    });
+```javascript
+// a struct
+var Product = struct({
+    name: Str,                  // required string
+    description: maybe(Str),    // optional string, can be null or undefined
+    homepage: Url,              // a subtype of a string
+    shippings: list(Str),       // a list of shipping methods
+    category: Category,         // an enumeration
+    price: union(Num, Price),   // a price expressed in dollars OR in another currency
+    dim: tuple([Num, Num])      // a tuple (width, height)
+});
 
-    var Url = subtype(Str, function (s) {
-        return s.indexOf('http://') === 0;
-    });
+var Url = subtype(Str, function (s) {
+    return s.indexOf('http://') === 0;
+});
 
-    var Category = enums({
-        audio: 0,
-        video: 1
-    });
+var Category = enums({
+    audio: 0,
+    video: 1
+});
 
-    var Price = struct({
-        currency: Str,
-        amount: Num
-    });
+var Price = struct({
+    currency: Str,
+    amount: Num
+});
 
-    // JSON representation of a product
-    var json = {
-        name: 'iPod',
-        description: 'Engineered for maximum funness.',
-        homepage: 'http://www.apple.com/ipod/',
-        shippings: ['Same Day', 'Next Businness Day'],
-        category: 'audio',
-        price: {currency: 'EUR', amount: 100},
-        dim: [2.4, 4.1]
-    };
+// JSON of a product
+var json = {
+    name: 'iPod',
+    description: 'Engineered for maximum funness.',
+    homepage: 'http://www.apple.com/ipod/',
+    shippings: ['Same Day', 'Next Businness Day'],
+    category: 'audio',
+    price: {currency: 'EUR', amount: 100},
+    dim: [2.4, 4.1]
+};
 
-    // get an immutable instance
-    var ipod = new Product(json);
+// get an immutable instance
+var ipod = new Product(json);
+```
 
 ### You have existing code and you want to add safety
 
-    // your code: plain old JavaScript class
-    function Point (x, y) {
-        this.x = x;
-        this.y = y;
-    }
+```javascript
+// your code: plain old JavaScript class
+function Point (x, y) {
+    this.x = x;
+    this.y = y;
+}
 
-    var p = new Point(1, 'a'); // silent error
+var p = new Point(1, 'a'); // silent error
+```
 
-in order to "tcombify" your code you can simply add some assertion (and a `is()` method if you want to use the combinators)
+in order to "tcombify" your code you can simply add some assertion
 
-    // plain old JavaScript class
-    function Point (x, y) {
-        assert(Num.is(x));
-        assert(Num.is(y));
-        this.x = x;
-        this.y = y;
-    }
+```javascript
+function Point (x, y) {
+    assert(Num.is(x));
+    assert(Num.is(y));
+    this.x = x;
+    this.y = y;
+}
 
-    Point.is = function (x) {
-        return x instanceof Point;
-    };
-
-    var p = new Point(1, 'a'); // => fail! debugger kicks in
+var p = new Point(1, 'a'); // => fail! debugger kicks in
+```
 
 ## Setup
 
@@ -111,21 +112,23 @@ Browser
 
 This library uses a few ES5 methods
 
-- Array#forEach()
-- Array#map()
-- Array#some()
-- Array#every()
-- Object#keys()
+- `Array#forEach()`
+- `Array#map()`
+- `Array#some()`
+- `Array#every()`
+- `Object#keys()`
 
 you can use `es5-shim` to support old browsers
 
-    <!--[if lt IE 9]>
-    <script src="es5-shim.min.js"></script>
-    <![endif]-->
-    <script type="text/javascript" src="tcomb.js"></script>
-    <script type="text/javascript">
-        console.log(t);
-    </script>
+```html
+<!--[if lt IE 9]>
+<script src="es5-shim.min.js"></script>
+<![endif]-->
+<script type="text/javascript" src="tcomb.js"></script>
+<script type="text/javascript">
+    console.log(t);
+</script>
+```
 
 ## Tests
 
@@ -163,37 +166,45 @@ Defines a struct like type.
 
 Example
 
-    // define a struct with two numerical props
-    var Point = struct({
-        x: Num,
-        y: Num
-    });
+```javascript
+"use strict";
 
-    // methods are defined as usual
-    Point.prototype.toString = function () {
-        return '(' + this.x + ', ' + this.y + ')';
-    };
+// define a struct with two numerical props
+var Point = struct({
+    x: Num,
+    y: Num
+});
 
-Building an instance is simple as
+// methods are defined as usual
+Point.prototype.toString = function () {
+    return '(' + this.x + ', ' + this.y + ')';
+};
 
-    "use strict";
-    var p = new Point({x: 1, y: 2});
-    p.x = 2; // => TypeError, p is immutable
-    
-    p = new Point({x: 1, y: 2}, true); // now p is mutable
-    p.x = 2; // ok
+// building an instance is simple as
+var p = new Point({x: 1, y: 2});
 
-is(x)
+p.x = 2; // => TypeError, p is immutable
+
+p = new Point({x: 1, y: 2}, true); // now p is mutable
+
+p.x = 2; // ok
+```
+
+#### is(x)
 
 Returns `true` if `x` is an instance of `Point`.
 
-    Point.is(p); // => true
+```javascript
+Point.is(p); // => true
+```
 
-update(instance, updates, [mut])
+#### update(instance, updates, [mut])
 
 Returns an instance with changed props, without modifying the original.
 
-    Point.update(p, {x: 3}); // => new Point({x: 3, y: 2})
+```javascript
+Point.update(p, {x: 3}); // => new Point({x: 3, y: 2})
+```
 
 ### union(types, [name])
 
@@ -204,37 +215,42 @@ Defines a types union.
 
 Example
 
-    var Circle = struct({
-        center: Point,
-        radius: Num
-    });
+```javascript
+var Circle = struct({
+    center: Point,
+    radius: Num
+});
 
-    var Rectangle = struct({
-        bl: Point, // bottom left vertex
-        tr: Point  // top right vertex
-    });
+var Rectangle = struct({
+    bl: Point, // bottom left vertex
+    tr: Point  // top right vertex
+});
 
-    var Shape = union([
-        Circle, 
-        Rectangle
-    ]);
+var Shape = union([
+    Circle, 
+    Rectangle
+]);
+```
 
-is(x)
+#### is(x)
 
 Returns `true` if `x` belongs to the union.
 
-    Shape.is(new Circle({center: p, radius: 10})); // => true
+```javascript
+Shape.is(new Circle({center: p, radius: 10})); // => true
+```
 
 ### maybe(type, [name])
 
 Same as `union([Nil, type])`.
 
-    var MaybeStr = maybe(Str);
+```javascript
+var MaybeStr = maybe(Str);
 
-    MaybeStr.is('a');     // => true
-    MaybeStr.is(null);    // => true
-    MaybeStr.is(1);       // => false
-    
+MaybeStr.is('a');     // => true
+MaybeStr.is(null);    // => true
+MaybeStr.is(1);       // => false
+```    
 
 ### enums(map, [name])
 
@@ -245,18 +261,22 @@ Defines an enum of strings.
 
 Example
 
-    var Direction = enums({
-        North: 0, 
-        East: 1,
-        South: 2, 
-        West: 3
-    });
+```javascript
+var Direction = enums({
+    North: 0, 
+    East: 1,
+    South: 2, 
+    West: 3
+});
+```
 
-is(x)
+#### is(x)
 
 Returns `true` if `x` belongs to the enum.
 
-    Direction.is('North'); // => true
+```javascript
+Direction.is('North'); // => true
+```
 
 ### tuple(types, [name])
 
@@ -267,23 +287,27 @@ Defines a tuple whose coordinates have the specified types.
 
 Example
 
-    var Args = tuple([Num, Num]);
+```javascript
+var Area = tuple([Num, Num]);
+```
 
-    var a = new Args([1, 2]);
-
-is(x)
+#### is(x)
 
 Returns `true` if `x` belongs to the tuple.
 
-    Args.is([1, 2]);      // => true
-    Args.is([1, 'a']);    // => false, second element is not a Num
-    Args.is([1, 2, 3]);   // => false, too many elements
+```javascript
+Area.is([1, 2]);      // => true
+Area.is([1, 'a']);    // => false, second element is not a Num
+Area.is([1, 2, 3]);   // => false, too many elements
+```
 
-update(instance, index, element, [mut])
+#### update(instance, index, element, [mut])
 
 Returns an instance without modifying the original.
     
-    Args.update(a, 0, 2);    // => [2, 2]
+```javascript
+Area.update(a, 0, 2);    // => [2, 2]
+```
 
 ### subtype(type, predicate, [name])
 
@@ -295,24 +319,28 @@ Defines a subtype of an existing type.
 
 Example
 
-    var Int = subtype(Num, function (n) {
-        return n === parseInt(n, 10);
-    });
+```javascript
+var Int = subtype(Num, function (n) {
+    return n === parseInt(n, 10);
+});
 
-    // points of the first quadrant
-    var Q1Point = subtype(Point, function (p) {
-        return p.x >= 0 && p.y >= 0;
-    });
+// points of the first quadrant
+var Q1Point = subtype(Point, function (p) {
+    return p.x >= 0 && p.y >= 0;
+});
 
-    // constructor usage
-    var p = new Q1Point({x: -1, y: -2}); // => fail!
+// constructor usage
+var p = new Q1Point({x: -1, y: -2}); // => fail!
+```
 
-is(x)
+#### is(x)
 
 Returns `true` if `x` belongs to the subtype.
 
-    Int.is(2);      // => true
-    Int.is(1.1);    // => false
+```javascript
+Int.is(2);      // => true
+Int.is(1.1);    // => false
+```
 
 ### list(type, [name])
 
@@ -323,30 +351,37 @@ Defines an array where all elements are of type `type`.
 
 Example
 
-    var Path = list(Point);
+```javascript
+var Path = list(Point);
 
-    // costructor usage
-    var path = new Path([
-        {x: 0, y: 0}, 
-        {x: 1, y: 1}
-    ]);
+// costructor usage
+var path = new Path([
+    {x: 0, y: 0}, 
+    {x: 1, y: 1}
+]);
+```
 
-is(x)
+#### is(x)
 
 Returns `true` if `x` belongs to the list.
 
-    var p1 = new Point({x: 0, y: 0});
-    var p2 = new Point({x: 1, y: 2});
-    Path.is([p1, p2]); // => true
+```javascript
+var p1 = new Point({x: 0, y: 0});
+var p2 = new Point({x: 1, y: 2});
+Path.is([p1, p2]); // => true
+```
 
-Useful methods
+#### Useful methods
 
-    // all of these methods return an instance without modifying the original.
-    Path.append(path, element, [mut]);
-    Path.prepend(path, element, [mut]);
-    Path.update(path, index, element, [mut]);
-    Path.remove(path, index, [mut]);
-    Path.move(path, from, to, [mut]);
+All of these methods return an instance without modifying the original.
+
+```javascript
+Path.append(path, element, [mut]);
+Path.prepend(path, element, [mut]);
+Path.update(path, index, element, [mut]);
+Path.remove(path, index, [mut]);
+Path.move(path, from, to, [mut]);
+```
 
 ### func(Arguments, f, [Return], [name])
 
@@ -359,12 +394,14 @@ Useful methods
 
 Example
 
-    var sum = func(tuple([Num, Num]), function (a, b) {
-        return a + b;
-    }, Num);
+```javascript
+var sum = func(tuple([Num, Num]), function (a, b) {
+    return a + b;
+}, Num);
 
-    sum(1, 2); // => 3
-    sum(1, 'a'); // => fail!
+sum(1, 2); // => 3
+sum(1, 'a'); // => fail!
+```
 
 ## TODO
 
