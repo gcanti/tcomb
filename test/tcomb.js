@@ -244,10 +244,10 @@ describe('Func', function(){
 
 describe('Err', function(){
     describe('#is(x)', function(){
-        it('should return true when x is a function', function() {
+        it('should return true when x is an error', function() {
             ok(Err.is(new Error()));
         });
-        it('should return false when x is not a function', function() {
+        it('should return false when x is not an error', function() {
             ko(Err.is(null));
             ko(Err.is(undefined));
             ko(Err.is(0));
