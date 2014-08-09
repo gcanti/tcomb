@@ -140,7 +140,7 @@ in the project root.
 
 ## What's a type?
 
-A `type` is a function `T` such that
+In tcomb a `type` is a function `T` such that
 
 1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean arg `mut` makes the instance mutable (default `false`)
 2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
