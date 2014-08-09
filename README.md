@@ -289,6 +289,9 @@ Example
 
 ```javascript
 var Area = tuple([Num, Num]);
+
+// constructor usage, area is immutable
+var area = new Area([1, 2]);
 ```
 
 #### is(x)
@@ -306,7 +309,7 @@ Area.is([1, 2, 3]);   // => false, too many elements
 Returns an instance without modifying the original.
     
 ```javascript
-Area.update(a, 0, 2);    // => [2, 2]
+Area.update(area, 0, 2);    // => [2, 2]
 ```
 
 ### subtype(type, predicate, [name])
