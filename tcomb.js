@@ -54,6 +54,10 @@
         return x;
     }
 
+    function getName (type) { 
+        return type.meta.name 
+    }
+
     // --------------------------------------------------------------
     // array manipulation
     // --------------------------------------------------------------
@@ -164,9 +168,11 @@
 
     function struct(props, name) {
 
+        name = name || 'struct()';
+
         function Struct(values, mut) {
 
-            assert(Obj.is(values), 'bad ' + (name || 'struct'));
+            assert(Obj.is(values), 'bad ' + name);
             assert(maybe(Bool).is(mut), 'bad mut');
 
             for (var prop in props) {
@@ -214,8 +220,10 @@
 
     function union(types, name) {
 
+        name = name || 'union(' + types.map(getName).join(', ') + ')';
+
         function Union(values, mut) {
-            assert(Func.is(Union.dispatch), 'tcomb: in order to use the constructor you must implement Union.dispatch()');
+            assert(Func.is(Union.dispatch), 'in order to use the constructor you must implement ' + name + '.dispatch()');
             var Type = Union.dispatch(values);
             return new Type(values, mut);
         }
@@ -241,6 +249,8 @@
 
     function maybe(Type, name) {
 
+        name = name || 'maybe(' + getName(Type) + ')';
+
         function Maybe(values, mut) {
             return Nil.is(values) ? null : new Type(values, mut);
         }
@@ -265,8 +275,10 @@
 
     function enums(map, name) {
 
+        name = name || 'enums()';
+
         function Enums(x) {
-            assert(Enums.is(x), 'bad ' + (name || 'enum'));
+            assert(Enums.is(x), 'bad ' + name);
             return x;
         }
 
@@ -289,11 +301,13 @@
 
     function tuple(types, name) {
 
+        name = name || 'tuple(' + types.map(getName).join(', ') + ')';
+
         var len = types.length;
 
         function Tuple(values, mut) {
 
-            assert(Arr.is(values), 'bad ' + (name || 'tuple'));
+            assert(Arr.is(values), 'bad ' + name);
 
             var arr = [];
             for (var i = 0 ; i < len ; i++) {
@@ -334,9 +348,11 @@
 
     function subtype(Type, predicate, name) {
 
+        name = name || 'subtype(' + getName(Type) + ')';
+
         function Subtype(values, mut) {
             var x = new Type(values, mut);
-            assert(predicate(x), 'bad ' + (name || 'subtype'));
+            assert(predicate(x), 'bad ' + name);
             return x;
         }
 
@@ -360,9 +376,11 @@
 
     function list(Type, name) {
 
+        name = name || 'list(' + getName(Type) + ')';
+
         function List(values, mut) {
 
-            assert(Arr.is(values), 'bad ' + (name || 'list'));
+            assert(Arr.is(values), 'bad ' + name);
 
             var arr = [];
             for (var i = 0, len = values.length ; i < len ; i++ ) {

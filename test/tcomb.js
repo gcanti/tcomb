@@ -15,6 +15,7 @@ var union = t.union;
 var tuple = t.tuple;
 var maybe = t.maybe;
 var subtype = t.subtype;
+var list = t.list;
 var func = t.func;
 
 //
@@ -25,7 +26,7 @@ var ok = function (x) { assert.strictEqual(true, x); };
 var ko = function (x) { assert.strictEqual(false, x); };
 var throws = assert.throws;
 
-// structs
+// struct
 var Point = struct({
     x: Num,
     y: Num
@@ -37,20 +38,20 @@ var Direction = enums({
     East: 1,
     South: 2, 
     West: 3
-}, 'Direction');
+});
 
-// unions
+// union
 var Circle = struct({
     center: Point,
     radius: Num
-});
+}, 'Circle');
 
 var Rectangle = struct({
     a: Point,
     b: Point
-});
+}, 'Rectangle');
 
-var Shape = union([Circle, Rectangle], 'Shape');
+var Shape = union([Circle, Rectangle]);
 
 Shape.dispatch = function (values) {
     assert(Obj.is(values));
@@ -59,10 +60,21 @@ Shape.dispatch = function (values) {
         Rectangle;   
 };
 
-// tuples
-var Numbers = tuple([Num, Num]);
+// maybe
+var Radio = maybe(Str);
 
-// funcs
+// tuple
+var Area = tuple([Num, Num]);
+
+// list
+var Path = list(Point);
+
+// subtype
+var Positive = subtype(Num, function (n) {
+    return n >= 0;
+});
+
+// func
 var sum = func(tuple([Num, Num]), function (a, b) {
     return a + b;
 }, Num);
@@ -255,21 +267,27 @@ describe('Err', function(){
 //
 
 describe('struct', function(){
+    it('should have a default meaningful meta.name', function() {
+        var X = struct();
+        ok(X.meta.name === 'struct()');
+        ok(Point.meta.name === 'Point');
+    });
     describe('#is(x)', function(){
-
         it('should return true when x is an instance of the struct', function() {
             var p = new Point({ x: 1, y: 2 });
             ok(Point.is(p));
         });
-
     });
 });
 
 //
-// enum
+// enums
 //
 
-describe('enum', function(){
+describe('enums', function(){
+    it('should have a default meaningful meta.name', function() {
+        ok(Direction.meta.name === 'enums()');
+    });
     describe('#is(x)', function(){
         it('should return true when x is an instance of the enum', function() {
             ok(Direction.is('North'));
@@ -285,6 +303,9 @@ describe('enum', function(){
 //
 
 describe('union', function(){
+    it('should have a default meaningful meta.name', function() {
+        ok(Shape.meta.name === 'union(Circle, Rectangle)');
+    });
     describe('#is(x)', function(){
         it('should return true when x is an instance of the union', function() {
             var p = new Circle({center: { x: 0, y: 0 }, radius: 10});
@@ -292,9 +313,22 @@ describe('union', function(){
         });
     });
     describe('Shape constructor', function(){
+        it('should throw when dispatch() is not implemented', function() {
+            
+        });
         it('should be used to buils instances', function() {
             
         });
+    });
+});
+
+//
+// maybe
+//
+
+describe('maybe', function(){
+    it('should have a default meaningful meta.name', function() {
+        ok(Radio.meta.name === 'maybe(Str)');
     });
 });
 
@@ -303,15 +337,38 @@ describe('union', function(){
 //
 
 describe('tuple', function(){
+    it('should have a default meaningful meta.name', function() {
+        ok(Area.meta.name === 'tuple(Num, Num)');
+    });
     describe('#is(x)', function(){
         it('should return true when x is an instance of the tuple', function() {
-            ok(Numbers.is([1, 2]));
+            ok(Area.is([1, 2]));
         });
         it("should return false when x is not an instance of the tuple", function() {
-            ko(Numbers.is([1]));
-            ko(Numbers.is([1, 2, 3]));
-            ko(Numbers.is([1, 'a']));
+            ko(Area.is([1]));
+            ko(Area.is([1, 2, 3]));
+            ko(Area.is([1, 'a']));
         });
+    });
+});
+
+//
+// list
+//
+
+describe('list', function(){
+    it('should have a default meaningful meta.name', function() {
+        ok(Path.meta.name === 'list(Point)');
+    });
+});
+
+//
+// subtype
+//
+
+describe('subtype', function(){
+    it('should have a default meaningful meta.name', function() {
+        ok(Positive.meta.name === 'subtype(Num)');
     });
 });
 
