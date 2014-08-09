@@ -2,13 +2,13 @@
 
 [![NPM version](https://badge.fury.io/js/tcomb.svg)](http://badge.fury.io/js/tcomb)
 
-tcomb is a library which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
+tcomb is a library for Node.js and browser which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
 
 - write complex domain models in a breeze and with small code footprint
 - easy debugging
 - **instances are immutables** by default
 - encode/decode of domain objects to/from JSON for free
-- make your existing code safer gradually
+- gradually make your existing code safer
 
 The library provides several type combinators and a built-in `assert` function. When an assertion fails the library **starts the debugger** so you can inspect the stack and quickly find out what's wrong.
 
@@ -89,7 +89,7 @@ function Point (x, y) {
 var p = new Point(1, 'a'); // silent error
 ```
 
-in order to "tcombify" your code you can simply add some assertion
+in order to "tcombify" your code you can simply add some assertions
 
 ```javascript
 function Point (x, y) {
@@ -134,17 +134,13 @@ you can use `es5-shim` to support old browsers
 
 ## Tests
 
-Run
-
-    mocha
-
-in the project root.
+Run `mocha` in the project root.
 
 ## What's a type?
 
 In tcomb a `type` is a function `T` such that
 
-1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean arg `mut` makes the instance mutable (default `false`)
+1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
 2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
 3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
 
@@ -171,7 +167,7 @@ Example
 ```javascript
 "use strict";
 
-// define a struct with two numerical props
+// defines a struct with two numerical props
 var Point = struct({
     x: Num,
     y: Num
@@ -194,7 +190,7 @@ p.x = 2; // ok
 
 #### is(x)
 
-Returns `true` if `x` is an instance of `Point`.
+Returns `true` if `x` is an instance of the struct.
 
 ```javascript
 Point.is(p); // => true
@@ -210,7 +206,7 @@ Point.update(p, {x: 3}); // => new Point({x: 3, y: 2})
 
 ### union(types, [name])
 
-Defines a types union.
+Defines a union of types.
 
 - `types` array of types
 - `name` optional string useful for debugging
@@ -320,7 +316,7 @@ Area.update(area, 0, 2);    // => [2, 2]
 Defines a subtype of an existing type.
 
 - `type` the supertype
-- `predicate`: a function with signature `(x) -> boolean`
+- `predicate` a function with signature `(x) -> boolean`
 - `name` optional string useful for debugging
 
 Example
@@ -352,7 +348,7 @@ Int.is(1.1);    // => false
 
 ### list(type, [name])
 
-Defines an array where all elements are of type `type`.
+Defines an array where all the elements are of type `type`.
 
 - `type` type of all the elements
 - `name` optional string useful for debugging
@@ -397,7 +393,7 @@ Path.move(path, from, to, [mut]);
 
 - `Arguments` the type of `arguments`
 - `f` the function to execute
-- `Return` optional type of the return value
+- `Return` optional, check the type of the return value
 - `name` optional string useful for debugging
 
 Example
