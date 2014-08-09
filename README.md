@@ -1,5 +1,7 @@
 # tcomb
 
+[![NPM version](https://badge.fury.io/js/tcomb.svg)](http://badge.fury.io/js/tcomb)
+
 tcomb is a library which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
 
 - write complex domain models in a breeze and with small code footprint
@@ -413,6 +415,13 @@ sum(1, 'a'); // => fail!
 
 - more tests
 - jsDoc comments
+- Your ideas?
+
+## Contribution
+
+If you do have a contribution for the package feel free to put up a Pull Request or open Issue.
+
+[![NPM](https://nodei.co/npm/tcomb.png?downloads=true)](https://nodei.co/npm/tcomb/)
 
 ## Copyright & License
 
