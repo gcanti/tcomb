@@ -180,7 +180,7 @@ Point.prototype.toString = function () {
     return '(' + this.x + ', ' + this.y + ')';
 };
 
-// building an instance is simple as
+// costructor usage, p is immutable
 var p = new Point({x: 1, y: 2});
 
 p.x = 2; // => TypeError, p is immutable
@@ -323,17 +323,15 @@ Defines a subtype of an existing type.
 Example
 
 ```javascript
-var Int = subtype(Num, function (n) {
-    return n === parseInt(n, 10);
-});
-
 // points of the first quadrant
 var Q1Point = subtype(Point, function (p) {
     return p.x >= 0 && p.y >= 0;
 });
 
-// constructor usage
-var p = new Q1Point({x: -1, y: -2}); // => fail!
+// costructor usage, p is immutable
+var p = new Q1Point({x: 1, y: 2});
+
+p = new Q1Point({x: -1, y: -2}); // => fail!
 ```
 
 #### is(x)
@@ -341,6 +339,10 @@ var p = new Q1Point({x: -1, y: -2}); // => fail!
 Returns `true` if `x` belongs to the subtype.
 
 ```javascript
+var Int = subtype(Num, function (n) {
+    return n === parseInt(n, 10);
+});
+
 Int.is(2);      // => true
 Int.is(1.1);    // => false
 ```
@@ -357,7 +359,7 @@ Example
 ```javascript
 var Path = list(Point);
 
-// costructor usage
+// costructor usage, path is immutable
 var path = new Path([
     {x: 0, y: 0}, 
     {x: 1, y: 1}
