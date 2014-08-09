@@ -183,7 +183,7 @@ Point.prototype.toString = function () {
 // costructor usage, p is immutable
 var p = new Point({x: 1, y: 2});
 
-p.x = 2; // => TypeError, p is immutable
+p.x = 2; // => TypeError
 
 p = new Point({x: 1, y: 2}, true); // now p is mutable
 
@@ -200,7 +200,7 @@ Point.is(p); // => true
 
 #### update(instance, updates, [mut])
 
-Returns an instance with changed props, without modifying the original.
+Returns an instance with updated props, without modifying the original.
 
 ```javascript
 Point.update(p, {x: 3}); // => new Point({x: 3, y: 2})
@@ -245,11 +245,12 @@ Shape.is(new Circle({center: p, radius: 10})); // => true
 Same as `union([Nil, type])`.
 
 ```javascript
-var MaybeStr = maybe(Str);
+// the value of a radio input where null = no selection
+var Radio = maybe(Str);
 
-MaybeStr.is('a');     // => true
-MaybeStr.is(null);    // => true
-MaybeStr.is(1);       // => false
+Radio.is('a');     // => true
+Radio.is(null);    // => true
+Radio.is(1);       // => false
 ```    
 
 ### enums(map, [name])
