@@ -1,6 +1,6 @@
 {
   "name": "tcomb",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "JavaScript types and combinators",
   "main": "tcomb.js",
   "scripts": {
@@ -18,5 +18,15 @@
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
     "mocha": "*"
-  }
+  },
+  "tags": [
+    "type",
+    "types",
+    "combinators",
+    "safety",
+    "models",
+    "domain",
+    "debugging",
+    "immutable"
+  ]
 }
