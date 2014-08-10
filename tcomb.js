@@ -20,23 +20,22 @@
 
     var slice = Array.prototype.slice;
 
-    var failed = false;
-    
-    function fail(message) {
-        if (!failed) { 
-            debugger; 
-        }
-        failed = true;
-        throw new Error(message);
-    }
-
     function assert(guard) {
         if (guard !== true) {
             var args = slice.call(arguments, 1);
             var message = args[0] ? print.apply(null, args) : 'assert(): failed';
-            fail(message); 
+            assert.onfail(message); 
         }
     }
+
+    assert.failed = false;
+    assert.onfail = function (message) {
+        if (!assert.failed) { 
+            debugger; 
+        }
+        assert.failed = true;
+        throw new Error(message);
+    };
 
     function freeze(obj_or_arr, unless) {
         if (unless !== true && Object.freeze) {
@@ -487,7 +486,6 @@
     };
 
     return {
-        fail: fail,
         assert: assert,
         freeze: freeze,
         mixin: mixin,
