@@ -34,56 +34,10 @@ var Point = struct({
     y: Num
 }, 'Point');
 
-// enums
-var Direction = enums({
-    North: 0, 
-    East: 1,
-    South: 2, 
-    West: 3
-});
-
-// union
-var Circle = struct({
-    center: Point,
-    radius: Num
-}, 'Circle');
-
-var Rectangle = struct({
-    a: Point,
-    b: Point
-}, 'Rectangle');
-
-var Shape = union([Circle, Rectangle]);
-
-Shape.dispatch = function (values) {
-    assert(Obj.is(values));
-    return values.hasOwnProperty('center') ?
-        Circle :
-        Rectangle;   
-};
-
-// maybe
-var Radio = maybe(Str);
-
-// tuple
-var Area = tuple([Num, Num]);
-
-// list
-var Path = list(Point);
-
-// subtype
-var Positive = subtype(Num, function (n) {
-    return n >= 0;
-});
-
-// func
-var sum = func(tuple([Num, Num]), function (a, b) {
-    return a + b;
-}, Num);
-
 //
 // print
 //
+
 describe('print', function(){
     it('should format the message', function() {
         ok(t.print('%s', 'a') === 'a');
@@ -351,6 +305,14 @@ describe('struct', function(){
 //
 
 describe('enums', function(){
+
+    var Direction = enums({
+        North: 0, 
+        East: 1,
+        South: 2, 
+        West: 3
+    });
+
     it('should have a default meaningful meta.name', function() {
         ok(Direction.meta.name === 'enums()');
     });
@@ -369,6 +331,19 @@ describe('enums', function(){
 //
 
 describe('union', function(){
+
+    var Circle = struct({
+        center: Point,
+        radius: Num
+    }, 'Circle');
+
+    var Rectangle = struct({
+        a: Point,
+        b: Point
+    }, 'Rectangle');
+
+    var Shape = union([Circle, Rectangle]);
+
     it('should have a default meaningful meta.name', function() {
         ok(Shape.meta.name === 'union(Circle, Rectangle)');
     });
@@ -380,10 +355,29 @@ describe('union', function(){
     });
     describe('Shape constructor', function(){
         it('should throw when dispatch() is not implemented', function() {
-            
+            throws(function () {
+                new Shape({center: {x: 0, y: 0}, radius: 10});
+            }, function (err) {
+                if ( (err instanceof Error) && err.message === 'unimplemented union(Circle, Rectangle).dispatch()' ) {
+                  return true;
+                }
+            });
         });
-        it('should be used to buils instances', function() {
-            
+        it('should build instances when dispatch() is implemented', function() {
+            Shape.dispatch = function (values) {
+                assert(Obj.is(values));
+                return values.hasOwnProperty('center') ?
+                    Circle :
+                    Rectangle;   
+            };
+            ok(Circle.is(new Shape({center: {x: 0, y: 0}, radius: 10})));
+        });
+        it('should have meta.ctor = true if all types are new-ables', function() {
+            ok(Shape.meta.ctor);
+        });
+        it('should have meta.ctor = true if at least one type is not new-able', function() {
+            var U = union([Str, Point]);
+            ko(U.meta.ctor);
         });
     });
 });
@@ -393,6 +387,9 @@ describe('union', function(){
 //
 
 describe('maybe', function(){
+
+    var Radio = maybe(Str);
+
     it('should have a default meaningful meta.name', function() {
         ok(Radio.meta.name === 'maybe(Str)');
     });
@@ -402,7 +399,10 @@ describe('maybe', function(){
 // tuple
 //
 
-describe('tuple', function(){
+describe('tuple', function () {
+
+    var Area = tuple([Num, Num]);
+
     it('should have a default meaningful meta.name', function() {
         ok(Area.meta.name === 'tuple(Num, Num)');
     });
@@ -423,6 +423,9 @@ describe('tuple', function(){
 //
 
 describe('list', function(){
+
+    var Path = list(Point);
+
     it('should have a default meaningful meta.name', function() {
         ok(Path.meta.name === 'list(Point)');
     });
@@ -433,18 +436,21 @@ describe('list', function(){
 //
 
 describe('subtype', function(){
-    var Email = subtype(Str, function (s) {
-        return s.indexOf('@') !== -1;
+
+    // subtype
+    var Positive = subtype(Num, function (n) {
+        return n >= 0;
     });
+
     it('should have a default meaningful meta.name', function() {
         ok(Positive.meta.name === 'subtype(Num)');
     });
     describe('#is(x)', function(){
         it('should return true when x is a subtype', function() {
-            ok(Email.is('a@b.it'));
+            ok(Positive.is(1));
         });
         it('should return false when x is not a subtype', function() {
-            ko(Email.is('a'));
+            ko(Positive.is(-1));
         });
     });
 });
@@ -454,6 +460,11 @@ describe('subtype', function(){
 //
 
 describe('func', function(){
+
+    var sum = func(tuple([Num, Num]), function (a, b) {
+        return a + b;
+    }, Num);
+
     describe('#is(x)', function(){
         it('should return true when x is the func', function() {
             ok(sum.is(sum));

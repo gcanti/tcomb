@@ -128,7 +128,7 @@
         return ret;
     }
 
-    function coerce (Type, values, mut) {
+    function coerce(Type, values, mut) {
         return Type.meta.kind === 'struct' ?
             new Type(values, mut) :
             Type(values, mut);
@@ -141,14 +141,15 @@
     function primitive(name, is) {
 
         function Primitive(values) {
+            assert(!(this instanceof Primitive), 'cannot use new with %s', name);
             assert(Primitive.is(values), 'bad %s', name);
-            assert(!(this instanceof Primitive), 'cannot use new with primitives');
             return values;
         }
 
         Primitive.meta = {
             kind: 'primitive',
-            name: name
+            name: name,
+            ctor: false
         };
 
         Primitive.is = is;
@@ -215,7 +216,8 @@
         Struct.meta = {
             kind: 'struct',
             props: props,
-            name: name
+            name: name,
+            ctor: true
         };
 
         Struct.is = function (x) { 
@@ -249,15 +251,19 @@
         name = name || print('union(%s)', types.map(getName).join(', '));
 
         function Union(values, mut) {
-            assert(Func.is(Union.dispatch), 'in order to use the constructor you must implement %s.dispatch()', name);
+            assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
             var Type = Union.dispatch(values);
+            if (this instanceof Union) {
+                assert(Type.meta.ctor, 'cannot use new with %s', name);
+            }
             return coerce(Type, values, mut);
         }
 
         Union.meta = {
             kind: 'union',
             types: types,
-            name: name
+            name: name,
+            ctor: types.every(function (type) { return type.meta.ctor; })
         };
 
         Union.is = function (x) {
@@ -278,13 +284,15 @@
         name = name || print('maybe(%s)', getName(Type));
 
         function Maybe(values, mut) {
+            assert(!(this instanceof Maybe), 'cannot use new with %s', name);
             return Nil.is(values) ? null : coerce(Type, values, mut);
         }
 
         Maybe.meta = {
             kind: 'maybe',
             type: Type,
-            name: name
+            name: name,
+            ctor: false
         };
 
         Maybe.is = function (x) {
@@ -304,6 +312,7 @@
         name = name || 'enums()';
 
         function Enums(x) {
+            assert(!(this instanceof Enums), 'cannot use new with %s', name);
             assert(Enums.is(x), 'bad %s', name);
             return x;
         }
@@ -311,7 +320,8 @@
         Enums.meta = {
             kind: 'enums',
             map: map,
-            name: name
+            name: name,
+            ctor: false
         };
 
         Enums.is = function (x) {
@@ -348,7 +358,8 @@
         Tuple.meta = {
             kind: 'tuple',
             types: types,
-            name: name
+            name: name,
+            ctor: true
         };
 
         Tuple.is = function (x) {
@@ -377,6 +388,9 @@
         name = name || print('subtype(%s)', getName(Type));
 
         function Subtype(values, mut) {
+            if (this instanceof Subtype) {
+                assert(Subtype.meta.ctor, 'cannot use new with %s', name);
+            }
             var x = coerce(Type, values, mut);
             assert(predicate(x), 'bad ' + name);
             return x;
@@ -386,7 +400,8 @@
             kind: 'subtype',
             type: Type,
             predicate: predicate,
-            name: name
+            name: name,
+            ctor: Type.ctor
         };
 
         Subtype.is = function (x) {
@@ -420,7 +435,8 @@
         List.meta = {
             kind: 'list',
             type: Type,
-            name: name
+            name: name,
+            ctor: true
         };
 
         List.is = function (x) {
