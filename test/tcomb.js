@@ -1,3 +1,4 @@
+"use strict";
 var assert = require('assert');
 var t = require('../tcomb');
 
@@ -150,7 +151,7 @@ describe('assert', function(){
 //
 
 describe('Nil', function(){
-    describe('#is(x)', function(){
+    describe('#is(x)', function () {
         it('should return true when x is null or undefined', function() {
             ok(Nil.is(null));
             ok(Nil.is(undefined));
@@ -432,8 +433,19 @@ describe('list', function(){
 //
 
 describe('subtype', function(){
+    var Email = subtype(Str, function (s) {
+        return s.indexOf('@') !== -1;
+    });
     it('should have a default meaningful meta.name', function() {
         ok(Positive.meta.name === 'subtype(Num)');
+    });
+    describe('#is(x)', function(){
+        it('should return true when x is a subtype', function() {
+            ok(Email.is('a@b.it'));
+        });
+        it('should return false when x is not a subtype', function() {
+            ko(Email.is('a'));
+        });
     });
 });
 

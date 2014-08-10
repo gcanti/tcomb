@@ -128,6 +128,12 @@
         return ret;
     }
 
+    function coerce (Type, values, mut) {
+        return Type.meta.kind === 'struct' ?
+            new Type(values, mut) :
+            Type(values, mut);
+    }
+
     // --------------------------------------------------------------
     // primitives
     // --------------------------------------------------------------
@@ -136,6 +142,7 @@
 
         function Primitive(values) {
             assert(Primitive.is(values), 'bad %s', name);
+            assert(!(this instanceof Primitive), 'cannot use new with primitives');
             return values;
         }
 
@@ -198,7 +205,7 @@
                 if (props.hasOwnProperty(prop)) {
                     var Type = props[prop],
                         value = values[prop];
-                    this[prop] = Type.is(value) ? value : new Type(value, mut);
+                    this[prop] = Type.is(value) ? value : coerce(Type, value, mut);
                 }
             }
 
@@ -244,7 +251,7 @@
         function Union(values, mut) {
             assert(Func.is(Union.dispatch), 'in order to use the constructor you must implement %s.dispatch()', name);
             var Type = Union.dispatch(values);
-            return new Type(values, mut);
+            return coerce(Type, values, mut);
         }
 
         Union.meta = {
@@ -271,7 +278,7 @@
         name = name || print('maybe(%s)', getName(Type));
 
         function Maybe(values, mut) {
-            return Nil.is(values) ? null : new Type(values, mut);
+            return Nil.is(values) ? null : coerce(Type, values, mut);
         }
 
         Maybe.meta = {
@@ -332,7 +339,7 @@
             for (var i = 0 ; i < len ; i++) {
                 var Type = types[i];
                 var value = values[i];
-                arr.push(Type.is(value) ? value : new Type(value, mut));
+                arr.push(Type.is(value) ? value : coerce(Type, value, mut));
             }
 
             return freeze(arr, mut);
@@ -353,7 +360,7 @@
 
         Tuple.update = function (instance, index, element, mut) {
             var Type = types[index],
-                value = Type.is(element) ? element : new Type(element, mut),
+                value = Type.is(element) ? element : coerce(Type, element, mut),
                 arr = update(instance, index, value);
             return freeze(arr, mut);
         };
@@ -370,7 +377,7 @@
         name = name || print('subtype(%s)', getName(Type));
 
         function Subtype(values, mut) {
-            var x = new Type(values, mut);
+            var x = coerce(Type, values, mut);
             assert(predicate(x), 'bad ' + name);
             return x;
         }
@@ -404,7 +411,7 @@
             var arr = [];
             for (var i = 0, len = values.length ; i < len ; i++ ) {
                 var value = values[i];
-                arr.push(Type.is(value) ? value : new Type(value, mut));
+                arr.push(Type.is(value) ? value : coerce(Type, value, mut));
             }
 
             return freeze(arr, mut);
@@ -421,19 +428,19 @@
         };
 
         List.append = function (instance, element, mut) {
-            var value = Type.is(element) ? element : new Type(element, mut),
+            var value = Type.is(element) ? element : coerce(Type, element, mut),
                 arr = append(instance, value);
             return freeze(arr, mut);
         };
 
         List.prepend = function (instance, element, mut) {
-            var value = Type.is(element) ? element : new Type(element, mut),
+            var value = Type.is(element) ? element : coerce(Type, element, mut),
                 arr = prepend(instance, value);
             return freeze(arr, mut);
         };
 
         List.update = function (instance, index, element, mut) {
-            var value = Type.is(element) ? element : new Type(element, mut),
+            var value = Type.is(element) ? element : coerce(Type, element, mut),
                 arr = update(instance, index, value);
             return freeze(arr, mut);
         };
@@ -461,12 +468,12 @@
             var args = slice.call(arguments);
             if (args.length < f.length) args.length = f.length; // handle optional arguments
 
-            args = Arguments.is(args) ? args : new Arguments(args);
+            args = Arguments.is(args) ? args : coerce(Arguments, args);
 
-            var r = f.apply(this, new Arguments(args));
+            var r = f.apply(this, args);
 
             if (Return) {
-                r = Return.is(r) ? r : new Return(r);
+                r = Return.is(r) ? r : coerce(Return, r);
             }
 
             return r;
@@ -505,7 +512,6 @@
         Func: Func,
         Err: Err,
 
-        primitive: primitive,        
         struct: struct,
         enums: enums,
         union: union,
