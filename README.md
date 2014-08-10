@@ -119,11 +119,13 @@ This library uses a few ES5 methods
 - `Array#some()`
 - `Array#every()`
 - `Object#keys()`
+- `JSON.stringify()`
 
-you can use `es5-shim` to support old browsers
+you can use `es5-shim` and `json2` to support old browsers
 
 ```html
 <!--[if lt IE 9]>
+<script src="json2.js"></script>
 <script src="es5-shim.min.js"></script>
 <![endif]-->
 <script type="text/javascript" src="tcomb.js"></script>
