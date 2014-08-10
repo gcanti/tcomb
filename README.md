@@ -161,7 +161,7 @@ Example
 ```javascript
 assert(1 === 2); // => 'assert(): failed'
 assert(1 === 2, 'error!'); // => 'error!'
-assert(1 === 2, 'error: %s === %s', 1, 2); // => 'error: 1 !== 2'
+assert(1 === 2, 'error: %s !== %s', 1, 2); // => 'error: 1 !== 2'
 ```
 
 ### struct(props, [name])
