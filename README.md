@@ -166,7 +166,7 @@ assert(1 === 2, 'error!'); // => 'error!'
 assert(1 === 2, 'error: %s !== %s', 1, 2); // => 'error: 1 !== 2'
 ```
 
-**Customize fail behaviour**
+**Customize failure behaviour**
 
 In production envs you don't want to leak failures to the user
 
