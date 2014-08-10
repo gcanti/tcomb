@@ -148,12 +148,21 @@ In tcomb a `type` is a function `T` such that
 
 ## Api
 
-### assert(guard, [message]);
+### assert(guard, [message], [values...]);
 
 If `guard !== true` the debugger kicks in.
 
 - `guard` boolean condition
 - `message` optional string useful for debugging
+- `values...` optional values formatted by `message` (visionmedia/debug style)
+
+Example
+
+```javascript
+assert(1 === 2); // => 'assert(): failed'
+assert(1 === 2, 'error!'); // => 'error!'
+assert(1 === 2, 'error: %s === %s', 1, 2); // => 'error: 1 !== 2'
+```
 
 ### struct(props, [name])
 

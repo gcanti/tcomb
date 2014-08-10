@@ -1,4 +1,3 @@
-//     tcomb.js 0.0.4
 //     https://github.com/gcanti/tcomb
 //     (c) 2014 Giulio Canti
 //     tcomb.js may be freely distributed under the MIT license.
@@ -19,6 +18,8 @@
     // Utils
     // --------------------------------------------------------------
 
+    var slice = Array.prototype.slice;
+
     var failed = false;
     
     function fail(message) {
@@ -29,9 +30,11 @@
         throw new Error(message);
     }
 
-    function assert(guard, message) {
-        if (guard !== true) { 
-            fail(message || 'assert failed'); 
+    function assert(guard) {
+        if (guard !== true) {
+            var args = slice.call(arguments, 1);
+            var message = args[0] ? print.apply(null, args) : 'assert(): failed';
+            fail(message); 
         }
     }
 
@@ -46,7 +49,7 @@
         for (var k in y) {
             if (y.hasOwnProperty(k)) {
                 if (!overwrite) {
-                    assert(!x.hasOwnProperty(k), 'mixin(): cannot overwrite property ' + k);
+                    assert(!x.hasOwnProperty(k), 'mixin(): cannot overwrite property %s', k);
                 }
                 x[k] = y[k];
             }
@@ -54,9 +57,26 @@
         return x;
     }
 
-    function getName (type) { 
+    function getName(type) { 
         return type.meta.name 
     }
+
+    function print() {
+        var args = slice.call(arguments);
+        var index = 0;
+        return args[0].replace(/%([a-z%])/g, function(match, format) {
+            if (match === '%%') return match;
+            index++;
+            var formatter = print.formatters[format];
+            var arg = args[index];
+            return formatter(arg);
+        });
+    }
+
+    print.formatters = {
+        s: function (x) { return String(x); },
+        o: function (x) { return JSON.stringify(x); }
+    };
 
     // --------------------------------------------------------------
     // array manipulation
@@ -116,7 +136,7 @@
     function primitive(name, is) {
 
         function Primitive(values) {
-            assert(Primitive.is(values), 'bad ' + name);
+            assert(Primitive.is(values), 'bad %s', name);
             return values;
         }
 
@@ -172,7 +192,7 @@
 
         function Struct(values, mut) {
 
-            assert(Obj.is(values), 'bad ' + name);
+            assert(Obj.is(values), 'bad %s', name);
             assert(maybe(Bool).is(mut), 'bad mut');
 
             for (var prop in props) {
@@ -220,10 +240,10 @@
 
     function union(types, name) {
 
-        name = name || 'union(' + types.map(getName).join(', ') + ')';
+        name = name || print('union(%s)', types.map(getName).join(', '));
 
         function Union(values, mut) {
-            assert(Func.is(Union.dispatch), 'in order to use the constructor you must implement ' + name + '.dispatch()');
+            assert(Func.is(Union.dispatch), 'in order to use the constructor you must implement %s.dispatch()', name);
             var Type = Union.dispatch(values);
             return new Type(values, mut);
         }
@@ -249,7 +269,7 @@
 
     function maybe(Type, name) {
 
-        name = name || 'maybe(' + getName(Type) + ')';
+        name = name || print('maybe(%s)', getName(Type));
 
         function Maybe(values, mut) {
             return Nil.is(values) ? null : new Type(values, mut);
@@ -278,7 +298,7 @@
         name = name || 'enums()';
 
         function Enums(x) {
-            assert(Enums.is(x), 'bad ' + name);
+            assert(Enums.is(x), 'bad %s', name);
             return x;
         }
 
@@ -301,13 +321,13 @@
 
     function tuple(types, name) {
 
-        name = name || 'tuple(' + types.map(getName).join(', ') + ')';
+        name = name || print('tuple(%s)', types.map(getName).join(', '));
 
         var len = types.length;
 
         function Tuple(values, mut) {
 
-            assert(Arr.is(values), 'bad ' + name);
+            assert(Arr.is(values), 'bad %s', name);
 
             var arr = [];
             for (var i = 0 ; i < len ; i++) {
@@ -348,7 +368,7 @@
 
     function subtype(Type, predicate, name) {
 
-        name = name || 'subtype(' + getName(Type) + ')';
+        name = name || print('subtype(%s)', getName(Type));
 
         function Subtype(values, mut) {
             var x = new Type(values, mut);
@@ -376,11 +396,11 @@
 
     function list(Type, name) {
 
-        name = name || 'list(' + getName(Type) + ')';
+        name = name || print('list(%s)', getName(Type));
 
         function List(values, mut) {
 
-            assert(Arr.is(values), 'bad ' + name);
+            assert(Arr.is(values), 'bad %s', name);
 
             var arr = [];
             for (var i = 0, len = values.length ; i < len ; i++ ) {
@@ -439,7 +459,7 @@
     var func = function (Arguments, f, Return, name) {
         
         function func() {
-            var args = Array.prototype.slice.call(arguments);
+            var args = slice.call(arguments);
             if (args.length < f.length) args.length = f.length; // handle optional arguments
 
             args = Arguments.is(args) ? args : new Arguments(args);
@@ -476,6 +496,7 @@
         update: update,
         remove: remove,
         move: move,
+        print: print,
         
         Nil: Nil,
         Str: Str,

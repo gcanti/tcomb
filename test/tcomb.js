@@ -79,6 +79,56 @@ var sum = func(tuple([Num, Num]), function (a, b) {
     return a + b;
 }, Num);
 
+//
+// print
+//
+describe('print', function(){
+    it('should format the message', function() {
+        ok(t.print('%s', 'a') === 'a');
+        ok(t.print('%s', 2) === '2');
+        ok(t.print('%o', {a: 1}) === '{"a":1}');
+        ok(t.print('%s === %s', 1, 1) === '1 === 1');
+    });
+});
+
+//
+// assert
+//
+
+describe('assert', function(){
+    it('should throw when guard is not true', function() {
+        throws(function () {
+            t.assert(1 === 2);
+        });
+    });
+    it('should throw a default message', function() {
+        throws(function () {
+            t.assert(1 === 2);
+        }, function (err) {
+            if ( (err instanceof Error) && err.message === 'assert(): failed' ) {
+              return true;
+            }
+        });
+    });
+    it('should throw the specified message', function() {
+        throws(function () {
+            t.assert(1 === 2, 'my message');
+        }, function (err) {
+            if ( (err instanceof Error) && err.message === 'my message' ) {
+              return true;
+            }
+        });
+    });
+    it('should format the specified message', function() {
+        throws(function () {
+            t.assert(1 === 2, '%s !== %s', 1, 2);
+        }, function (err) {
+            if ( (err instanceof Error) && err.message === '1 !== 2' ) {
+              return true;
+            }
+        });
+    });
+});
 
 //
 // primitives types
