@@ -25,6 +25,7 @@ var func = t.func;
 var ok = function (x) { assert.strictEqual(true, x); };
 var ko = function (x) { assert.strictEqual(false, x); };
 var throws = assert.throws;
+var doesNotThrow = assert.doesNotThrow;
 
 // struct
 var Point = struct({
@@ -127,6 +128,20 @@ describe('assert', function(){
               return true;
             }
         });
+    });
+    it('should handle custom onfail behaviour', function() {
+        var onfail = t.assert.onfail;
+        t.assert.onfail = function (message) {
+            try {
+                throw new Error(message);
+            } catch (e) {
+                ok(e.message === 'report error');
+            }
+        };
+        doesNotThrow(function () {
+            t.assert(1 === 2, 'report error');
+        });
+        t.assert.onfail = onfail;
     });
 });
 

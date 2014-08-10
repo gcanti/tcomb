@@ -166,6 +166,23 @@ assert(1 === 2, 'error!'); // => 'error!'
 assert(1 === 2, 'error: %s !== %s', 1, 2); // => 'error: 1 !== 2'
 ```
 
+**Customize fail behaviour**
+
+In production envs you don't want to leak failures to the user
+
+```javascript
+// override onfail hook
+assert.onfail = function (message) {
+    try {
+        // capture stack trace
+        throw new Error(message);
+    } catch (e) {
+        // use you favourite JavaScript error logging service
+        console.log(e.stack);
+    }
+};
+```
+
 ### struct(props, [name])
 
 Defines a struct like type.
