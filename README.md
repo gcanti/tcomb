@@ -156,7 +156,7 @@ If `guard !== true` the debugger kicks in.
 
 - `guard` boolean condition
 - `message` optional string useful for debugging
-- `values...` optional values formatted by `message` (visionmedia/debug style)
+- `values...` optional values formatted by `message` ([visionmedia/debug](https://github.com/visionmedia/debug) style)
 
 Example
 
