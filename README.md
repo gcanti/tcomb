@@ -2,7 +2,7 @@
 
 [![NPM version](https://badge.fury.io/js/tcomb.svg)](http://badge.fury.io/js/tcomb)
 
-tcomb is a library for Node.js and browser which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
+tcomb is a library for Node.js and the browser which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
 
 - write complex domain models in a breeze and with small code footprint
 - easy debugging
@@ -10,7 +10,7 @@ tcomb is a library for Node.js and browser which allows you to **check the types
 - encode/decode of domain objects to/from JSON for free
 - gradually make your existing code safer
 
-The library provides several type combinators and a built-in `assert` function. When an assertion fails the library **starts the debugger** so you can inspect the stack and quickly find out what's wrong.
+The library provides several type combinators and a built-in `assert` function. If an assertion fails the library **starts the debugger** so you can inspect the stack and quickly find out what's wrong.
 
 You can check:
 
@@ -89,7 +89,7 @@ function Point (x, y) {
 var p = new Point(1, 'a'); // silent error
 ```
 
-in order to "tcombify" your code you can simply add some assertions
+in order to "tcombify" your code you can simply add some asserts
 
 ```javascript
 function Point (x, y) {
@@ -327,7 +327,7 @@ Returns `true` if `x` belongs to the tuple.
 
 ```javascript
 Area.is([1, 2]);      // => true
-Area.is([1, 'a']);    // => false, second element is not a Num
+Area.is([1, 'a']);    // => false, the second element is not a Num
 Area.is([1, 2, 3]);   // => false, too many elements
 ```
 
