@@ -57,7 +57,7 @@
     }
 
     function getName(type) { 
-        return type.meta.name 
+        return type.meta && type.meta.name ? type.meta.name : type.name || 'Unknown';
     }
 
     function print() {
