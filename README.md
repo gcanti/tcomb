@@ -4,7 +4,7 @@
 
 tcomb is a library for Node.js and the browser which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
 
-- write complex domain models in a breeze and with small code footprint
+- **write complex domain models** in a breeze and with small code footprint
 - easy debugging
 - **instances are immutables** by default
 - encode/decode of domain objects to/from JSON for free
