@@ -518,6 +518,7 @@
         remove: remove,
         move: move,
         print: print,
+        getName: getName,
         
         Nil: Nil,
         Str: Str,
