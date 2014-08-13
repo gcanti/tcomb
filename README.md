@@ -442,12 +442,12 @@ sum(1, 'a'); // => fail!
 
 ## TODO and IDEAS
 
+- A database of types and combinators written with tcomb: [tcomb-types](https://github.com/gcanti/tcomb-types)
 - more tests
 - jsDoc comments
 - explore auto generated UI from domain models written with tcomb
 - explore auto validation of UI involving domain models written with tcomb
 - explore using tcomb with React.js
-- database of types written with tcomb
 - Your ideas?
 
 ## Contribution
