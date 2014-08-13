@@ -440,13 +440,14 @@ sum(1, 'a'); // => fail!
 - [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
 - tcomb and React Prop Validation (coming soon)
 
-## TODO
+## TODO and IDEAS
 
 - more tests
 - jsDoc comments
 - explore auto generated UI from domain models written with tcomb
 - explore auto validation of UI involving domain models written with tcomb
 - explore using tcomb with React.js
+- database of types written with tcomb
 - Your ideas?
 
 ## Contribution
