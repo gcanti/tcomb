@@ -332,6 +332,7 @@
     }
 
     enums.of = function (keys, name) {
+        keys = Str.is(keys) ? keys.split(' ') : keys;
         var values = {};
         keys.forEach(function (k, i) {
             values[k] = i;

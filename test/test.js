@@ -330,6 +330,11 @@ describe('enums', function(){
             ok(Size.meta.map.large === 0);
             ok(Size.meta.map.small === 1);
         });
+        it('should handle a string', function() {
+            var Size = enums.of('large small');
+            ok(Size.meta.map.large === 0);
+            ok(Size.meta.map.small === 1);
+        });
     });
 });
 
