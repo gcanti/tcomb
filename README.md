@@ -112,6 +112,10 @@ Node
 
 Browser
 
+    bower install tcomb
+
+or download `tcomb.js` file.
+
 This library uses a few ES5 methods
 
 - `Array#forEach()`
