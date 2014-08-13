@@ -442,7 +442,7 @@ sum(1, 'a'); // => fail!
 
 ## TODO and IDEAS
 
-- A database of types and combinators written with tcomb: [tcomb-types](https://github.com/gcanti/tcomb-types)
+- A database of types and combinators written with tcomb: [tcomb-commons](https://github.com/gcanti/tcomb-commons)
 - more tests
 - jsDoc comments
 - explore auto generated UI from domain models written with tcomb
