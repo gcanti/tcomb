@@ -316,12 +316,19 @@ describe('enums', function(){
     it('should have a default meaningful meta.name', function() {
         ok(Direction.meta.name === 'enums()');
     });
-    describe('#is(x)', function(){
+    describe('#is(x)', function() {
         it('should return true when x is an instance of the enum', function() {
             ok(Direction.is('North'));
         });
         it("should return false when x is not an instance of the enum", function() {
             ko(Direction.is('North-East'));
+        });
+    });
+    describe('#of(keys)', function() {
+        it('should return an enum', function() {
+            var Size = enums.of(['large', 'small']);
+            ok(Size.meta.map.large === 0);
+            ok(Size.meta.map.small === 1);
         });
     });
 });

@@ -305,6 +305,15 @@ Returns `true` if `x` belongs to the enum.
 Direction.is('North'); // => true
 ```
 
+#### enums.of(keys, [name])
+
+Returns an enums of an array of keys.
+
+```javascript
+// result is the same as the previuos example
+Direction = enums.of(['North', 'East', 'South', 'West']);
+```
+
 ### tuple(types, [name])
 
 Defines a tuple whose coordinates have the specified types.

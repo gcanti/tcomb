@@ -331,6 +331,14 @@
         return Enums;
     }
 
+    enums.of = function (keys, name) {
+        var values = {};
+        keys.forEach(function (k, i) {
+            values[k] = i;
+        });
+        return enums(values, name);
+    };
+
     // --------------------------------------------------------------
     // tuple
     // --------------------------------------------------------------
