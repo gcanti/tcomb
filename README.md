@@ -442,6 +442,7 @@ sum(1, 'a'); // => fail!
 
 ## TODO and IDEAS
 
+- bower support
 - A database of types and combinators written with tcomb: [tcomb-commons](https://github.com/gcanti/tcomb-commons)
 - more tests
 - jsDoc comments
