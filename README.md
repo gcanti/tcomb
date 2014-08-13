@@ -452,7 +452,7 @@ sum(1, 'a'); // => fail!
 
 ## Contribution
 
-If you do have a contribution for the package feel free to put up a Pull Request or open Issue.
+If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.
 
 [![NPM](https://nodei.co/npm/tcomb.png?downloads=true)](https://nodei.co/npm/tcomb/)
 
