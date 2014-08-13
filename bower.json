@@ -1,0 +1,33 @@
+{
+  "name": "tcomb",
+  "main": "tcomb.js",
+  "version": "0.0.7",
+  "homepage": "https://github.com/gcanti/tcomb",
+  "authors": [
+    "gcanti <giulio.canti@gmail.com>"
+  ],
+  "description": "JavaScript types and combinators",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "type",
+    "types",
+    "combinators",
+    "safety",
+    "models",
+    "domain",
+    "debugging",
+    "immutable"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
