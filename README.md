@@ -307,10 +307,11 @@ Direction.is('North'); // => true
 
 #### enums.of(keys, [name])
 
-Returns an enums of an array of keys.
+Returns an enums of an array of keys, useful when you don't mind to define
+custom values form the enums.
 
 ```javascript
-// result is the same as the previuos example
+// result is the same as the main example
 Direction = enums.of(['North', 'East', 'South', 'West']);
 ```
 
