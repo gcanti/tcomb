@@ -26,6 +26,9 @@
   "ignore": [
     "**/.*",
     "node_modules",
-    "test"
+    "src",
+    "test",
+    "package.json",
+    "Grunfile.js"
   ]
 }
