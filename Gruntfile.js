@@ -8,7 +8,9 @@ module.exports = function (grunt) {
   ].join('\n');
 
   grunt.initConfig({
+    
     pkg: grunt.file.readJSON('package.json'),
+    
     rig: {
       compile: {
         options: {
@@ -21,6 +23,7 @@ module.exports = function (grunt) {
         }
       }
     },
+    
     jshint: {
       options: {
         reporter: require('jshint-stylish')
@@ -30,11 +33,13 @@ module.exports = function (grunt) {
         'build/tcomb.js'
       ]
     },
+    
     mochaTest: {
       all: {
         src: ['test/**/*.js']
       }
     },
+
     uglify: {
       all: {
         options: {
@@ -46,6 +51,7 @@ module.exports = function (grunt) {
         }
       }
     },
+    
     watch: {
       options: {
         interrupt: true,
@@ -60,14 +66,18 @@ module.exports = function (grunt) {
         'test'
       ]
     }
+
   });
 
+  // plugins
   grunt.loadNpmTasks('grunt-rigger');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-clean');
 
+  // tasks
   grunt.registerTask('test', ['mochaTest']);
   grunt.registerTask('default', ['rig', 'jshint', 'test', 'watch']);
   grunt.registerTask('build', ['rig', 'jshint', 'uglify']);

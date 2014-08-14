@@ -7,7 +7,8 @@
     "test": "grunt test",
     "build": "grunt build",
     "jshint": "grunt jshint",
-    "start": "grunt"
+    "start": "grunt",
+    "coverage": "istanbul cover _mocha -- --ui bdd -R spec -t 5000"
   },
   "repository": {
     "type": "git",
@@ -21,14 +22,16 @@
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
     "mocha": "*",
-    "grunt": "0.4.1",
-    "grunt-rigger": "0.5.0",
-    "grunt-contrib-jshint": "0.6.4",
-    "grunt-mocha-test": "0.11.0",
-    "grunt-contrib-uglify": "0.2.2",
-    "grunt-contrib-watch": "0.4.4",
-    "grunt-cli": "0.1.9",
-    "jshint-stylish": "*"
+    "grunt": "*",
+    "grunt-rigger": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-mocha-test": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-watch": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-cli": "*",
+    "jshint-stylish": "*",
+    "istanbul": "*"
   },
   "tags": [
     "type",
