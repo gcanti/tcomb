@@ -24,12 +24,12 @@
         if (guard !== true) {
             var args = slice.call(arguments, 1);
             var message = args[0] ? print.apply(null, args) : 'assert(): failed';
-            assert.onfail(message); 
+            assert.onFail(message); 
         }
     }
 
     assert.failed = false;
-    assert.onfail = function (message) {
+    assert.onFail = function (message) {
         if (!assert.failed) { 
             debugger; 
         }
@@ -81,7 +81,7 @@
     // array manipulation
     // --------------------------------------------------------------
 
-    function is_valid_index(index, from, to) {
+    function isValidIndex(index, from, to) {
         return Num.is(index) && index >= from && index <= to;
     }
 
@@ -101,7 +101,7 @@
 
     function update(arr, index, element) {
         assert(Arr.is(arr), 'update(): bad array');
-        assert(is_valid_index(index, 0, arr.length - 1), 'update(): bad index');
+        assert(isValidIndex(index, 0, arr.length - 1), 'update(): bad index');
         var ret = arr.slice();
         ret[index] = element;
         return ret;
@@ -109,7 +109,7 @@
 
     function remove(arr, index) {
         assert(Arr.is(arr), 'remove(): bad array');
-        assert(is_valid_index(index, 0, arr.length - 1), 'remove(): bad index');
+        assert(isValidIndex(index, 0, arr.length - 1), 'remove(): bad index');
         var ret = arr.slice();
         ret.splice(index, 1);
         return ret;
@@ -117,8 +117,8 @@
 
     function move(arr, from, to) {
         assert(Arr.is(arr), 'move(): bad array');
-        assert(is_valid_index(from, 0, arr.length - 1), 'move(): bad from');
-        assert(is_valid_index(to, 0, arr.length - 1), 'move(): bad to');
+        assert(isValidIndex(from, 0, arr.length - 1), 'move(): bad from');
+        assert(isValidIndex(to, 0, arr.length - 1), 'move(): bad to');
         var ret = arr.slice();
         if (from === to) {
             return ret;

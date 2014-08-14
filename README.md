@@ -175,8 +175,8 @@ assert(1 === 2, 'error: %s !== %s', 1, 2); // => 'error: 1 !== 2'
 In production envs you don't want to leak failures to the user
 
 ```javascript
-// override onfail hook
-assert.onfail = function (message) {
+// override onFail hook
+assert.onFail = function (message) {
     try {
         // capture stack trace
         throw new Error(message);
