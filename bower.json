@@ -1,6 +1,6 @@
 {
   "name": "tcomb",
-  "main": "tcomb.js",
+  "main": "build/tcomb.js",
   "version": "0.0.8",
   "homepage": "https://github.com/gcanti/tcomb",
   "authors": [
@@ -26,8 +26,6 @@
   "ignore": [
     "**/.*",
     "node_modules",
-    "bower_components",
-    "test",
-    "tests"
+    "test"
   ]
 }

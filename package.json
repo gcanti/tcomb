@@ -2,9 +2,11 @@
   "name": "tcomb",
   "version": "0.0.8",
   "description": "JavaScript types and combinators",
-  "main": "tcomb.js",
+  "main": "build/tcomb.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "build": "grunt build",
+    "start": "grunt"
   },
   "repository": {
     "type": "git",

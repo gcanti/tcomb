@@ -1,10 +1,18 @@
 module.exports = function (grunt) {
+
+  var banner = [
+    '//     <%= pkg.name %> <%= pkg.version %>',
+    '//     <%= pkg.homepage %>',
+    '//     (c) 2014 <%= pkg.author %>',
+    '//     <%= pkg.name %> may be freely distributed under the MIT license.'
+  ].join('\n');
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     rig: {
       compile: {
         options: {
-          banner: '/* Compiled : <%= grunt.template.today("yyyy-mm-dd HH:MM") %> */\n'
+          banner: banner + '\n\n'
         },
         files: {
           'build/tcomb.js': [
@@ -48,7 +56,6 @@ module.exports = function (grunt) {
       ],
       tasks: [
         'rig',
-        'jshint',
         'test'
       ]
     }
@@ -61,6 +68,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('test', ['mochaTest']);
-  grunt.registerTask('default', ['rig', /*'jshint',*/ 'test', 'uglify']);
+  grunt.registerTask('default', ['rig', /*'jshint',*/ 'test', 'watch']);
   grunt.registerTask('build', ['rig', 'uglify']);
 };
