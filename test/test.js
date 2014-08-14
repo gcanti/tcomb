@@ -18,6 +18,7 @@ var maybe = t.maybe;
 var subtype = t.subtype;
 var list = t.list;
 var func = t.func;
+var getName = t.getName;
 
 //
 // setup
@@ -32,19 +33,6 @@ var doesNotThrow = assert.doesNotThrow;
 var Point = struct({
     x: Num,
     y: Num
-}, 'Point');
-
-//
-// print
-//
-
-describe('print', function(){
-    it('should format the message', function() {
-        ok(t.print('%s', 'a') === 'a');
-        ok(t.print('%s', 2) === '2');
-        ok(t.print('%o', {a: 1}) === '{"a":1}');
-        ok(t.print('%s === %s', 1, 1) === '1 === 1');
-    });
 });
 
 //
@@ -97,6 +85,56 @@ describe('assert', function(){
             t.assert(1 === 2, 'report error');
         });
         t.assert.onFail = onFail;
+    });
+});
+
+//
+// utils
+//
+
+describe('print', function(){
+    it('should format the message', function() {
+        ok(t.print('%s', 'a') === 'a');
+        ok(t.print('%s', 2) === '2');
+        ok(t.print('%o', {a: 1}) === '{"a":1}');
+        ok(t.print('%s === %s', 1, 1) === '1 === 1');
+    });
+});
+
+describe('getName', function(){
+
+    var UnnamedStruct = struct({});
+    var NamedStruct = struct({}, 'NamedStruct');
+    var UnnamedUnion = union([Str, Num]);
+    var NamedUnion = union([Str, Num], 'NamedUnion');
+    var UnnamedMaybe = maybe(Str);
+    var NamedMaybe = maybe(Str, 'NamedMaybe');
+    var UnnamedEnums = enums({});
+    var NamedEnums = enums({}, 'NamedEnums');
+    var UnnamedTuple = tuple([Str, Num]);
+    var NamedTuple = tuple([Str, Num], 'NamedTuple');
+    var UnnamedSubtype = subtype(Str, function (x) { return x !== ''; });
+    var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
+    var UnnamedList = list(Str);
+    var NamedList = list(Str, 'NamedList');
+
+    it('should return the name of a named type', function() {
+        ok(getName(NamedStruct) === 'NamedStruct');
+        ok(getName(NamedUnion) === 'NamedUnion');
+        ok(getName(NamedMaybe) === 'NamedMaybe');
+        ok(getName(NamedEnums) === 'NamedEnums');
+        ok(getName(NamedTuple) === 'NamedTuple');
+        ok(getName(NamedSubtype) === 'NamedSubtype');
+        ok(getName(NamedList) === 'NamedList');
+    });
+    it('should return a meaningful name of a unnamed type', function() {
+        ok(getName(UnnamedStruct) === 'struct()');
+        ok(getName(UnnamedUnion) === 'union(Str, Num)');
+        ok(getName(UnnamedMaybe) === 'maybe(Str)');
+        ok(getName(UnnamedEnums) === 'enums()');
+        ok(getName(UnnamedTuple) === 'tuple(Str, Num)');
+        ok(getName(UnnamedSubtype) === 'subtype(Str)');
+        ok(getName(UnnamedList) === 'list(Str)');
     });
 });
 
@@ -287,11 +325,6 @@ describe('Err', function(){
 //
 
 describe('struct', function(){
-    it('should have a default meaningful meta.name', function() {
-        var X = struct();
-        ok(X.meta.name === 'struct()');
-        ok(Point.meta.name === 'Point');
-    });
     describe('#is(x)', function(){
         it('should return true when x is an instance of the struct', function() {
             var p = new Point({ x: 1, y: 2 });
@@ -313,9 +346,6 @@ describe('enums', function(){
         West: 3
     });
 
-    it('should have a default meaningful meta.name', function() {
-        ok(Direction.meta.name === 'enums()');
-    });
     describe('#is(x)', function() {
         it('should return true when x is an instance of the enum', function() {
             ok(Direction.is('North'));
@@ -347,18 +377,15 @@ describe('union', function(){
     var Circle = struct({
         center: Point,
         radius: Num
-    }, 'Circle');
+    });
 
     var Rectangle = struct({
         a: Point,
         b: Point
-    }, 'Rectangle');
+    });
 
     var Shape = union([Circle, Rectangle]);
 
-    it('should have a default meaningful meta.name', function() {
-        ok(Shape.meta.name === 'union(Circle, Rectangle)');
-    });
     describe('#is(x)', function(){
         it('should return true when x is an instance of the union', function() {
             var p = new Circle({center: { x: 0, y: 0 }, radius: 10});
@@ -370,9 +397,7 @@ describe('union', function(){
             throws(function () {
                 new Shape({center: {x: 0, y: 0}, radius: 10});
             }, function (err) {
-                if ( (err instanceof Error) && err.message === 'unimplemented union(Circle, Rectangle).dispatch()' ) {
-                  return true;
-                }
+                return err instanceof Error;
             });
         });
         it('should build instances when dispatch() is implemented', function() {
@@ -402,8 +427,12 @@ describe('maybe', function(){
 
     var Radio = maybe(Str);
 
-    it('should have a default meaningful meta.name', function() {
-        ok(Radio.meta.name === 'maybe(Str)');
+    describe('#is(x)', function(){
+        it('should return true when x is an instance of the maybe', function() {
+            ok(Radio.is('a'));
+            ok(Radio.is(null));
+            ok(Radio.is(undefined));
+        });
     });
 });
 
@@ -415,9 +444,6 @@ describe('tuple', function () {
 
     var Area = tuple([Num, Num]);
 
-    it('should have a default meaningful meta.name', function() {
-        ok(Area.meta.name === 'tuple(Num, Num)');
-    });
     describe('#is(x)', function(){
         it('should return true when x is an instance of the tuple', function() {
             ok(Area.is([1, 2]));
@@ -437,10 +463,15 @@ describe('tuple', function () {
 describe('list', function(){
 
     var Path = list(Point);
+    var p1 = new Point({x: 0, y: 0});
+    var p2 = new Point({x: 1, y: 1});
 
-    it('should have a default meaningful meta.name', function() {
-        ok(Path.meta.name === 'list(Point)');
+    describe('#is(x)', function(){
+        it('should return true when x is a list', function() {
+            ok(Path.is([p1, p2]));
+        });
     });
+
 });
 
 //
@@ -454,9 +485,6 @@ describe('subtype', function(){
         return n >= 0;
     });
 
-    it('should have a default meaningful meta.name', function() {
-        ok(Positive.meta.name === 'subtype(Num)');
-    });
     describe('#is(x)', function(){
         it('should return true when x is a subtype', function() {
             ok(Positive.is(1));
@@ -513,22 +541,3 @@ describe('func', function(){
         });
     });
 });
-
-describe('generics', function(){
-    // generic Either A B
-    var Either = function (A, B) {
-        return subtype(tuple([maybe(A), maybe(B)]), function (x) {
-            return Nil.is(x[0]) !== Nil.is(x[1]);
-        });
-    };
-    // node.js style callback
-    var CallbackArguments = Either(Err, Obj);
-    it('should return true when x is an instance of CallbackArguments', function() {
-        ok(CallbackArguments.is([null, {}]));
-        ok(CallbackArguments.is([new Error(), null]));
-    });
-    it('should return false when x is not an instance of CallbackArguments', function() {
-        ko(CallbackArguments.is([null, null]));
-    });
-});
-

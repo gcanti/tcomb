@@ -2,6 +2,7 @@
 //     https://github.com/gcanti/tcomb
 //     (c) 2014 Giulio Canti <giulio.canti@gmail.com>
 //     tcomb may be freely distributed under the MIT license.
+
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define([], factory);
@@ -14,124 +15,124 @@
 
     "use strict";
 
-    // --------------------------------------------------------------
-    // Utils
-    // --------------------------------------------------------------
-
-    var slice = Array.prototype.slice;
-
+    //
+    // assert
+    //
+    
     function assert(guard) {
-        if (guard !== true) {
-            var args = slice.call(arguments, 1);
-            var message = args[0] ? print.apply(null, args) : 'assert(): failed';
-            assert.onFail(message); 
-        }
+      if (guard !== true) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        var message = args[0] ? print.apply(null, args) : 'assert(): failed';
+        assert.onFail(message); 
+      }
     }
-
+    
     assert.failed = false;
     assert.onFail = function (message) {
-        if (!assert.failed) { 
-            debugger; 
-        }
-        assert.failed = true;
-        throw new Error(message);
+      if (!assert.failed) { 
+        debugger; 
+      }
+      assert.failed = true;
+      throw new Error(message);
     };
 
+    //
+    // utils
+    //
+    
     function freeze(obj_or_arr, unless) {
-        if (unless !== true && Object.freeze) {
-            Object.freeze(obj_or_arr);
-        }
-        return obj_or_arr;
+      if (unless !== true && Object.freeze) {
+        Object.freeze(obj_or_arr);
+      }
+      return obj_or_arr;
     }
-
+    
     function mixin(x, y, overwrite) {
-        for (var k in y) {
-            if (y.hasOwnProperty(k)) {
-                if (!overwrite) {
-                    assert(!x.hasOwnProperty(k), 'mixin(): cannot overwrite property %s', k);
-                }
-                x[k] = y[k];
-            }
+      for (var k in y) {
+        if (y.hasOwnProperty(k)) {
+          if (!overwrite) {
+            assert(!x.hasOwnProperty(k), 'mixin(): cannot overwrite property %s', k);
+          }
+          x[k] = y[k];
         }
-        return x;
+      }
+      return x;
     }
-
+    
     function getName(type) { 
-        return type.meta && type.meta.name ? type.meta.name : type.name || 'Unknown';
+      return type.meta && type.meta.name ? type.meta.name : type.name || 'Unknown';
     }
-
+    
     function print() {
-        var args = slice.call(arguments);
-        var index = 0;
-        return args[0].replace(/%([a-z%])/g, function(match, format) {
-            if (match === '%%') return match;
-            index++;
-            var formatter = print.formatters[format];
-            var arg = args[index];
-            return formatter(arg);
-        });
+      var args = Array.prototype.slice.call(arguments);
+      var index = 0;
+      return args[0].replace(/%([a-z%])/g, function(match, format) {
+        if (match === '%%') return match;
+        index++;
+        var formatter = print.formatters[format];
+        var arg = args[index];
+        return formatter(arg);
+      });
     }
-
+    
     print.formatters = {
-        s: function (x) { return String(x); },
-        o: function (x) { return JSON.stringify(x); }
+      s: function (x) { return String(x); },
+      o: function (x) { return JSON.stringify(x); }
     };
-
-    // --------------------------------------------------------------
+    
     // array manipulation
-    // --------------------------------------------------------------
-
+    
     function isValidIndex(index, from, to) {
-        return Num.is(index) && index >= from && index <= to;
+      return Num.is(index) && index >= from && index <= to;
     }
-
+    
     function append(arr, element) {
-        assert(Arr.is(arr), 'append(): bad array');
-        var ret = arr.slice();
-        ret.push(element);
-        return ret;
+      assert(Arr.is(arr), 'append(): bad array');
+      var ret = arr.slice();
+      ret.push(element);
+      return ret;
     }
-
+    
     function prepend(arr, element) {
-        assert(Arr.is(arr), 'prepend(): bad array');
-        var ret = arr.slice();
-        ret.unshift(element);
-        return ret;
+      assert(Arr.is(arr), 'prepend(): bad array');
+      var ret = arr.slice();
+      ret.unshift(element);
+      return ret;
     }
-
+    
     function update(arr, index, element) {
-        assert(Arr.is(arr), 'update(): bad array');
-        assert(isValidIndex(index, 0, arr.length - 1), 'update(): bad index');
-        var ret = arr.slice();
-        ret[index] = element;
-        return ret;
+      assert(Arr.is(arr), 'update(): bad array');
+      assert(isValidIndex(index, 0, arr.length - 1), 'update(): bad index');
+      var ret = arr.slice();
+      ret[index] = element;
+      return ret;
     }
-
+    
     function remove(arr, index) {
-        assert(Arr.is(arr), 'remove(): bad array');
-        assert(isValidIndex(index, 0, arr.length - 1), 'remove(): bad index');
-        var ret = arr.slice();
-        ret.splice(index, 1);
-        return ret;
+      assert(Arr.is(arr), 'remove(): bad array');
+      assert(isValidIndex(index, 0, arr.length - 1), 'remove(): bad index');
+      var ret = arr.slice();
+      ret.splice(index, 1);
+      return ret;
     }
-
+    
     function move(arr, from, to) {
-        assert(Arr.is(arr), 'move(): bad array');
-        assert(isValidIndex(from, 0, arr.length - 1), 'move(): bad from');
-        assert(isValidIndex(to, 0, arr.length - 1), 'move(): bad to');
-        var ret = arr.slice();
-        if (from === to) {
-            return ret;
-        }
-        var element = ret.splice(from, 1)[0];
-        ret.splice(to, 0, element);
+      assert(Arr.is(arr), 'move(): bad array');
+      assert(isValidIndex(from, 0, arr.length - 1), 'move(): bad from');
+      assert(isValidIndex(to, 0, arr.length - 1), 'move(): bad to');
+      var ret = arr.slice();
+      if (from === to) {
         return ret;
+      }
+      var element = ret.splice(from, 1)[0];
+      ret.splice(to, 0, element);
+      return ret;
     }
-
+    
     function coerce(Type, values, mut) {
-        return Type.meta.kind === 'struct' ?
-            new Type(values, mut) :
-            Type(values, mut);
+      return Type.meta.kind === 'struct' ?
+          new Type(values, mut) :
+          Type(values, mut);
     }
 
     // --------------------------------------------------------------
@@ -490,7 +491,7 @@
     var func = function (Arguments, f, Return, name) {
         
         function func() {
-            var args = slice.call(arguments);
+            var args = Array.prototype.slice.call(arguments);
             if (args.length < f.length) args.length = f.length; // handle optional arguments
 
             args = Arguments.is(args) ? args : coerce(Arguments, args);
