@@ -1,4 +1,4 @@
-//     tcomb 0.0.8
+//     tcomb 0.0.9
 //     https://github.com/gcanti/tcomb
 //     (c) 2014 Giulio Canti <giulio.canti@gmail.com>
 //     tcomb may be freely distributed under the MIT license.
