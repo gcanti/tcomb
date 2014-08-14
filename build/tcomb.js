@@ -33,7 +33,8 @@
     
     assert.onFail = function (message) {
       // start debugger only once
-      if (!assert.failed) { 
+      if (!assert.failed) {
+        /*jshint debug: true*/
         debugger; 
       }
       assert.failed = true;
@@ -133,10 +134,11 @@
       return ret;
     }
     
-    function coerce(Type, values, mut) {
-      return Type.meta.kind === 'struct' ?
-          new Type(values, mut) :
-          Type(values, mut);
+    function coerce(type, values, mut) {
+      return type.meta.kind === 'struct' ?
+          /*jshint newcap: false*/
+          new type(values, mut) :
+          type(values, mut);
     }
 
     //
@@ -279,9 +281,9 @@
       return Union;
     }
 
-    // --------------------------------------------------------------
+    //
     // maybe
-    // --------------------------------------------------------------
+    //
     
     function maybe(Type, name) {
     
@@ -404,7 +406,7 @@
           assert(Subtype.meta.ctor, 'cannot use new with %s', name);
         }
         var x = coerce(Type, values, mut);
-        assert(predicate(x), 'bad ' + name);
+        assert(predicate(x), 'bad %s', name);
         return x;
       }
     
@@ -490,15 +492,15 @@
     // func (experimental)
     //
     
-    var func = function (Arguments, f, Return, name) {
+    function func(Arguments, f, Return, name) {
         
-      function func() {
+      function g() {
         var args = Array.prototype.slice.call(arguments);
         if (args.length < f.length) args.length = f.length; // handle optional arguments
     
         args = Arguments.is(args) ? args : coerce(Arguments, args);
     
-        var r = f.apply(this, args);
+        var r = f.apply(null, args);
     
         if (Return) {
           r = Return.is(r) ? r : coerce(Return, r);
@@ -507,9 +509,9 @@
         return r;
       }
     
-      func.is = function (x) { return x === func; };
+      g.is = function (x) { return x === g; };
     
-      func.meta = {
+      g.meta = {
         kind: 'func',
         Arguments: Arguments,
         f: f,
@@ -517,8 +519,8 @@
         name: name
       };
     
-      return func;
-    };
+      return g;
+    }
 
     return {
         assert: assert,

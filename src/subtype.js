@@ -11,7 +11,7 @@ function subtype(Type, predicate, name) {
       assert(Subtype.meta.ctor, 'cannot use new with %s', name);
     }
     var x = coerce(Type, values, mut);
-    assert(predicate(x), 'bad ' + name);
+    assert(predicate(x), 'bad %s', name);
     return x;
   }
 

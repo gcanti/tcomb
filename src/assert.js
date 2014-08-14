@@ -14,7 +14,8 @@ assert.failed = false;
 
 assert.onFail = function (message) {
   // start debugger only once
-  if (!assert.failed) { 
+  if (!assert.failed) {
+    /*jshint debug: true*/
     debugger; 
   }
   assert.failed = true;

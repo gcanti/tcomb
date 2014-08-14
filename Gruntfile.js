@@ -22,11 +22,12 @@ module.exports = function (grunt) {
       }
     },
     jshint: {
+      options: {
+        reporter: require('jshint-stylish')
+      },
       all: [
         'Gruntfile.js',
-        'build/tcomb.js',
-        'src/*.js',
-        'test/*.js'
+        'build/tcomb.js'
       ]
     },
     mochaTest: {
@@ -68,6 +69,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('test', ['mochaTest']);
-  grunt.registerTask('default', ['rig', /*'jshint',*/ 'test', 'watch']);
-  grunt.registerTask('build', ['rig', 'uglify']);
+  grunt.registerTask('default', ['rig', 'jshint', 'test', 'watch']);
+  grunt.registerTask('build', ['rig', 'jshint', 'uglify']);
 };

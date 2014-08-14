@@ -2,15 +2,15 @@
 // func (experimental)
 //
 
-var func = function (Arguments, f, Return, name) {
+function func(Arguments, f, Return, name) {
     
-  function func() {
+  function g() {
     var args = Array.prototype.slice.call(arguments);
     if (args.length < f.length) args.length = f.length; // handle optional arguments
 
     args = Arguments.is(args) ? args : coerce(Arguments, args);
 
-    var r = f.apply(this, args);
+    var r = f.apply(null, args);
 
     if (Return) {
       r = Return.is(r) ? r : coerce(Return, r);
@@ -19,9 +19,9 @@ var func = function (Arguments, f, Return, name) {
     return r;
   }
 
-  func.is = function (x) { return x === func; };
+  g.is = function (x) { return x === g; };
 
-  func.meta = {
+  g.meta = {
     kind: 'func',
     Arguments: Arguments,
     f: f,
@@ -29,6 +29,6 @@ var func = function (Arguments, f, Return, name) {
     name: name
   };
 
-  return func;
-};
+  return g;
+}
 

@@ -91,8 +91,9 @@ function move(arr, from, to) {
   return ret;
 }
 
-function coerce(Type, values, mut) {
-  return Type.meta.kind === 'struct' ?
-      new Type(values, mut) :
-      Type(values, mut);
+function coerce(type, values, mut) {
+  return type.meta.kind === 'struct' ?
+      /*jshint newcap: false*/
+      new type(values, mut) :
+      type(values, mut);
 }
