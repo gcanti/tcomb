@@ -61,6 +61,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('test', ['mochaTest']);
-  grunt.registerTask('default', ['rig', 'jshint', 'test', 'uglify']);
+  grunt.registerTask('default', ['rig', /*'jshint',*/ 'test', 'uglify']);
   grunt.registerTask('build', ['rig', 'uglify']);
 };

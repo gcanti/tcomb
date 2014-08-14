@@ -1,6 +1,6 @@
 "use strict";
 var assert = require('assert');
-var t = require('../tcomb');
+var t = require('../build/tcomb');
 
 var Nil = t.Nil;
 var Bool = t.Bool;
@@ -84,9 +84,9 @@ describe('assert', function(){
             }
         });
     });
-    it('should handle custom onfail behaviour', function() {
-        var onfail = t.assert.onfail;
-        t.assert.onfail = function (message) {
+    it('should handle custom onFail behaviour', function() {
+        var onFail = t.assert.onFail;
+        t.assert.onFail = function (message) {
             try {
                 throw new Error(message);
             } catch (e) {
@@ -96,7 +96,7 @@ describe('assert', function(){
         doesNotThrow(function () {
             t.assert(1 === 2, 'report error');
         });
-        t.assert.onfail = onfail;
+        t.assert.onFail = onFail;
     });
 });
 
