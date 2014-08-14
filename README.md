@@ -25,7 +25,7 @@ You can handle:
 - Func: functions
 - Err: errors
 
-**type combinators** build new types from those already defined
+**type combinators** (build new types from those already defined)
 
 - struct (i.e. classes)
 - union
@@ -141,7 +141,7 @@ Run `mocha` or `npm test` in the project root.
 
 ## The Idea
 
-What's a type? In tcomb a `type` is a function `T` such that
+What's a type? In tcomb a type is a function `T` such that
 
 1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
 2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
@@ -454,25 +454,23 @@ sum(1, 2); // => 3
 sum(1, 'a'); // => fail!
 ```
 
-## IDEAS and TODO
+## Roadmap
 
 - explore auto generated UI from domain models written with tcomb
 - explore auto validation of UI involving domain models written with tcomb
 - explore using tcomb with React.js
-- **Your ideas?**
-- detailed api docs
+- 100% test coverage
+- api docs
 
 ## Contribution
 
 If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.
 
-## Roadmap
-
 ### v0.0.9
 
 - grunt build system
 - splitted source files
-- 100% test coverage
+- 70% test coverage
 
 ## License (MIT)
 
