@@ -1,21 +1,21 @@
 # tcomb
 
-[![NPM version](https://badge.fury.io/js/tcomb.svg)](http://badge.fury.io/js/tcomb)
+tcomb is a library for Node.js and the browser which allows you to **check the types** of JavaScript values at runtime with a simple syntax. It is great for checking external input, for testing and for **adding safety** to your internal code. 
 
-tcomb is a library for Node.js and the browser which allows you to **check the types** of JavaScript values at runtime with a **simple syntax**. It is great for checking external input, for testing and for adding safety to your internal code. Bonus points: 
+Some features include:
 
-- **write complex domain models** in a breeze and with small code footprint
+- write complex domain models in a breeze and with small code footprint
 - easy debugging
-- **instances are immutables** by default
-- encode/decode of domain objects to/from JSON for free
-- gradually make your existing code safer
+- instances are immutables by default
+- encode/decode of domain models to/from JSON for free
 
-The library provides several type combinators and a built-in `assert` function. If an assertion fails the library **starts the debugger** so you can inspect the stack and quickly find out what's wrong.
+The library provides a built-in `assert` function, if an assert fails the **debugger kick in** 
+so you can inspect the stack and quickly find out what's wrong.
 
-You can check:
+You can handle:
 
 - JavaScript native types
-    - Nil: `null` and  `undefined`
+    - Nil: `null` and `undefined`
     - Str: strings
     - Num: numbers
     - Bool: booleans
@@ -23,44 +23,38 @@ You can check:
     - Obj: plain objects
     - Func: functions
     - Err: errors
-- structs (i.e. classes)
-- unions
-- maybe
-- enums
-- tuples
-- subtypes
-- lists
-- function types (experimental)
+- type combinators (build new types from those already defined)
+    - struct (i.e. classes)
+    - union
+    - maybe
+    - enums
+    - tuple
+    - subtype
+    - list
+    - function type (experimental)
 
 ## Quick examples
 
-### Let's build a new product model
+Let's build a product model
 
 ```javascript
-// a struct
 var Product = struct({
     name: Str,                  // required string
-    description: maybe(Str),    // optional string, can be null or undefined
+    description: maybe(Str),    // optional string, can be null
     homepage: Url,              // a subtype of a string
     shippings: list(Str),       // a list of shipping methods
-    category: Category,         // an enumeration
-    price: union(Num, Price),   // a price expressed in dollars OR in another currency
-    dim: tuple([Num, Num])      // a tuple (width, height)
+    category: Category,         // enum, one of [audio, video]
+    price: union(Num, Price),   // a price (dollars) OR in another currency
+    dim: tuple([Num, Num])      // dimensions (width, height)
 });
 
 var Url = subtype(Str, function (s) {
     return s.indexOf('http://') === 0;
 });
 
-var Category = enums({
-    audio: 0,
-    video: 1
-});
+var Category = enums({ audio: 0, video: 1});
 
-var Price = struct({
-    currency: Str,
-    amount: Num
-});
+var Price = struct({ currency: Str, amount: Num });
 
 // JSON of a product
 var json = {
@@ -108,13 +102,11 @@ Node
 
     npm install tcomb
 
-    var t = require('tcomb');
-
 Browser
 
     bower install tcomb
 
-or download `tcomb.js` file.
+or download `build/tcomb.js` file.
 
 This library uses a few ES5 methods
 
@@ -457,33 +449,25 @@ sum(1, 2); // => 3
 sum(1, 'a'); // => fail!
 ```
 
-## Articles concerning tcomb
+## IDEAS and TODO
 
-- [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
-- tcomb and React Prop Validation (coming soon)
-
-## TODO and IDEAS
-
-- more tests
-- jsDoc comments
 - explore auto generated UI from domain models written with tcomb
 - explore auto validation of UI involving domain models written with tcomb
 - explore using tcomb with React.js
-- Your ideas?
+- **Your ideas?**
+- detailed api docs
 
 ## Contribution
 
 If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.
 
-[![NPM](https://nodei.co/npm/tcomb.png?downloads=true)](https://nodei.co/npm/tcomb/)
+## Roadmap
 
-## Changelog
+### v0.0.9
 
-### v0.0.9 (todo)
-
-- grunt workflow
-- split source files
-- more tests
+- grunt build system
+- splitted source files
+- 100% test coverage
 
 ## License (MIT)
 
