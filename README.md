@@ -4,44 +4,47 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 
 Some features include:
 
-- write complex domain models in a breeze and with small code footprint
+- **write complex domain models** in a breeze and with small code footprint
 - easy debugging
 - instances are immutables by default
 - encode/decode of domain models to/from JSON for free
 
-The library provides a built-in `assert` function, if an assert fails the **debugger kick in** 
+The library provides a built-in `assert` function, if an assert fails the **debugger kicks in** 
 so you can inspect the stack and quickly find out what's wrong.
 
 You can handle:
 
-- JavaScript native types
-    - Nil: `null` and `undefined`
-    - Str: strings
-    - Num: numbers
-    - Bool: booleans
-    - Arr: arrays
-    - Obj: plain objects
-    - Func: functions
-    - Err: errors
-- type combinators (build new types from those already defined)
-    - struct (i.e. classes)
-    - union
-    - maybe
-    - enums
-    - tuple
-    - subtype
-    - list
-    - function type (experimental)
+**JavaScript native types**
 
-## Quick examples
+- Nil: `null` and `undefined`
+- Str: strings
+- Num: numbers
+- Bool: booleans
+- Arr: arrays
+- Obj: plain objects
+- Func: functions
+- Err: errors
+
+**type combinators** build new types from those already defined
+
+- struct (i.e. classes)
+- union
+- maybe
+- enums
+- tuple
+- subtype
+- list
+- function type (experimental)
+
+## Quick Examples
 
 Let's build a product model
 
 ```javascript
 var Product = struct({
     name: Str,                  // required string
-    description: maybe(Str),    // optional string, can be null
-    homepage: Url,              // a subtype of a string
+    desc: maybe(Str),           // optional string, can be null
+    home: Url,                  // a subtype of a string
     shippings: list(Str),       // a list of shipping methods
     category: Category,         // enum, one of [audio, video]
     price: union(Num, Price),   // a price (dollars) OR in another currency
@@ -52,15 +55,15 @@ var Url = subtype(Str, function (s) {
     return s.indexOf('http://') === 0;
 });
 
-var Category = enums({ audio: 0, video: 1});
+var Category = enums({ audio: 0, video: 1 });
 
 var Price = struct({ currency: Str, amount: Num });
 
 // JSON of a product
 var json = {
     name: 'iPod',
-    description: 'Engineered for maximum funness.',
-    homepage: 'http://www.apple.com/ipod/',
+    desc: 'Engineered for maximum funness.',
+    home: 'http://www.apple.com/ipod/',
     shippings: ['Same Day', 'Next Businness Day'],
     category: 'audio',
     price: {currency: 'EUR', amount: 100},
@@ -71,7 +74,7 @@ var json = {
 var ipod = new Product(json);
 ```
 
-### You have existing code and you want to add safety
+You have existing code and you want to add safety
 
 ```javascript
 // your code: plain old JavaScript class
@@ -106,7 +109,9 @@ Browser
 
     bower install tcomb
 
-or download `build/tcomb.js` file.
+or download the `build/tcomb.min.js` file.
+
+### Requirements
 
 This library uses a few ES5 methods
 
@@ -132,11 +137,11 @@ you can use `es5-shim` and `json2` to support old browsers
 
 ## Tests
 
-Run `mocha` or `grunt test` in the project root.
+Run `mocha` or `npm test` in the project root.
 
-## What's a type?
+## The Idea
 
-In tcomb a `type` is a function `T` such that
+What's a type? In tcomb a `type` is a function `T` such that
 
 1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
 2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
