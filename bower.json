@@ -28,6 +28,7 @@
     "node_modules",
     "src",
     "test",
+    "coverage",
     "package.json",
     "Grunfile.js"
   ]
