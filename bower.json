@@ -30,6 +30,7 @@
     "test",
     "coverage",
     "package.json",
-    "Grunfile.js"
+    "Gruntfile.js",
+    ".jshintrc"
   ]
 }

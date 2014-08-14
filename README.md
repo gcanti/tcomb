@@ -309,9 +309,9 @@ Direction.is('North'); // => true
 #### enums.of(keys, [name])
 
 Returns an enums of an array of keys, useful when you don't mind to define
-custom values form the enums.
+custom values for the enums.
 
-- `keys` array or string of keys
+- `keys` array (or string) of keys
 - `name` optional string useful for debugging
 
 Example
