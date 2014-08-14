@@ -4,16 +4,18 @@
 //     tcomb may be freely distributed under the MIT license.
 
 (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof exports === 'object') {
-        module.exports = factory();
-    } else {
-        root.t = factory();
-    }
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.t = factory();
+  }
 }(this, function () {
 
     "use strict";
+
+    // rigger includes (https://github.com/buildjs/rigger)
 
     //
     // assert
@@ -28,7 +30,9 @@
     }
     
     assert.failed = false;
+    
     assert.onFail = function (message) {
+      // start debugger only once
       if (!assert.failed) { 
         debugger; 
       }
@@ -135,387 +139,385 @@
           Type(values, mut);
     }
 
-    // --------------------------------------------------------------
+    //
     // primitives
-    // --------------------------------------------------------------
-
+    //
+    
     function primitive(name, is) {
-
-        function Primitive(values) {
-            assert(!(this instanceof Primitive), 'cannot use new with %s', name);
-            assert(Primitive.is(values), 'bad %s', name);
-            return values;
-        }
-
-        Primitive.meta = {
-            kind: 'primitive',
-            name: name,
-            ctor: false
-        };
-
-        Primitive.is = is;
-
-        return Primitive;
+    
+      function Primitive(values) {
+        assert(!(this instanceof Primitive), 'cannot use new with %s', name);
+        assert(Primitive.is(values), 'bad %s', name);
+        return values;
+      }
+    
+      Primitive.meta = {
+        kind: 'primitive',
+        name: name,
+        ctor: false
+      };
+    
+      Primitive.is = is;
+    
+      return Primitive;
     }
-
+    
     var Nil = primitive('Nil', function (x) {
-        return x === null || x === undefined;
+      return x === null || x === undefined;
     });
-
+    
     var Str = primitive('Str', function (x) {
-        return typeof x === 'string';
+      return typeof x === 'string';
     });
-
+    
     var Num = primitive('Num', function (x) {
-        return typeof x === 'number' && isFinite(x) && !isNaN(x);
+      return typeof x === 'number' && isFinite(x) && !isNaN(x);
     });
-
+    
     var Bool = primitive('Bool', function (x) {
-        return x === true || x === false;
+      return x === true || x === false;
     });
-
+    
     var Arr = primitive('Arr', function (x) {
-        return x instanceof Array;
+      return x instanceof Array;
     });
-
+    
     var Obj = primitive('Obj', function (x) {
-        return !Nil.is(x) && x.constructor === Object && !Arr.is(x);
+      return !Nil.is(x) && x.constructor === Object && !Arr.is(x);
     });
-
+    
     var Func = primitive('Func', function (x) {
-        return typeof x === 'function';
+      return typeof x === 'function';
     });
-
+    
     var Err = primitive('Err', function (x) {
-        return x instanceof Error;
+      return x instanceof Error;
     });
 
-    // --------------------------------------------------------------
+    //
     // struct
-    // --------------------------------------------------------------
-
+    //
+    
     function struct(props, name) {
-
-        name = name || 'struct()';
-
-        function Struct(values, mut) {
-
-            assert(Obj.is(values), 'bad %s', name);
-            assert(maybe(Bool).is(mut), 'bad mut');
-
-            for (var prop in props) {
-                if (props.hasOwnProperty(prop)) {
-                    var Type = props[prop],
-                        value = values[prop];
-                    this[prop] = Type.is(value) ? value : coerce(Type, value, mut);
-                }
-            }
-
-            freeze(this, mut);
+    
+      name = name || 'struct()';
+    
+      function Struct(values, mut) {
+    
+        assert(Obj.is(values), 'bad %s', name);
+        assert(maybe(Bool).is(mut), 'bad mut');
+    
+        for (var prop in props) {
+          if (props.hasOwnProperty(prop)) {
+            var Type = props[prop],
+              value = values[prop];
+            this[prop] = Type.is(value) ? value : coerce(Type, value, mut);
+          }
         }
-
-        Struct.meta = {
-            kind: 'struct',
-            props: props,
-            name: name,
-            ctor: true
-        };
-
-        Struct.is = function (x) { 
-            return x instanceof Struct; 
-        };
-
-        Struct.update = function (instance, updates, mut) {
-
-            assert(Struct.is(instance));
-            assert(Obj.is(updates));
-
-            var v = {};
-            for (var prop in props) {
-                if (props.hasOwnProperty(prop)) {
-                    v[prop] = updates.hasOwnProperty(prop) ? updates[prop]
-                            : instance[prop];
-                }
-            }
-            return new Struct(v, mut);
-        };
-
-        return Struct;
+    
+        freeze(this, mut);
+      }
+    
+      Struct.meta = {
+        kind: 'struct',
+        props: props,
+        name: name,
+        ctor: true
+      };
+    
+      Struct.is = function (x) { 
+        return x instanceof Struct; 
+      };
+    
+      Struct.update = function (instance, updates, mut) {
+    
+        assert(Struct.is(instance));
+        assert(Obj.is(updates));
+    
+        var v = {};
+        for (var prop in props) {
+          if (props.hasOwnProperty(prop)) {
+              v[prop] = updates.hasOwnProperty(prop) ? updates[prop] : instance[prop];
+          }
+        }
+        return new Struct(v, mut);
+      };
+    
+      return Struct;
     }
 
-    // --------------------------------------------------------------
+    //
     // union
-    // --------------------------------------------------------------
-
+    //
+    
     function union(types, name) {
-
-        name = name || print('union(%s)', types.map(getName).join(', '));
-
-        function Union(values, mut) {
-            assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
-            var Type = Union.dispatch(values);
-            if (this instanceof Union) {
-                assert(Type.meta.ctor, 'cannot use new with %s', name);
-            }
-            return coerce(Type, values, mut);
+    
+      name = name || print('union(%s)', types.map(getName).join(', '));
+    
+      function Union(values, mut) {
+        assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
+        var Type = Union.dispatch(values);
+        if (this instanceof Union) {
+          assert(Type.meta.ctor, 'cannot use new with %s', name);
         }
-
-        Union.meta = {
-            kind: 'union',
-            types: types,
-            name: name,
-            ctor: types.every(function (type) { return type.meta.ctor; })
-        };
-
-        Union.is = function (x) {
-            return types.some(function (type) {
-                return type.is(x);
-            });
-        };
-
-        return Union;
+        return coerce(Type, values, mut);
+      }
+    
+      Union.meta = {
+        kind: 'union',
+        types: types,
+        name: name,
+        ctor: types.every(function (type) { return type.meta.ctor; })
+      };
+    
+      Union.is = function (x) {
+        return types.some(function (type) {
+          return type.is(x);
+        });
+      };
+    
+      return Union;
     }
 
     // --------------------------------------------------------------
     // maybe
     // --------------------------------------------------------------
-
+    
     function maybe(Type, name) {
-
-        name = name || print('maybe(%s)', getName(Type));
-
-        function Maybe(values, mut) {
-            assert(!(this instanceof Maybe), 'cannot use new with %s', name);
-            return Nil.is(values) ? null : coerce(Type, values, mut);
-        }
-
-        Maybe.meta = {
-            kind: 'maybe',
-            type: Type,
-            name: name,
-            ctor: false
-        };
-
-        Maybe.is = function (x) {
-            return Nil.is(x) || Type.is(x);
-        };
-
-        return Maybe;
+    
+      name = name || print('maybe(%s)', getName(Type));
+    
+      function Maybe(values, mut) {
+        assert(!(this instanceof Maybe), 'cannot use new with %s', name);
+        return Nil.is(values) ? null : coerce(Type, values, mut);
+      }
+    
+      Maybe.meta = {
+        kind: 'maybe',
+        type: Type,
+        name: name,
+        ctor: false
+      };
+    
+      Maybe.is = function (x) {
+        return Nil.is(x) || Type.is(x);
+      };
+    
+      return Maybe;
     }
 
-    // --------------------------------------------------------------
+    //
     // enums
-    // --------------------------------------------------------------
-
-
+    //
+    
     function enums(map, name) {
-
-        name = name || 'enums()';
-
-        function Enums(x) {
-            assert(!(this instanceof Enums), 'cannot use new with %s', name);
-            assert(Enums.is(x), 'bad %s', name);
-            return x;
-        }
-
-        Enums.meta = {
-            kind: 'enums',
-            map: map,
-            name: name,
-            ctor: false
-        };
-
-        Enums.is = function (x) {
-            return Str.is(x) && map.hasOwnProperty(x);
-        };
-
-        return Enums;
+    
+      name = name || 'enums()';
+    
+      function Enums(x) {
+        assert(!(this instanceof Enums), 'cannot use new with %s', name);
+        assert(Enums.is(x), 'bad %s', name);
+        return x;
+      }
+    
+      Enums.meta = {
+        kind: 'enums',
+        map: map,
+        name: name,
+        ctor: false
+      };
+    
+      Enums.is = function (x) {
+        return Str.is(x) && map.hasOwnProperty(x);
+      };
+    
+      return Enums;
     }
-
+    
     enums.of = function (keys, name) {
-        keys = Str.is(keys) ? keys.split(' ') : keys;
-        var values = {};
-        keys.forEach(function (k, i) {
-            values[k] = i;
-        });
-        return enums(values, name);
+      keys = Str.is(keys) ? keys.split(' ') : keys;
+      var values = {};
+      keys.forEach(function (k, i) {
+        values[k] = i;
+      });
+      return enums(values, name);
     };
 
-    // --------------------------------------------------------------
+    //
     // tuple
-    // --------------------------------------------------------------
-
+    //
+    
     function tuple(types, name) {
-
-        name = name || print('tuple(%s)', types.map(getName).join(', '));
-
-        var len = types.length;
-
-        function Tuple(values, mut) {
-
-            assert(Arr.is(values), 'bad %s', name);
-
-            var arr = [];
-            for (var i = 0 ; i < len ; i++) {
-                var Type = types[i];
-                var value = values[i];
-                arr.push(Type.is(value) ? value : coerce(Type, value, mut));
-            }
-
-            return freeze(arr, mut);
+    
+      name = name || print('tuple(%s)', types.map(getName).join(', '));
+    
+      var len = types.length;
+    
+      function Tuple(values, mut) {
+    
+        assert(Arr.is(values), 'bad %s', name);
+    
+        var arr = [];
+        for (var i = 0 ; i < len ; i++) {
+          var Type = types[i];
+          var value = values[i];
+          arr.push(Type.is(value) ? value : coerce(Type, value, mut));
         }
-
-        Tuple.meta = {
-            kind: 'tuple',
-            types: types,
-            name: name,
-            ctor: true
-        };
-
-        Tuple.is = function (x) {
-            return Arr.is(x) && x.length === len && 
-                types.every(function (type, i) { 
-                    return type.is(x[i]); 
-                });
-        };
-
-        Tuple.update = function (instance, index, element, mut) {
-            var Type = types[index],
-                value = Type.is(element) ? element : coerce(Type, element, mut),
-                arr = update(instance, index, value);
-            return freeze(arr, mut);
-        };
-
-        return Tuple;
+    
+        return freeze(arr, mut);
+      }
+    
+      Tuple.meta = {
+        kind: 'tuple',
+        types: types,
+        name: name,
+        ctor: true
+      };
+    
+      Tuple.is = function (x) {
+        return Arr.is(x) && x.length === len && 
+          types.every(function (type, i) { 
+            return type.is(x[i]); 
+          });
+      };
+    
+      Tuple.update = function (instance, index, element, mut) {
+        var Type = types[index],
+          value = Type.is(element) ? element : coerce(Type, element, mut),
+          arr = update(instance, index, value);
+        return freeze(arr, mut);
+      };
+    
+      return Tuple;
     }
 
-    // --------------------------------------------------------------
+    //
     // subtype
-    // --------------------------------------------------------------
-
+    //
+    
     function subtype(Type, predicate, name) {
-
-        name = name || print('subtype(%s)', getName(Type));
-
-        function Subtype(values, mut) {
-            if (this instanceof Subtype) {
-                assert(Subtype.meta.ctor, 'cannot use new with %s', name);
-            }
-            var x = coerce(Type, values, mut);
-            assert(predicate(x), 'bad ' + name);
-            return x;
+    
+      name = name || print('subtype(%s)', getName(Type));
+    
+      function Subtype(values, mut) {
+        if (this instanceof Subtype) {
+          assert(Subtype.meta.ctor, 'cannot use new with %s', name);
         }
-
-        Subtype.meta = {
-            kind: 'subtype',
-            type: Type,
-            predicate: predicate,
-            name: name,
-            ctor: Type.ctor
-        };
-
-        Subtype.is = function (x) {
-            return Type.is(x) && predicate(x);
-        };
-
-        return Subtype;
+        var x = coerce(Type, values, mut);
+        assert(predicate(x), 'bad ' + name);
+        return x;
+      }
+    
+      Subtype.meta = {
+        kind: 'subtype',
+        type: Type,
+        predicate: predicate,
+        name: name,
+        ctor: Type.ctor
+      };
+    
+      Subtype.is = function (x) {
+        return Type.is(x) && predicate(x);
+      };
+    
+      return Subtype;
     }
 
-    // --------------------------------------------------------------
+    //
     // list
-    // --------------------------------------------------------------
-
+    //
+    
     function list(Type, name) {
-
-        name = name || print('list(%s)', getName(Type));
-
-        function List(values, mut) {
-
-            assert(Arr.is(values), 'bad %s', name);
-
-            var arr = [];
-            for (var i = 0, len = values.length ; i < len ; i++ ) {
-                var value = values[i];
-                arr.push(Type.is(value) ? value : coerce(Type, value, mut));
-            }
-
-            return freeze(arr, mut);
+    
+      name = name || print('list(%s)', getName(Type));
+    
+      function List(values, mut) {
+    
+        assert(Arr.is(values), 'bad %s', name);
+    
+        var arr = [];
+        for (var i = 0, len = values.length ; i < len ; i++ ) {
+          var value = values[i];
+          arr.push(Type.is(value) ? value : coerce(Type, value, mut));
         }
-
-        List.meta = {
-            kind: 'list',
-            type: Type,
-            name: name,
-            ctor: true
-        };
-
-        List.is = function (x) {
-            return Arr.is(x) && x.every(Type.is);
-        };
-
-        List.append = function (instance, element, mut) {
-            var value = Type.is(element) ? element : coerce(Type, element, mut),
-                arr = append(instance, value);
-            return freeze(arr, mut);
-        };
-
-        List.prepend = function (instance, element, mut) {
-            var value = Type.is(element) ? element : coerce(Type, element, mut),
-                arr = prepend(instance, value);
-            return freeze(arr, mut);
-        };
-
-        List.update = function (instance, index, element, mut) {
-            var value = Type.is(element) ? element : coerce(Type, element, mut),
-                arr = update(instance, index, value);
-            return freeze(arr, mut);
-        };
-
-        List.remove = function (instance, index, mut) {
-            var arr = remove(instance, index);
-            return freeze(arr, mut);
-        };
-
-        List.move = function (instance, from, to, mut) {
-            var arr = move(instance, from, to);
-            return freeze(arr, mut);
-        };
-
-        return List;
+    
+        return freeze(arr, mut);
+      }
+    
+      List.meta = {
+        kind: 'list',
+        type: Type,
+        name: name,
+        ctor: true
+      };
+    
+      List.is = function (x) {
+        return Arr.is(x) && x.every(Type.is);
+      };
+    
+      List.append = function (instance, element, mut) {
+        var value = Type.is(element) ? element : coerce(Type, element, mut),
+          arr = append(instance, value);
+        return freeze(arr, mut);
+      };
+    
+      List.prepend = function (instance, element, mut) {
+        var value = Type.is(element) ? element : coerce(Type, element, mut),
+          arr = prepend(instance, value);
+        return freeze(arr, mut);
+      };
+    
+      List.update = function (instance, index, element, mut) {
+        var value = Type.is(element) ? element : coerce(Type, element, mut),
+          arr = update(instance, index, value);
+        return freeze(arr, mut);
+      };
+    
+      List.remove = function (instance, index, mut) {
+        var arr = remove(instance, index);
+        return freeze(arr, mut);
+      };
+    
+      List.move = function (instance, from, to, mut) {
+        var arr = move(instance, from, to);
+        return freeze(arr, mut);
+      };
+    
+      return List;
     }
 
-    // --------------------------------------------------------------
+    //
     // func (experimental)
-    // --------------------------------------------------------------
-
+    //
+    
     var func = function (Arguments, f, Return, name) {
         
-        function func() {
-            var args = Array.prototype.slice.call(arguments);
-            if (args.length < f.length) args.length = f.length; // handle optional arguments
-
-            args = Arguments.is(args) ? args : coerce(Arguments, args);
-
-            var r = f.apply(this, args);
-
-            if (Return) {
-                r = Return.is(r) ? r : coerce(Return, r);
-            }
-
-            return r;
+      function func() {
+        var args = Array.prototype.slice.call(arguments);
+        if (args.length < f.length) args.length = f.length; // handle optional arguments
+    
+        args = Arguments.is(args) ? args : coerce(Arguments, args);
+    
+        var r = f.apply(this, args);
+    
+        if (Return) {
+          r = Return.is(r) ? r : coerce(Return, r);
         }
-
-        func.is = function (x) { return x === func; };
-
-        func.meta = {
-            kind: 'func',
-            Arguments: Arguments,
-            f: f,
-            Return: Return,
-            name: name
-        };
-
-        return func;
+    
+        return r;
+      }
+    
+      func.is = function (x) { return x === func; };
+    
+      func.meta = {
+        kind: 'func',
+        Arguments: Arguments,
+        f: f,
+        Return: Return,
+        name: name
+      };
+    
+      return func;
     };
 
     return {

@@ -11,7 +11,9 @@ function assert(guard) {
 }
 
 assert.failed = false;
+
 assert.onFail = function (message) {
+  // start debugger only once
   if (!assert.failed) { 
     debugger; 
   }

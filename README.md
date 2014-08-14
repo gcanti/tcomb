@@ -477,6 +477,14 @@ If you do have a contribution for the package feel free to put up a Pull Request
 
 [![NPM](https://nodei.co/npm/tcomb.png?downloads=true)](https://nodei.co/npm/tcomb/)
 
+## Changelog
+
+### v0.0.9 (todo)
+
+- grunt workflow
+- split source files
+- more tests
+
 ## License (MIT)
 
     The MIT License (MIT)
