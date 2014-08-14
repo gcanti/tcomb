@@ -140,7 +140,7 @@ you can use `es5-shim` and `json2` to support old browsers
 
 ## Tests
 
-Run `mocha` in the project root.
+Run `mocha` or `grunt test` in the project root.
 
 ## What's a type?
 
