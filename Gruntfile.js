@@ -62,8 +62,7 @@ module.exports = function (grunt) {
         'test/*'
       ],
       tasks: [
-        'rig',
-        'test'
+        'default'
       ]
     }
 
@@ -79,6 +78,6 @@ module.exports = function (grunt) {
 
   // tasks
   grunt.registerTask('test', ['mochaTest']);
-  grunt.registerTask('default', ['rig', 'jshint', 'test', 'watch']);
-  grunt.registerTask('build', ['rig', 'jshint', 'uglify']);
+  grunt.registerTask('default', ['rig', 'test', 'watch']);
+  grunt.registerTask('build', ['rig', 'jshint', 'test', 'uglify']);
 };

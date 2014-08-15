@@ -30,35 +30,8 @@ function list(Type, name) {
     return Arr.is(x) && x.every(Type.is);
   };
 
-  /* TODO deprecated
-  List.append = function (instance, element, mut) {
-    var value = Type.is(element) ? element : coerce(Type, element, mut),
-      arr = append(instance, value);
-    return freeze(arr, mut);
-  };
 
-  List.prepend = function (instance, element, mut) {
-    var value = Type.is(element) ? element : coerce(Type, element, mut),
-      arr = prepend(instance, value);
-    return freeze(arr, mut);
-  };
-
-  List.update = function (instance, index, element, mut) {
-    var value = Type.is(element) ? element : coerce(Type, element, mut),
-      arr = update(instance, index, value);
-    return freeze(arr, mut);
-  };
-
-  List.remove = function (instance, index, mut) {
-    var arr = remove(instance, index);
-    return freeze(arr, mut);
-  };
-
-  List.move = function (instance, from, to, mut) {
-    var arr = move(instance, from, to);
-    return freeze(arr, mut);
-  };
-  */
+  List.update = update;
 
   return List;
 }

@@ -5,7 +5,7 @@
 function func(Arguments, f, Return, name) {
     
   function g() {
-    var args = Array.prototype.slice.call(arguments);
+    var args = slice.call(arguments);
     if (args.length < f.length) args.length = f.length; // handle optional arguments
 
     args = Arguments.is(args) ? args : coerce(Arguments, args);

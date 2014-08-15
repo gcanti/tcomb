@@ -2,6 +2,8 @@
 // utils
 //
 
+var slice = Array.prototype.slice;
+
 function freeze(obj_or_arr, unless) {
   if (unless !== true && Object.freeze) {
     Object.freeze(obj_or_arr);
@@ -26,7 +28,7 @@ function getName(type) {
 }
 
 function print() {
-  var args = Array.prototype.slice.call(arguments);
+  var args = slice.call(arguments);
   var index = 0;
   return args[0].replace(/%([a-z%])/g, function(match, format) {
     if (match === '%%') return match;
@@ -47,4 +49,13 @@ function coerce(type, values, mut) {
       /*jshint newcap: false*/
       new type(values, mut) :
       type(values, mut);
+}
+
+function update() {
+  assert(Func.is(options.update), 'options.update is missing');
+  /*jshint validthis:true*/
+  var Type = this;
+  var args = slice.call(arguments);
+  var values = options.update.apply(Type, args);
+  return new Type(values);
 }

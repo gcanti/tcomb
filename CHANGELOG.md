@@ -1,12 +1,14 @@
-# v0.0.10
+# v0.0.10 (Roadmap)
 
-- added t.opts for configuring tcomb
-  - t.opts.onFail
-  - t.opts.update
-- removed all update methods, now configure t.opts.update if needed
+- add `options` for configuring tcomb:
+  - `options.onFail`
+  - `options.update`
+- remove assert.onFail, , now configure `options.onFail` if needed
+- remove all update methods, now configure `options.update` if needed
+- 100% test coverage
 
 # v0.0.9
 
 - grunt build system
-- splitted source files
+- split source files
 - 70% test coverage

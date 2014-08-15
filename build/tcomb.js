@@ -18,32 +18,43 @@
     // rigger includes (https://github.com/buildjs/rigger)
 
     //
+    // options
+    //
+    
+    var failed = false;
+    
+    function onFail(message) {
+      // start debugger only once
+      if (!failed) {
+        /*jshint debug: true*/
+        debugger; 
+      }
+      failed = true;
+      throw new Error(message);
+    }
+    
+    var options = {
+      onFail: onFail,
+      update: null
+    };
+
+    //
     // assert
     //
     
     function assert(guard) {
       if (guard !== true) {
-        var args = Array.prototype.slice.call(arguments, 1);
+        var args = slice.call(arguments, 1);
         var message = args[0] ? print.apply(null, args) : 'assert(): failed';
-        assert.onFail(message); 
+        options.onFail(message); 
       }
     }
-    
-    assert.failed = false;
-    
-    assert.onFail = function (message) {
-      // start debugger only once
-      if (!assert.failed) {
-        /*jshint debug: true*/
-        debugger; 
-      }
-      assert.failed = true;
-      throw new Error(message);
-    };
 
     //
     // utils
     //
+    
+    var slice = Array.prototype.slice;
     
     function freeze(obj_or_arr, unless) {
       if (unless !== true && Object.freeze) {
@@ -69,7 +80,7 @@
     }
     
     function print() {
-      var args = Array.prototype.slice.call(arguments);
+      var args = slice.call(arguments);
       var index = 0;
       return args[0].replace(/%([a-z%])/g, function(match, format) {
         if (match === '%%') return match;
@@ -90,6 +101,15 @@
           /*jshint newcap: false*/
           new type(values, mut) :
           type(values, mut);
+    }
+    
+    function update() {
+      assert(Func.is(options.update), 'options.update is missing');
+      /*jshint validthis:true*/
+      var Type = this;
+      var args = slice.call(arguments);
+      var values = options.update.apply(Type, args);
+      return new Type(values);
     }
 
     //
@@ -182,19 +202,7 @@
         return x instanceof Struct; 
       };
     
-      Struct.update = function (instance, updates, mut) {
-    
-        assert(Struct.is(instance));
-        assert(Obj.is(updates));
-    
-        var v = {};
-        for (var prop in props) {
-          if (props.hasOwnProperty(prop)) {
-              v[prop] = updates.hasOwnProperty(prop) ? updates[prop] : instance[prop];
-          }
-        }
-        return new Struct(v, mut);
-      };
+      Struct.update = update;
     
       return Struct;
     }
@@ -334,14 +342,7 @@
           });
       };
     
-      /* TODO deprecated
-      Tuple.update = function (instance, index, element, mut) {
-        var Type = types[index],
-          value = Type.is(element) ? element : coerce(Type, element, mut),
-          arr = update(instance, index, value);
-        return freeze(arr, mut);
-      };
-      */
+      Tuple.update = update;
     
       return Tuple;
     }
@@ -410,35 +411,8 @@
         return Arr.is(x) && x.every(Type.is);
       };
     
-      /* TODO deprecated
-      List.append = function (instance, element, mut) {
-        var value = Type.is(element) ? element : coerce(Type, element, mut),
-          arr = append(instance, value);
-        return freeze(arr, mut);
-      };
     
-      List.prepend = function (instance, element, mut) {
-        var value = Type.is(element) ? element : coerce(Type, element, mut),
-          arr = prepend(instance, value);
-        return freeze(arr, mut);
-      };
-    
-      List.update = function (instance, index, element, mut) {
-        var value = Type.is(element) ? element : coerce(Type, element, mut),
-          arr = update(instance, index, value);
-        return freeze(arr, mut);
-      };
-    
-      List.remove = function (instance, index, mut) {
-        var arr = remove(instance, index);
-        return freeze(arr, mut);
-      };
-    
-      List.move = function (instance, from, to, mut) {
-        var arr = move(instance, from, to);
-        return freeze(arr, mut);
-      };
-      */
+      List.update = update;
     
       return List;
     }
@@ -450,7 +424,7 @@
     function func(Arguments, f, Return, name) {
         
       function g() {
-        var args = Array.prototype.slice.call(arguments);
+        var args = slice.call(arguments);
         if (args.length < f.length) args.length = f.length; // handle optional arguments
     
         args = Arguments.is(args) ? args : coerce(Arguments, args);
@@ -478,6 +452,9 @@
     }
 
     return {
+
+        options: options,
+
         assert: assert,
         freeze: freeze,
         mixin: mixin,

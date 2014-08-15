@@ -167,22 +167,7 @@ assert(1 === 2, 'error!'); // => 'error!'
 assert(1 === 2, 'error: %s !== %s', 1, 2); // => 'error: 1 !== 2'
 ```
 
-**Customize failure behaviour**
-
-In production envs you don't want to leak failures to the user
-
-```javascript
-// override onFail hook
-assert.onFail = function (message) {
-    try {
-        // capture stack trace
-        throw new Error(message);
-    } catch (e) {
-        // use you favourite JavaScript error logging service
-        console.log(e.stack);
-    }
-};
-```
+To customize failure behaviuor, see `options.onFail`.
 
 ### struct(props, [name])
 
@@ -223,14 +208,6 @@ Returns `true` if `x` is an instance of the struct.
 
 ```javascript
 Point.is(p); // => true
-```
-
-#### update(instance, updates, [mut])
-
-Returns an instance with updated props, without modifying the original.
-
-```javascript
-Point.update(p, {x: 3}); // => new Point({x: 3, y: 2})
 ```
 
 ### union(types, [name])
@@ -422,18 +399,6 @@ var p2 = new Point({x: 1, y: 2});
 Path.is([p1, p2]); // => true
 ```
 
-#### Useful methods
-
-All of these methods return an instance without modifying the original.
-
-```javascript
-Path.append(path, element, [mut]);
-Path.prepend(path, element, [mut]);
-Path.update(path, index, element, [mut]);
-Path.remove(path, index, [mut]);
-Path.move(path, from, to, [mut]);
-```
-
 ### func(Arguments, f, [Return], [name])
 
 **Experimental**. Defines a function where the `arguments` and the return value are checked.
@@ -454,13 +419,41 @@ sum(1, 2); // => 3
 sum(1, 'a'); // => fail!
 ```
 
-## Roadmap
+### options
+
+#### function `options.onFail`
+
+In production envs you don't want to leak failures to the user
+
+```javascript
+// override onFail hook
+options.onFail = function (message) {
+    try {
+        // capture stack trace
+        throw new Error(message);
+    } catch (e) {
+        // use you favourite JavaScript error logging service
+        console.log(e.stack);
+    }
+};
+```
+
+#### function `options.update`
+
+Add to structs, tuples and lists a static method `update`
+
+```javascript
+// see http://facebook.github.io/react/docs/update.html
+options.update = React.addons.update;
+var p1  = new Point({x: 0, y: 0});
+var p2 = Point.update(p1, {x: {$set: 1}}); // => Point({x: 1, y: 0})
+```
+
+## IDEAS
 
 - explore generating UI based on domain models written with tcomb
 - explore auto validation of UI involving domain models written with tcomb
 - explore using tcomb with React.js
-- 100% test coverage
-- api docs
 
 ## Contribution
 

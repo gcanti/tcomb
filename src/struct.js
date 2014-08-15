@@ -33,19 +33,7 @@ function struct(props, name) {
     return x instanceof Struct; 
   };
 
-  Struct.update = function (instance, updates, mut) {
-
-    assert(Struct.is(instance));
-    assert(Obj.is(updates));
-
-    var v = {};
-    for (var prop in props) {
-      if (props.hasOwnProperty(prop)) {
-          v[prop] = updates.hasOwnProperty(prop) ? updates[prop] : instance[prop];
-      }
-    }
-    return new Struct(v, mut);
-  };
+  Struct.update = update;
 
   return Struct;
 }

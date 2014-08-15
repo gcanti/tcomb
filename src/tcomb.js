@@ -12,6 +12,8 @@
 
     // rigger includes (https://github.com/buildjs/rigger)
 
+    //= options.js
+
     //= assert.js
 
     //= utils.js
@@ -35,6 +37,9 @@
     //= func.js
 
     return {
+
+        options: options,
+
         assert: assert,
         freeze: freeze,
         mixin: mixin,

@@ -29,7 +29,7 @@ var ko = function (x) { assert.strictEqual(false, x); };
 var throws = assert.throws;
 var doesNotThrow = assert.doesNotThrow;
 
-// struct
+// defined here because it's used in a bunch of tests
 var Point = struct({
     x: Num,
     y: Num
@@ -39,11 +39,9 @@ var Point = struct({
 // assert
 //
 
-describe('assert', function(){
-    it('should throw when guard is not true', function() {
-        throws(function () {
-            t.assert(1 === 2);
-        });
+describe('assert', function () {
+    it('should nor throw when guard is true', function() {
+        assert(true);
     });
     it('should throw a default message', function() {
         throws(function () {
@@ -73,8 +71,8 @@ describe('assert', function(){
         });
     });
     it('should handle custom onFail behaviour', function() {
-        var onFail = t.assert.onFail;
-        t.assert.onFail = function (message) {
+        var onFail = t.options.onFail;
+        t.options.onFail = function (message) {
             try {
                 throw new Error(message);
             } catch (e) {
@@ -84,7 +82,7 @@ describe('assert', function(){
         doesNotThrow(function () {
             t.assert(1 === 2, 'report error');
         });
-        t.assert.onFail = onFail;
+        t.options.onFail = onFail;
     });
 });
 
@@ -92,7 +90,7 @@ describe('assert', function(){
 // utils
 //
 
-describe('print', function(){
+describe('print', function () {
     it('should format the message', function() {
         ok(t.print('%s', 'a') === 'a');
         ok(t.print('%s', 2) === '2');
@@ -101,7 +99,7 @@ describe('print', function(){
     });
 });
 
-describe('getName', function(){
+describe('getName', function () {
 
     var UnnamedStruct = struct({});
     var NamedStruct = struct({}, 'NamedStruct');
@@ -142,7 +140,7 @@ describe('getName', function(){
 // primitives types
 //
 
-describe('Nil', function(){
+describe('Nil', function () {
     describe('#is(x)', function () {
         it('should return true when x is null or undefined', function() {
             ok(Nil.is(null));
@@ -162,8 +160,8 @@ describe('Nil', function(){
     });
 });
 
-describe('Bool', function(){
-    describe('#is(x)', function(){
+describe('Bool', function () {
+    describe('#is(x)', function () {
         it('should return true when x is true or false', function() {
             ok(Bool.is(true));
             ok(Bool.is(false));
@@ -183,8 +181,8 @@ describe('Bool', function(){
     });
 });
 
-describe('Num', function(){
-    describe('#is(x)', function(){
+describe('Num', function () {
+    describe('#is(x)', function () {
         it('should return true when x is a number', function() {
             ok(Num.is(0));
             ok(Num.is(1));
@@ -208,8 +206,8 @@ describe('Num', function(){
     });
 });
 
-describe('Str', function(){
-    describe('#is(x)', function(){
+describe('Str', function () {
+    describe('#is(x)', function () {
         it('should return true when x is a string', function() {
             ok(Str.is(''));
             ok(Str.is('a'));
@@ -233,8 +231,8 @@ describe('Str', function(){
     });
 });
 
-describe('Arr', function(){
-    describe('#is(x)', function(){
+describe('Arr', function () {
+    describe('#is(x)', function () {
         it('should return true when x is an array', function() {
             ok(Arr.is([]));
         });
@@ -256,8 +254,8 @@ describe('Arr', function(){
     });
 });
 
-describe('Obj', function(){
-    describe('#is(x)', function(){
+describe('Obj', function () {
+    describe('#is(x)', function () {
         it('should return true when x is an object literal', function() {
             ok(Obj.is({}));
         });
@@ -278,8 +276,8 @@ describe('Obj', function(){
     });
 });
 
-describe('Func', function(){
-    describe('#is(x)', function(){
+describe('Func', function () {
+    describe('#is(x)', function () {
         it('should return true when x is a function', function() {
             ok(Func.is(function () {}));
             ok(Func.is(new Function()));
@@ -300,8 +298,8 @@ describe('Func', function(){
     });
 });
 
-describe('Err', function(){
-    describe('#is(x)', function(){
+describe('Err', function () {
+    describe('#is(x)', function () {
         it('should return true when x is an error', function() {
             ok(Err.is(new Error()));
         });
@@ -324,11 +322,34 @@ describe('Err', function(){
 // struct
 //
 
-describe('struct', function(){
-    describe('#is(x)', function(){
+describe('struct', function () {
+    describe('#is(x)', function () {
         it('should return true when x is an instance of the struct', function() {
             var p = new Point({ x: 1, y: 2 });
             ok(Point.is(p));
+        });
+    });
+    describe('#update()', function () {
+        var Type = struct({name: Str});
+        var instance = new Type({name: 'Giulio'});
+        it('should throw if options.update is missing', function() {
+            throws(function () {
+                var newInstance = Type.update(instance, {name: 'Canti'});
+            }, function (err) {
+                if ( (err instanceof Error) && err.message === 'options.update is missing' ) {
+                  return true;
+                }
+            });
+        });
+        it('should return a new instance if options.update is defined', function() {
+            t.options.update = function (instance, updates) {
+                return updates;
+            };
+            var newInstance = Type.update(instance, {name: 'Canti'});
+            assert(Type.is(newInstance));
+            assert(instance.name === 'Giulio');
+            assert(newInstance.name === 'Canti');
+            t.options.update = null;
         });
     });
 });
@@ -337,7 +358,7 @@ describe('struct', function(){
 // enums
 //
 
-describe('enums', function(){
+describe('enums', function () {
 
     var Direction = enums({
         North: 0, 
@@ -372,7 +393,7 @@ describe('enums', function(){
 // union
 //
 
-describe('union', function(){
+describe('union', function () {
 
     var Circle = struct({
         center: Point,
@@ -386,18 +407,16 @@ describe('union', function(){
 
     var Shape = union([Circle, Rectangle]);
 
-    describe('#is(x)', function(){
+    describe('#is(x)', function () {
         it('should return true when x is an instance of the union', function() {
             var p = new Circle({center: { x: 0, y: 0 }, radius: 10});
             ok(Shape.is(p));
         });
     });
-    describe('Shape constructor', function(){
+    describe('Shape constructor', function () {
         it('should throw when dispatch() is not implemented', function() {
             throws(function () {
                 new Shape({center: {x: 0, y: 0}, radius: 10});
-            }, function (err) {
-                return err instanceof Error;
             });
         });
         it('should build instances when dispatch() is implemented', function() {
@@ -423,11 +442,11 @@ describe('union', function(){
 // maybe
 //
 
-describe('maybe', function(){
+describe('maybe', function () {
 
     var Radio = maybe(Str);
 
-    describe('#is(x)', function(){
+    describe('#is(x)', function () {
         it('should return true when x is an instance of the maybe', function() {
             ok(Radio.is('a'));
             ok(Radio.is(null));
@@ -444,7 +463,7 @@ describe('tuple', function () {
 
     var Area = tuple([Num, Num]);
 
-    describe('#is(x)', function(){
+    describe('#is(x)', function () {
         it('should return true when x is an instance of the tuple', function() {
             ok(Area.is([1, 2]));
         });
@@ -454,38 +473,83 @@ describe('tuple', function () {
             ko(Area.is([1, 'a']));
         });
     });
+    describe('#update()', function () {
+        var Type = tuple([Str, Num]);
+        var instance = new Type(['a', 1]);
+        it('should throw if options.update is missing', function() {
+            throws(function () {
+                var newInstance = Type.update(instance, ['b', 2]);
+            }, function (err) {
+                if ( (err instanceof Error) && err.message === 'options.update is missing' ) {
+                  return true;
+                }
+            });
+        });
+        it('should return a new instance if options.update is defined', function() {
+            t.options.update = function (instance, updates) {
+                return updates;
+            };
+            var newInstance = Type.update(instance, ['b', 2]);
+            assert(Type.is(newInstance));
+            assert(instance[0] === 'a');
+            assert(newInstance[0] === 'b');
+            t.options.update = null;
+        });
+    });
 });
 
 //
 // list
 //
 
-describe('list', function(){
+describe('list', function () {
 
     var Path = list(Point);
     var p1 = new Point({x: 0, y: 0});
     var p2 = new Point({x: 1, y: 1});
 
-    describe('#is(x)', function(){
+    describe('#is(x)', function () {
         it('should return true when x is a list', function() {
             ok(Path.is([p1, p2]));
         });
     });
-
+    describe('#update()', function () {
+        var Type = list(Str);
+        var instance = new Type(['a', 'b']);
+        it('should throw if options.update is missing', function() {
+            throws(function () {
+                var newInstance = Type.update(instance, ['b', 2]);
+            }, function (err) {
+                if ( (err instanceof Error) && err.message === 'options.update is missing' ) {
+                  return true;
+                }
+            });
+        });
+        it('should return a new instance if options.update is defined', function() {
+            t.options.update = function (instance, updates) {
+                return updates;
+            };
+            var newInstance = Type.update(instance, ['a', 'b', 'c']);
+            assert(Type.is(newInstance));
+            assert(instance.length === 2);
+            assert(newInstance.length === 3);
+            t.options.update = null;
+        });
+    });
 });
 
 //
 // subtype
 //
 
-describe('subtype', function(){
+describe('subtype', function () {
 
     // subtype
     var Positive = subtype(Num, function (n) {
         return n >= 0;
     });
 
-    describe('#is(x)', function(){
+    describe('#is(x)', function () {
         it('should return true when x is a subtype', function() {
             ok(Positive.is(1));
         });
@@ -499,13 +563,13 @@ describe('subtype', function(){
 // func (experimental)
 //
 
-describe('func', function(){
+describe('func', function () {
 
     var sum = func(tuple([Num, Num]), function (a, b) {
         return a + b;
     }, Num);
 
-    describe('#is(x)', function(){
+    describe('#is(x)', function () {
         it('should return true when x is the func', function() {
             ok(sum.is(sum));
             ok(sum(1, 2) === 3);
