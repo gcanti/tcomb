@@ -15,7 +15,7 @@ function maybe(Type, name) {
     kind: 'maybe',
     type: Type,
     name: name,
-    ctor: false
+    ctor: false // cannot use new with null
   };
 
   Maybe.is = function (x) {

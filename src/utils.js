@@ -45,7 +45,7 @@ print.formatters = {
 };
 
 function coerce(type, values, mut) {
-  return type.meta.kind === 'struct' ?
+  return type.meta.ctor ?
       /*jshint newcap: false*/
       new type(values, mut) :
       type(values, mut);
@@ -57,5 +57,5 @@ function update() {
   var Type = this;
   var args = slice.call(arguments);
   var values = options.update.apply(Type, args);
-  return new Type(values);
+  return coerce(Type, values);
 }
