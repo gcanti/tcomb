@@ -97,7 +97,7 @@
     };
     
     function coerce(type, values, mut) {
-      return type.meta.kind === 'struct' ?
+      return type.meta.ctor ?
           /*jshint newcap: false*/
           new type(values, mut) :
           type(values, mut);
@@ -109,7 +109,7 @@
       var Type = this;
       var args = slice.call(arguments);
       var values = options.update.apply(Type, args);
-      return new Type(values);
+      return coerce(Type, values);
     }
 
     //
@@ -176,10 +176,6 @@
       name = name || 'struct()';
     
       function Struct(values, mut) {
-    
-        assert(Obj.is(values), 'bad %s', name);
-        assert(maybe(Bool).is(mut), 'bad mut');
-    
         for (var prop in props) {
           if (props.hasOwnProperty(prop)) {
             var Type = props[prop],
@@ -257,7 +253,7 @@
         kind: 'maybe',
         type: Type,
         name: name,
-        ctor: false
+        ctor: false // cannot use new with null
       };
     
       Maybe.is = function (x) {
