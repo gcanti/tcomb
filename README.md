@@ -456,7 +456,7 @@ sum(1, 'a'); // => fail!
 
 ## Roadmap
 
-- explore auto generated UI from domain models written with tcomb
+- explore generating UI based on domain models written with tcomb
 - explore auto validation of UI involving domain models written with tcomb
 - explore using tcomb with React.js
 - 100% test coverage
@@ -465,12 +465,6 @@ sum(1, 'a'); // => fail!
 ## Contribution
 
 If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.
-
-### v0.0.9
-
-- grunt build system
-- splitted source files
-- 70% test coverage
 
 ## License (MIT)
 
