@@ -440,7 +440,12 @@ options.onFail = function (message) {
 
 #### function `options.update`
 
-Add to structs, tuples and lists a static method `update`
+TODO: better docs
+
+Add to structs, tuples and lists a static method `update` that returns a new instance
+without modifying the original.
+
+Example
 
 ```javascript
 // see http://facebook.github.io/react/docs/update.html
