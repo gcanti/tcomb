@@ -38,11 +38,6 @@
         assert: assert,
         freeze: freeze,
         mixin: mixin,
-        append: append,
-        prepend: prepend,
-        update: update,
-        remove: remove,
-        move: move,
         print: print,
         getName: getName,
         

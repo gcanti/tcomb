@@ -6,7 +6,7 @@
   "authors": [
     "gcanti <giulio.canti@gmail.com>"
   ],
-  "description": "JavaScript types and combinators",
+  "description": "Runtime types checking for JavaScript ",
   "moduleType": [
     "amd",
     "globals",
@@ -16,6 +16,7 @@
     "type",
     "types",
     "combinators",
+    "checking",
     "safety",
     "models",
     "domain",

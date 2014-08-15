@@ -1,7 +1,7 @@
 {
   "name": "tcomb",
   "version": "0.0.9",
-  "description": "JavaScript types and combinators",
+  "description": "Runtime types checking for JavaScript ",
   "main": "build/tcomb.js",
   "scripts": {
     "test": "grunt test",
@@ -37,6 +37,7 @@
     "type",
     "types",
     "combinators",
+    "checking",
     "safety",
     "models",
     "domain",

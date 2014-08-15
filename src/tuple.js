@@ -36,12 +36,14 @@ function tuple(types, name) {
       });
   };
 
+  /* TODO deprecated
   Tuple.update = function (instance, index, element, mut) {
     var Type = types[index],
       value = Type.is(element) ? element : coerce(Type, element, mut),
       arr = update(instance, index, value);
     return freeze(arr, mut);
   };
+  */
 
   return Tuple;
 }

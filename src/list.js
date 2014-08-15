@@ -30,6 +30,7 @@ function list(Type, name) {
     return Arr.is(x) && x.every(Type.is);
   };
 
+  /* TODO deprecated
   List.append = function (instance, element, mut) {
     var value = Type.is(element) ? element : coerce(Type, element, mut),
       arr = append(instance, value);
@@ -57,6 +58,7 @@ function list(Type, name) {
     var arr = move(instance, from, to);
     return freeze(arr, mut);
   };
+  */
 
   return List;
 }
