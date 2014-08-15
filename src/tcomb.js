@@ -18,6 +18,8 @@
 
     //= utils.js
 
+    //= any.js
+
     //= primitive.js
 
     //= struct.js
@@ -46,6 +48,7 @@
         print: print,
         getName: getName,
         
+        Any: Any,
         Nil: Nil,
         Str: Str,
         Num: Num,

@@ -2,6 +2,7 @@
 var assert = require('assert');
 var t = require('../build/tcomb');
 
+var Any = t.Any;
 var Nil = t.Nil;
 var Bool = t.Bool;
 var Num = t.Num;
@@ -19,6 +20,8 @@ var subtype = t.subtype;
 var list = t.list;
 var func = t.func;
 var getName = t.getName;
+var mixin = t.mixin;
+var print = t.print;
 
 //
 // setup
@@ -27,9 +30,18 @@ var getName = t.getName;
 var ok = function (x) { assert.strictEqual(true, x); };
 var ko = function (x) { assert.strictEqual(false, x); };
 var throws = assert.throws;
+var throwsWithMessage = function (f, message) {
+    assert.throws(f, function (e) {
+        if (e instanceof Error && e.message === message) {
+            return true;
+        }
+    });
+};
 var doesNotThrow = assert.doesNotThrow;
+var eq = assert.strictEqual;
 
-// defined here because it's used in a bunch of tests
+// used all over the place
+var noop = function () {};
 var Point = struct({
     x: Num,
     y: Num
@@ -40,35 +52,26 @@ var Point = struct({
 //
 
 describe('assert', function () {
+
+    var assert = t.assert;
+    
     it('should nor throw when guard is true', function() {
         assert(true);
     });
     it('should throw a default message', function() {
-        throws(function () {
-            t.assert(1 === 2);
-        }, function (err) {
-            if ( (err instanceof Error) && err.message === 'assert(): failed' ) {
-              return true;
-            }
-        });
+        throwsWithMessage(function () {
+            assert(1 === 2);
+        }, 'assert(): failed');
     });
     it('should throw the specified message', function() {
-        throws(function () {
-            t.assert(1 === 2, 'my message');
-        }, function (err) {
-            if ( (err instanceof Error) && err.message === 'my message' ) {
-              return true;
-            }
-        });
+        throwsWithMessage(function () {
+            assert(1 === 2, 'my message');
+        }, 'my message');
     });
     it('should format the specified message', function() {
-        throws(function () {
-            t.assert(1 === 2, '%s !== %s', 1, 2);
-        }, function (err) {
-            if ( (err instanceof Error) && err.message === '1 !== 2' ) {
-              return true;
-            }
-        });
+        throwsWithMessage(function () {
+            assert(1 === 2, '%s !== %s', 1, 2);
+        }, '1 !== 2');
     });
     it('should handle custom onFail behaviour', function() {
         var onFail = t.options.onFail;
@@ -76,11 +79,11 @@ describe('assert', function () {
             try {
                 throw new Error(message);
             } catch (e) {
-                ok(e.message === 'report error');
+                eq(e.message, 'report error');
             }
         };
         doesNotThrow(function () {
-            t.assert(1 === 2, 'report error');
+            assert(1 === 2, 'report error');
         });
         t.options.onFail = onFail;
     });
@@ -91,11 +94,42 @@ describe('assert', function () {
 //
 
 describe('print', function () {
-    it('should format the message', function() {
-        ok(t.print('%s', 'a') === 'a');
-        ok(t.print('%s', 2) === '2');
-        ok(t.print('%o', {a: 1}) === '{"a":1}');
-        ok(t.print('%s === %s', 1, 1) === '1 === 1');
+    it('should format the message', function () {
+        eq(print('%s', 'a'), 'a');
+        eq(print('%s', 2), '2');
+        eq(print('%o', {a: 1}), '{"a":1}');
+        eq(print('%s === %s', 1, 1), '1 === 1');
+    });
+    it('should handle %%', function () {
+        eq(print('%%s'), '%%s');
+    });
+});
+
+describe('mixin', function () {
+    it('should mix two objects', function () {
+        var o1 = {a: 1};
+        var o2 = {b: 2}
+        var o3 = mixin(o1, o2);
+        eq(o3.a, 1);
+        eq(o3.b, 2);
+    });
+    it('should throw if a property already exists', function () {
+        throws(function () {
+            var o1 = {a: 1};
+            var o2 = {a: 2, b: 2}
+            var o3 = mixin(o1, o2);
+        }, function (err) {
+            if (err instanceof Error && err.message === 'cannot overwrite property a') {
+                return true;
+            }
+        });
+    });
+    it('should not throw if a property already exists but overwrite = true', function () {
+        var o1 = {a: 1};
+        var o2 = {a: 2, b: 2}
+        var o3 = mixin(o1, o2, true);
+        eq(o3.a, 2);
+        eq(o3.b, 2);
     });
 });
 
@@ -137,6 +171,63 @@ describe('getName', function () {
 });
 
 //
+// Ant
+//
+
+describe('Any', function () {
+    var T = Any;
+    describe('ctor', function () {
+        it('should behave like identity', function() {
+            eq(Any('a'), 'a');
+        });
+        it('should throw if used with new', function() {
+            throwsWithMessage(function () {
+                new T();
+            }, 'cannot use new with Any');
+        });
+    });
+    describe('#is(x)', function () {
+        it('should always return true', function() {
+            ok(T.is(null));
+            ok(T.is(undefined));
+            ok(T.is(0));
+            ok(T.is(true));
+            ok(T.is(''));
+            ok(T.is([]));
+            ok(T.is({}));
+            ok(T.is(noop));
+            ok(T.is(/a/));
+            ok(T.is(new RegExp('a')));
+            ok(T.is(new Error()));
+        });
+    });
+});
+
+it('primitives types should throw if used with new', function () {
+    [
+        {ctor: Nil, x: null},
+        {ctor: Str, x: 'a'},
+        {ctor: Num, x: 1},
+        {ctor: Bool, x: true},
+        {ctor: Arr, x: []},
+        {ctor: Obj, x: {}},
+        {ctor: Func, x: noop},
+        {ctor: Err, x: new Error()}
+    ].forEach(function (o) {
+        var T = o.ctor;
+        var x = o.x;
+        it('should behave like identity', function() {
+            eq(T(x), x);
+        });
+        it('should throw if used with new', function() {
+            throwsWithMessage(function () {
+                new T();
+            }, 'cannot use new with ' + T.meta.name);
+        });
+    });
+});
+
+//
 // primitives types
 //
 
@@ -152,7 +243,7 @@ describe('Nil', function () {
             ko(Nil.is(''));
             ko(Nil.is([]));
             ko(Nil.is({}));
-            ko(Nil.is(function () {}));
+            ko(Nil.is(noop));
             ko(Nil.is(/a/));
             ko(Nil.is(new RegExp('a')));
             ko(Nil.is(new Error()));
@@ -173,7 +264,7 @@ describe('Bool', function () {
             ko(Bool.is(''));
             ko(Bool.is([]));
             ko(Bool.is({}));
-            ko(Bool.is(function () {}));
+            ko(Bool.is(noop));
             ko(Bool.is(/a/));
             ko(Bool.is(new RegExp('a')));
             ko(Bool.is(new Error()));
@@ -198,7 +289,7 @@ describe('Num', function () {
             ko(Num.is(''));
             ko(Num.is([]));
             ko(Num.is({}));
-            ko(Num.is(function () {}));
+            ko(Num.is(noop));
             ko(Num.is(/a/));
             ko(Num.is(new RegExp('a')));
             ko(Num.is(new Error()));
@@ -223,7 +314,7 @@ describe('Str', function () {
             ko(Str.is(1));
             ko(Str.is([]));
             ko(Str.is({}));
-            ko(Str.is(function () {}));
+            ko(Str.is(noop));
             ko(Str.is(/a/));
             ko(Str.is(new RegExp('a')));
             ko(Str.is(new Error()));
@@ -246,7 +337,7 @@ describe('Arr', function () {
             ko(Arr.is(1));
             ko(Arr.is('a'));
             ko(Arr.is({}));
-            ko(Arr.is(function () {}));
+            ko(Arr.is(noop));
             ko(Arr.is(/a/));
             ko(Arr.is(new RegExp('a')));
             ko(Arr.is(new Error()));
@@ -265,7 +356,7 @@ describe('Obj', function () {
             ko(Obj.is(0));
             ko(Obj.is(''));
             ko(Obj.is([]));
-            ko(Obj.is(function () {}));
+            ko(Obj.is(noop));
             ko(Obj.is(new String('1')));
             ko(Obj.is(new Number(1)));
             ko(Obj.is(new Boolean()));
@@ -279,7 +370,7 @@ describe('Obj', function () {
 describe('Func', function () {
     describe('#is(x)', function () {
         it('should return true when x is a function', function() {
-            ok(Func.is(function () {}));
+            ok(Func.is(noop));
             ok(Func.is(new Function()));
         });
         it('should return false when x is not a function', function() {
@@ -359,15 +450,13 @@ describe('struct', function () {
 //
 
 describe('enums', function () {
-
-    var Direction = enums({
-        North: 0, 
-        East: 1,
-        South: 2, 
-        West: 3
-    });
-
     describe('#is(x)', function() {
+        var Direction = enums({
+            North: 0, 
+            East: 1,
+            South: 2, 
+            West: 3
+        });
         it('should return true when x is an instance of the enum', function() {
             ok(Direction.is('North'));
         });
@@ -407,6 +496,15 @@ describe('union', function () {
 
     var Shape = union([Circle, Rectangle]);
 
+    describe('ctor', function () {
+        it('should throw if used with new', function() {
+            throwsWithMessage(function () {
+                var T = union([Str, Num], 'T');
+                T.dispatch = function () { return Str; }
+                new T();
+            }, 'cannot use new with T');
+        });
+    });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the union', function() {
             var p = new Circle({center: { x: 0, y: 0 }, radius: 10});
@@ -443,11 +541,21 @@ describe('union', function () {
 //
 
 describe('maybe', function () {
-
-    var Radio = maybe(Str);
-
+    describe('ctor', function () {
+        it('should throw if used with new', function() {
+            throwsWithMessage(function () {
+                var T = maybe(Str, 'T');
+                new T();
+            }, 'cannot use new with T');
+        });
+        it('as a function should coerce values', function() {
+            var T = maybe(Point);
+            ok(Point.is(T({x: 0, y: 0})));
+        });
+    });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the maybe', function() {
+            var Radio = maybe(Str);
             ok(Radio.is('a'));
             ok(Radio.is(null));
             ok(Radio.is(undefined));
@@ -543,13 +651,18 @@ describe('list', function () {
 //
 
 describe('subtype', function () {
-
-    // subtype
-    var Positive = subtype(Num, function (n) {
-        return n >= 0;
+    describe('ctor', function () {
+        it('should throw if used with new', function() {
+            throwsWithMessage(function () {
+                var T = subtype(Str, function () { return true; }, 'T');
+                new T();
+            }, 'cannot use new with T');
+        });
     });
-
     describe('#is(x)', function () {
+        var Positive = subtype(Num, function (n) {
+            return n >= 0;
+        });
         it('should return true when x is a subtype', function() {
             ok(Positive.is(1));
         });
@@ -575,7 +688,7 @@ describe('func', function () {
             ok(sum(1, 2) === 3);
         });
         it("should return false when x is not the func", function() {
-            ko(sum.is(function () {}));
+            ko(sum.is(noop));
         });
         it("should throw with wrong arguments", function() {
             throws(function () {
@@ -605,3 +718,4 @@ describe('func', function () {
         });
     });
 });
+

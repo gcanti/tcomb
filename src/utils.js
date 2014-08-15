@@ -15,7 +15,7 @@ function mixin(x, y, overwrite) {
   for (var k in y) {
     if (y.hasOwnProperty(k)) {
       if (!overwrite) {
-        assert(!x.hasOwnProperty(k), 'mixin(): cannot overwrite property %s', k);
+        assert(!x.hasOwnProperty(k), 'cannot overwrite property %s', k);
       }
       x[k] = y[k];
     }
@@ -24,7 +24,7 @@ function mixin(x, y, overwrite) {
 }
 
 function getName(type) { 
-  return type.meta && type.meta.name ? type.meta.name : type.name || 'Unknown';
+  return type.meta && type.meta.name ? type.meta.name : type.name || '?';
 }
 
 function print() {

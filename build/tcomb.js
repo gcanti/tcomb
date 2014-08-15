@@ -42,11 +42,15 @@
     // assert
     //
     
+    function fail(message) {
+      options.onFail(message);
+    }
+    
     function assert(guard) {
       if (guard !== true) {
         var args = slice.call(arguments, 1);
         var message = args[0] ? print.apply(null, args) : 'assert(): failed';
-        options.onFail(message); 
+        fail(message); 
       }
     }
 
@@ -67,7 +71,7 @@
       for (var k in y) {
         if (y.hasOwnProperty(k)) {
           if (!overwrite) {
-            assert(!x.hasOwnProperty(k), 'mixin(): cannot overwrite property %s', k);
+            assert(!x.hasOwnProperty(k), 'cannot overwrite property %s', k);
           }
           x[k] = y[k];
         }
@@ -76,7 +80,7 @@
     }
     
     function getName(type) { 
-      return type.meta && type.meta.name ? type.meta.name : type.name || 'Unknown';
+      return type.meta && type.meta.name ? type.meta.name : type.name || '?';
     }
     
     function print() {
@@ -111,6 +115,23 @@
       var values = options.update.apply(Type, args);
       return coerce(Type, values);
     }
+
+    //
+    // Any - because sometimes you really gonna need it
+    //
+    
+    function Any(values) {
+      assert(!(this instanceof Any), 'cannot use new with Any');
+      return values;
+    }
+    
+    Any.meta = {
+      kind: 'any',
+      name: 'Any',
+      ctor: false
+    };
+    
+    Any.is = function () { return true; };
 
     //
     // primitives
@@ -365,7 +386,7 @@
         type: Type,
         predicate: predicate,
         name: name,
-        ctor: Type.ctor
+        ctor: Type.meta.ctor
       };
     
       Subtype.is = function (x) {
@@ -457,6 +478,7 @@
         print: print,
         getName: getName,
         
+        Any: Any,
         Nil: Nil,
         Str: Str,
         Num: Num,
