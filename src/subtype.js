@@ -20,7 +20,7 @@ function subtype(Type, predicate, name) {
     type: Type,
     predicate: predicate,
     name: name,
-    ctor: Type.ctor
+    ctor: Type.meta.ctor
   };
 
   Subtype.is = function (x) {
