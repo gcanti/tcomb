@@ -7,8 +7,8 @@ function enums(map, name) {
   name = name || 'enums()';
 
   function Enums(x) {
-    assert(!(this instanceof Enums), 'cannot use new with %s', name);
     assert(Enums.is(x), 'bad %s', name);
+    assert(!(this instanceof Enums), 'cannot use new with %s', name);
     return x;
   }
 
