@@ -4,7 +4,7 @@
 
 function list(Type, name) {
 
-  name = name || print('list(%s)', getName(Type));
+  name = name || format('list(%s)', getName(Type));
 
   function List(values, mut) {
 
