@@ -46,6 +46,7 @@
         freeze: freeze,
         mixin: mixin,
         print: print,
+        coerce: coerce,
         getName: getName,
         
         Any: Any,
