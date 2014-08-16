@@ -49,7 +49,7 @@
     function assert(guard) {
       if (guard !== true) {
         var args = slice.call(arguments, 1);
-        var message = args[0] ? print.apply(null, args) : 'assert(): failed';
+        var message = args[0] ? format.apply(null, args) : 'assert(): failed';
         fail(message); 
       }
     }
@@ -67,37 +67,44 @@
       return obj_or_arr;
     }
     
-    function mixin(x, y, overwrite) {
-      for (var k in y) {
-        if (y.hasOwnProperty(k)) {
+    function mixin(target, source, overwrite) {
+      for (var k in source) {
+        if (source.hasOwnProperty(k)) {
           if (!overwrite) {
-            assert(!x.hasOwnProperty(k), 'cannot overwrite property %s', k);
+            assert(!target.hasOwnProperty(k), 'cannot overwrite property %s', k);
           }
-          x[k] = y[k];
+          target[k] = source[k];
         }
       }
-      return x;
+      return target;
     }
     
-    function getName(type) { 
-      return type.meta && type.meta.name ? type.meta.name : type.name || '?';
+    function getName(type) {
+      assert(Obj.is(type.meta), 'missing type meta hash');
+      return type.meta.name;
     }
     
-    function print() {
+    function format() {
       var args = slice.call(arguments);
-      var index = 0;
-      return args[0].replace(/%([a-z%])/g, function(match, format) {
-        if (match === '%%') return match;
-        index++;
-        var formatter = print.formatters[format];
-        var arg = args[index];
-        return formatter(arg);
+      var len = args.length;
+      var i = 1;
+      var message = args[0];
+      var str = message.replace(/%([a-z%])/g, function(match, type) {
+        if (match === '%%') { return '%'; }       // handle escaping %
+        if (i >= len) { return match; }           // handle less arguments than placeholders
+        var formatter = format.formatters[type];
+        if (!formatter) { return match; }         // handle undefined formatters
+        return formatter(args[i++]);
       });
+      if (i < len) {
+        str += ' ' + args.slice(i).join(' ');     // handle more arguments than placeholders
+      }
+      return str;
     }
     
-    print.formatters = {
+    format.formatters = {
       s: function (x) { return String(x); },
-      o: function (x) { return JSON.stringify(x); }
+      j: function (x) { return JSON.stringify(x); }
     };
     
     function coerce(type, values, mut) {
@@ -187,6 +194,10 @@
     var Err = primitive('Err', function (x) {
       return x instanceof Error;
     });
+    
+    var Re = primitive('Re', function (x) {
+      return x instanceof RegExp;
+    });
 
     //
     // struct
@@ -197,6 +208,9 @@
       name = name || 'struct()';
     
       function Struct(values, mut) {
+    
+        assert(Obj.is(values), 'bad %s', name);
+    
         for (var prop in props) {
           if (props.hasOwnProperty(prop)) {
             var Type = props[prop],
@@ -230,7 +244,7 @@
     
     function union(types, name) {
     
-      name = name || print('union(%s)', types.map(getName).join(', '));
+      name = name || format('union(%s)', types.map(getName).join(', '));
     
       function Union(values, mut) {
         assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
@@ -263,7 +277,7 @@
     
     function maybe(Type, name) {
     
-      name = name || print('maybe(%s)', getName(Type));
+      name = name || format('maybe(%s)', getName(Type));
     
       function Maybe(values, mut) {
         assert(!(this instanceof Maybe), 'cannot use new with %s', name);
@@ -293,8 +307,8 @@
       name = name || 'enums()';
     
       function Enums(x) {
-        assert(!(this instanceof Enums), 'cannot use new with %s', name);
         assert(Enums.is(x), 'bad %s', name);
+        assert(!(this instanceof Enums), 'cannot use new with %s', name);
         return x;
       }
     
@@ -327,7 +341,7 @@
     
     function tuple(types, name) {
     
-      name = name || print('tuple(%s)', types.map(getName).join(', '));
+      name = name || format('tuple(%s)', types.map(getName).join(', '));
     
       var len = types.length;
     
@@ -370,7 +384,7 @@
     
     function subtype(Type, predicate, name) {
     
-      name = name || print('subtype(%s)', getName(Type));
+      name = name || format('subtype(%s)', getName(Type));
     
       function Subtype(values, mut) {
         if (this instanceof Subtype) {
@@ -402,7 +416,7 @@
     
     function list(Type, name) {
     
-      name = name || print('list(%s)', getName(Type));
+      name = name || format('list(%s)', getName(Type));
     
       function List(values, mut) {
     
@@ -475,7 +489,8 @@
         assert: assert,
         freeze: freeze,
         mixin: mixin,
-        print: print,
+        format: format,
+        coerce: coerce,
         getName: getName,
         
         Any: Any,
@@ -487,6 +502,7 @@
         Obj: Obj,
         Func: Func,
         Err: Err,
+        Re: Re,
 
         struct: struct,
         enums: enums,

@@ -52,3 +52,8 @@ var Func = primitive('Func', function (x) {
 var Err = primitive('Err', function (x) {
   return x instanceof Error;
 });
+
+var Re = primitive('Re', function (x) {
+  return x instanceof RegExp;
+});
+

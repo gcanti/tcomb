@@ -11,6 +11,7 @@ var Arr = t.Arr;
 var Obj = t.Obj;
 var Func = t.Func;
 var Err = t.Err;
+var Re = t.Re;
 var struct = t.struct;
 var enums = t.enums;
 var union = t.union;
@@ -257,7 +258,8 @@ describe('primitives types constructors', function () {
         {T: Arr, x: []},
         {T: Obj, x: {}},
         {T: Func, x: noop},
-        {T: Err, x: new Error()}
+        {T: Err, x: new Error()},
+        {T: Re, x: /a/}
     ].forEach(function (o) {
         var T = o.T;
         var x = o.x;
@@ -450,6 +452,26 @@ describe('Err', function () {
             ko(Err.is(new Boolean()));
             ko(Err.is(/a/));
             ko(Err.is(new RegExp('a')));
+        });
+    });
+});
+
+describe('Re', function () {
+    describe('#is(x)', function () {
+        it('should return true when x is a regexp', function () {
+            ok(Re.is(/a/));
+            ok(Re.is(new RegExp('a')));
+        });
+        it('should return false when x is not a regexp', function () {
+            ko(Re.is(null));
+            ko(Re.is(undefined));
+            ko(Re.is(0));
+            ko(Re.is(''));
+            ko(Re.is([]));
+            ko(Re.is(new String('1')));
+            ko(Re.is(new Number(1)));
+            ko(Re.is(new Boolean()));
+            ko(Re.is(new Error()));
         });
     });
 });

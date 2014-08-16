@@ -58,6 +58,7 @@
         Obj: Obj,
         Func: Func,
         Err: Err,
+        Re: Re,
 
         struct: struct,
         enums: enums,

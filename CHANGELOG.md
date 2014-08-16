@@ -3,21 +3,20 @@ Roadmap
 
 # v0.0.10
 
-## Enhancements
-
-- TODO added `RegExp` primitive type, fix #3
-- TODO added `Date` primitive type, fix #4
-- reached 95% test coverage
+- TODO add `Date` primitive type, fix #4
+- add `Re` primitive type, fix #3
+- reach 100% test coverage
 - jshint says: No problems
-- added `options` to configuring tcomb fix #5 :
+- add `options` to configuring tcomb fix #5 :
+- decouple onFail implementation from assert(), fix #6
+- add `Any` type, fix #2
+- fix #1
+
+**BREAKING**
+
 - removed `assert.onFail`, now override `options.onFail`
 - removed all update methods, now define `options.update`
-- decoupled onFail implementation from assert(), fix #6
-- added `Any` type, fix #2
-
-## Bugs
-
-- fix #1
+- rename `print` to `format`, implement like `util.format` in Node, fix #7
 
 Releases
 ========
