@@ -11,37 +11,44 @@ function freeze(obj_or_arr, unless) {
   return obj_or_arr;
 }
 
-function mixin(x, y, overwrite) {
-  for (var k in y) {
-    if (y.hasOwnProperty(k)) {
+function mixin(target, source, overwrite) {
+  for (var k in source) {
+    if (source.hasOwnProperty(k)) {
       if (!overwrite) {
-        assert(!x.hasOwnProperty(k), 'cannot overwrite property %s', k);
+        assert(!target.hasOwnProperty(k), 'cannot overwrite property %s', k);
       }
-      x[k] = y[k];
+      target[k] = source[k];
     }
   }
-  return x;
+  return target;
 }
 
-function getName(type) { 
-  return type.meta && type.meta.name ? type.meta.name : type.name || '?';
+function getName(type) {
+  assert(Obj.is(type.meta), 'missing type meta hash');
+  return type.meta.name;
 }
 
-function print() {
+function format() {
   var args = slice.call(arguments);
-  var index = 0;
-  return args[0].replace(/%([a-z%])/g, function(match, format) {
-    if (match === '%%') return match;
-    index++;
-    var formatter = print.formatters[format];
-    var arg = args[index];
-    return formatter(arg);
+  var len = args.length;
+  var i = 1;
+  var message = args[0];
+  var str = message.replace(/%([a-z%])/g, function(match, type) {
+    if (match === '%%') { return '%'; }       // handle escaping %
+    if (i >= len) { return match; }           // handle less arguments than placeholders
+    var formatter = format.formatters[type];
+    if (!formatter) { return match; }         // handle undefined formatters
+    return formatter(args[i++]);
   });
+  if (i < len) {
+    str += ' ' + args.slice(i).join(' ');     // handle more arguments than placeholders
+  }
+  return str;
 }
 
-print.formatters = {
+format.formatters = {
   s: function (x) { return String(x); },
-  o: function (x) { return JSON.stringify(x); }
+  j: function (x) { return JSON.stringify(x); }
 };
 
 function coerce(type, values, mut) {
