@@ -1,6 +1,10 @@
-//
-// Any - because sometimes you really gonna need it
-//
+/**
+    ### Any(values, [mut])
+
+    Because sometimes you really gonna need it.
+
+        Any.is(..whatever..); // => true
+**/
 
 function Any(values) {
   assert(!(this instanceof Any), 'cannot use new with Any');

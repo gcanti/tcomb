@@ -1,6 +1,38 @@
-//
-// union
-//
+/**
+    ### union(types, [name])
+
+    Defines a union of types.
+
+    - `types` array of types
+    - `name` optional string useful for debugging
+
+    Example
+
+    ```javascript
+    var Circle = struct({
+        center: Point,
+        radius: Num
+    });
+
+    var Rectangle = struct({
+        bl: Point, // bottom left vertex
+        tr: Point  // top right vertex
+    });
+
+    var Shape = union([
+        Circle, 
+        Rectangle
+    ]);
+    ```
+
+    #### is(x)
+
+    Returns `true` if `x` belongs to the union.
+
+    ```javascript
+    Shape.is(new Circle({center: p, radius: 10})); // => true
+    ```
+**/
 
 function union(types, name) {
 

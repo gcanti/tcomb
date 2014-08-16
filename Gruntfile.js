@@ -64,6 +64,10 @@ module.exports = function (grunt) {
       tasks: [
         'default'
       ]
+    },
+
+    emu: {
+      'README.md': 'build/tcomb.js'
     }
 
   });
@@ -77,7 +81,15 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
 
   // tasks
+  grunt.registerMultiTask('emu', function () {
+    var emu = require('emu'),
+      fs = require('fs'),
+      source = fs.readFileSync(this.data, 'utf8');
+
+    fs.writeFileSync(this.target, emu.getComments(source));
+  });
+  grunt.registerTask('doc', ['rig', 'emu']);
   grunt.registerTask('test', ['mochaTest']);
   grunt.registerTask('default', ['rig', 'test', 'watch']);
-  grunt.registerTask('build', ['rig', 'jshint', 'test', 'uglify']);
+  grunt.registerTask('build', ['rig', 'jshint', 'test', 'uglify', 'emu']);
 };

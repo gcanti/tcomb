@@ -1,6 +1,22 @@
-//
-// enums
-//
+/**
+    #### enums.of(keys, [name])
+
+    Returns an enums of an array of keys, useful when you don't mind to define
+    custom values for the enums.
+
+    - `keys` array (or string) of keys
+    - `name` optional string useful for debugging
+
+    Example
+
+    ```javascript
+    // result is the same as the main example
+    var Direction = enums.of(['North', 'East', 'South', 'West']);
+
+    // or..
+    Direction = enums.of('North East South West');
+    ```
+**/
 
 function enums(map, name) {
 

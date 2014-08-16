@@ -1,6 +1,43 @@
-//
-// maybe
-//
+/**
+    ### maybe(type, [name])
+
+    Same as `union([Nil, type])`.
+
+    ```javascript
+    // the value of a radio input where null = no selection
+    var Radio = maybe(Str);
+
+    Radio.is('a');     // => true
+    Radio.is(null);    // => true
+    Radio.is(1);       // => false
+    ```    
+
+    ### enums(map, [name])
+
+    Defines an enum of strings.
+
+    - `map` hash enum -> value
+    - `name` optional string useful for debugging
+
+    Example
+
+    ```javascript
+    var Direction = enums({
+        North: 0, 
+        East: 1,
+        South: 2, 
+        West: 3
+    });
+    ```
+
+    #### is(x)
+
+    Returns `true` if `x` belongs to the enum.
+
+    ```javascript
+    Direction.is('North'); // => true
+    ```
+**/
 
 function maybe(Type, name) {
 

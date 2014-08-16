@@ -1,6 +1,24 @@
-//
-// func (experimental)
-//
+/**
+    ### func(Arguments, f, [Return], [name])
+
+    **Experimental**. Defines a function where the `arguments` and the return value are checked.
+
+    - `Arguments` the type of `arguments`
+    - `f` the function to execute
+    - `Return` optional, check the type of the return value
+    - `name` optional string useful for debugging
+
+    Example
+
+    ```javascript
+    var sum = func(tuple([Num, Num]), function (a, b) {
+        return a + b;
+    }, Num);
+
+    sum(1, 2); // => 3
+    sum(1, 'a'); // => fail!
+    ```
+**/
 
 function func(Arguments, f, Return, name) {
     
