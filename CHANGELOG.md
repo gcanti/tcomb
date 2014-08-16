@@ -3,6 +3,8 @@ Roadmap
 
 # v.0.0.11
 
+- remove `freeze()` function
+
 # v0.0.10
 
 - add `Dat` primitive type, fix #4

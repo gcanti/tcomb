@@ -57,7 +57,7 @@ function struct(props, name) {
       }
     }
 
-    freeze(this, mut);
+    if (!mut) { Object.freeze(this); }
   }
 
   Struct.meta = {

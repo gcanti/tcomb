@@ -43,7 +43,8 @@ function list(Type, name) {
       arr.push(Type.is(value) ? value : coerce(Type, value, mut));
     }
 
-    return freeze(arr, mut);
+    if (!mut) { Object.freeze(arr); }
+    return arr;
   }
 
   List.meta = {

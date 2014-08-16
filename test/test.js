@@ -161,25 +161,6 @@ describe('mixin', function () {
     });
 });
 
-describe('freeze', function () {
-    var freeze = t.freeze;
-    it('should freeze if unless === false', function () {
-        var o = {a: 1};
-        freeze(o);
-        throws(function () {
-            o.a = 2;
-        });
-    });
-    it('should not freeze if unless === true', function () {
-        var o = {a: 1};
-        freeze(o, true);
-        doesNotThrow(function () {
-            o.a = 2;
-            eq(o.a, 2);
-        });
-    });
-});
-
 describe('getName', function () {
 
     var UnnamedStruct = struct({});

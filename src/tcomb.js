@@ -198,7 +198,6 @@
         options: options,
 
         assert: assert,
-        freeze: freeze,
         mixin: mixin,
         format: format,
         coerce: coerce,

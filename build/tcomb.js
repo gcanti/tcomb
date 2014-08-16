@@ -263,13 +263,6 @@
     
     var slice = Array.prototype.slice;
     
-    function freeze(obj_or_arr, unless) {
-      if (unless !== true && Object.freeze) {
-        Object.freeze(obj_or_arr);
-      }
-      return obj_or_arr;
-    }
-    
     function mixin(target, source, overwrite) {
       for (var k in source) {
         if (source.hasOwnProperty(k)) {
@@ -469,7 +462,7 @@
           }
         }
     
-        freeze(this, mut);
+        if (!mut) { Object.freeze(this); }
       }
     
       Struct.meta = {
@@ -715,7 +708,8 @@
           arr.push(Type.is(value) ? value : coerce(Type, value, mut));
         }
     
-        return freeze(arr, mut);
+        if (!mut) { Object.freeze(arr); }
+        return arr;
       }
     
       Tuple.meta = {
@@ -847,7 +841,8 @@
           arr.push(Type.is(value) ? value : coerce(Type, value, mut));
         }
     
-        return freeze(arr, mut);
+        if (!mut) { Object.freeze(arr); }
+        return arr;
       }
     
       List.meta = {
@@ -924,7 +919,6 @@
         options: options,
 
         assert: assert,
-        freeze: freeze,
         mixin: mixin,
         format: format,
         coerce: coerce,
