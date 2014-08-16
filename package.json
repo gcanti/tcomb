@@ -8,7 +8,7 @@
     "build": "grunt build",
     "jshint": "grunt jshint",
     "start": "grunt",
-    "coverage": "istanbul cover _mocha -- --ui bdd -R spec -t 5000"
+    "coverage": "istanbul cover _mocha -- --ui bdd -R dot"
   },
   "repository": {
     "type": "git",
