@@ -4,7 +4,7 @@
 
 function union(types, name) {
 
-  name = name || print('union(%s)', types.map(getName).join(', '));
+  name = name || format('union(%s)', types.map(getName).join(', '));
 
   function Union(values, mut) {
     assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);

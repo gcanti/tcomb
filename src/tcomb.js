@@ -45,7 +45,7 @@
         assert: assert,
         freeze: freeze,
         mixin: mixin,
-        print: print,
+        format: format,
         coerce: coerce,
         getName: getName,
         

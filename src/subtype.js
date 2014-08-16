@@ -4,7 +4,7 @@
 
 function subtype(Type, predicate, name) {
 
-  name = name || print('subtype(%s)', getName(Type));
+  name = name || format('subtype(%s)', getName(Type));
 
   function Subtype(values, mut) {
     if (this instanceof Subtype) {

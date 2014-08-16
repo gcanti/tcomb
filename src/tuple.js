@@ -4,7 +4,7 @@
 
 function tuple(types, name) {
 
-  name = name || print('tuple(%s)', types.map(getName).join(', '));
+  name = name || format('tuple(%s)', types.map(getName).join(', '));
 
   var len = types.length;
 

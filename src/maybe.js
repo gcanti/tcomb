@@ -4,7 +4,7 @@
 
 function maybe(Type, name) {
 
-  name = name || print('maybe(%s)', getName(Type));
+  name = name || format('maybe(%s)', getName(Type));
 
   function Maybe(values, mut) {
     assert(!(this instanceof Maybe), 'cannot use new with %s', name);
