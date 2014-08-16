@@ -59,6 +59,7 @@
         Func: Func,
         Err: Err,
         Re: Re,
+        Dat: Dat,
 
         struct: struct,
         enums: enums,

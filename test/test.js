@@ -12,6 +12,7 @@ var Obj = t.Obj;
 var Func = t.Func;
 var Err = t.Err;
 var Re = t.Re;
+var Dat = t.Dat;
 var struct = t.struct;
 var enums = t.enums;
 var union = t.union;
@@ -291,9 +292,10 @@ describe('Nil', function () {
             ko(Nil.is([]));
             ko(Nil.is({}));
             ko(Nil.is(noop));
+            ko(Nil.is(new Error()));
+            ko(Nil.is(new Date()));
             ko(Nil.is(/a/));
             ko(Nil.is(new RegExp('a')));
-            ko(Nil.is(new Error()));
         });
     });
 });
@@ -315,6 +317,7 @@ describe('Bool', function () {
             ko(Bool.is(/a/));
             ko(Bool.is(new RegExp('a')));
             ko(Bool.is(new Error()));
+            ko(Bool.is(new Date()));
         });
     });
 });
@@ -340,6 +343,7 @@ describe('Num', function () {
             ko(Num.is(/a/));
             ko(Num.is(new RegExp('a')));
             ko(Num.is(new Error()));
+            ko(Num.is(new Date()));
         });
     });
 });
@@ -365,6 +369,7 @@ describe('Str', function () {
             ko(Str.is(/a/));
             ko(Str.is(new RegExp('a')));
             ko(Str.is(new Error()));
+            ko(Str.is(new Date()));
         });
     });
 });
@@ -388,6 +393,7 @@ describe('Arr', function () {
             ko(Arr.is(/a/));
             ko(Arr.is(new RegExp('a')));
             ko(Arr.is(new Error()));
+            ko(Arr.is(new Date()));
         });
     });
 });
@@ -410,6 +416,7 @@ describe('Obj', function () {
             ko(Obj.is(/a/));
             ko(Obj.is(new RegExp('a')));
             ko(Obj.is(new Error()));
+            ko(Obj.is(new Date()));
         });
     });
 });
@@ -432,6 +439,7 @@ describe('Func', function () {
             ko(Func.is(/a/));
             ko(Func.is(new RegExp('a')));
             ko(Func.is(new Error()));
+            ko(Func.is(new Date()));
         });
     });
 });
@@ -452,6 +460,7 @@ describe('Err', function () {
             ko(Err.is(new Boolean()));
             ko(Err.is(/a/));
             ko(Err.is(new RegExp('a')));
+            ko(Err.is(new Date()));
         });
     });
 });
@@ -472,6 +481,28 @@ describe('Re', function () {
             ko(Re.is(new Number(1)));
             ko(Re.is(new Boolean()));
             ko(Re.is(new Error()));
+            ko(Re.is(new Date()));
+        });
+    });
+});
+
+describe('Dat', function () {
+    describe('#is(x)', function () {
+        it('should return true when x is a Dat', function () {
+            ok(Dat.is(new Date()));
+        });
+        it('should return false when x is not a Dat', function () {
+            ko(Dat.is(null));
+            ko(Dat.is(undefined));
+            ko(Dat.is(0));
+            ko(Dat.is(''));
+            ko(Dat.is([]));
+            ko(Dat.is(new String('1')));
+            ko(Dat.is(new Number(1)));
+            ko(Dat.is(new Boolean()));
+            ko(Dat.is(new Error()));
+            ko(Dat.is(/a/));
+            ko(Dat.is(new RegExp('a')));
         });
     });
 });

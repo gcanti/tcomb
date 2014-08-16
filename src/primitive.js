@@ -57,3 +57,6 @@ var Re = primitive('Re', function (x) {
   return x instanceof RegExp;
 });
 
+var Dat = primitive('Dat', function (x) {
+  return x instanceof Date;
+});

@@ -1,9 +1,11 @@
 Roadmap
 =======
 
+# v.0.0.11
+
 # v0.0.10
 
-- TODO add `Date` primitive type, fix #4
+- add `Dat` primitive type, fix #4
 - add `Re` primitive type, fix #3
 - reach 100% test coverage
 - jshint says: No problems

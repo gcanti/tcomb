@@ -1,4 +1,4 @@
-//     tcomb 0.0.9
+//     tcomb 0.0.10
 //     https://github.com/gcanti/tcomb
 //     (c) 2014 Giulio Canti <giulio.canti@gmail.com>
 //     tcomb may be freely distributed under the MIT license.
@@ -197,6 +197,10 @@
     
     var Re = primitive('Re', function (x) {
       return x instanceof RegExp;
+    });
+    
+    var Dat = primitive('Dat', function (x) {
+      return x instanceof Date;
     });
 
     //
@@ -503,6 +507,7 @@
         Func: Func,
         Err: Err,
         Re: Re,
+        Dat: Dat,
 
         struct: struct,
         enums: enums,
