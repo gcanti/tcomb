@@ -156,8 +156,7 @@ What's a type? In tcomb a type is a function `T` such that
 If `guard !== true` the debugger kicks in.
 
 - `guard` boolean condition
-- `message` optional string useful for debugging
-- `values...` optional values formatted by `message` ([visionmedia/debug](https://github.com/visionmedia/debug) style)
+- `message` optional string useful for debugging, formatted with values like [util.format in Node][1]
 
 Example
 
@@ -487,3 +486,5 @@ If you do have a contribution for the package feel free to put up a Pull Request
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+
+[1]: http://nodejs.org/api/util.html#util_util_format_format
