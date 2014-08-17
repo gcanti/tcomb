@@ -12,7 +12,7 @@
     var Path = list(Point);
 
     // costructor usage, path is immutable
-    var path = new Path([
+    var path = Path([
         {x: 0, y: 0}, 
         {x: 1, y: 1}
     ]);
@@ -23,39 +23,41 @@
     Returns `true` if `x` belongs to the list.
 
     ```javascript
-    var p1 = new Point({x: 0, y: 0});
-    var p2 = new Point({x: 1, y: 2});
+    var p1 = Point({x: 0, y: 0});
+    var p2 = Point({x: 1, y: 2});
     Path.is([p1, p2]); // => true
     ```
 **/
 
-function list(Type, name) {
+function list(T, name) {
 
-  name = name || format('list(%s)', getName(Type));
+  name = name || format('list(%s)', getName(T));
 
-  function List(values, mut) {
+  function List(value, mut) {
 
-    assert(Arr.is(values), 'bad %s', name);
+    assert(!(this instanceof List), 'cannot use new with %s', name);
+    assert(Arr.is(value), 'bad %s', name);
 
     var arr = [];
-    for (var i = 0, len = values.length ; i < len ; i++ ) {
-      var value = values[i];
-      arr.push(Type.is(value) ? value : coerce(Type, value, mut));
+    for (var i = 0, len = value.length ; i < len ; i++ ) {
+      var v = value[i];
+      arr.push(T.is(v) ? v : T(v, mut));
     }
 
-    if (!mut) { Object.freeze(arr); }
+    if (!mut) { 
+      Object.freeze(arr); 
+    }
     return arr;
   }
 
   List.meta = {
     kind: 'list',
-    type: Type,
-    name: name,
-    ctor: true
+    type: T,
+    name: name
   };
 
   List.is = function (x) {
-    return Arr.is(x) && x.every(Type.is);
+    return Arr.is(x) && x.every(T.is);
   };
 
 

@@ -24,14 +24,18 @@ function func(Arguments, f, Return, name) {
     
   function g() {
     var args = slice.call(arguments);
-    if (args.length < f.length) args.length = f.length; // handle optional arguments
 
-    args = Arguments.is(args) ? args : coerce(Arguments, args);
+    // handle optional arguments
+    if (args.length < f.length) {
+      args.length = f.length; 
+    }
+
+    args = Arguments.is(args) ? args : Arguments(args);
 
     var r = f.apply(null, args);
 
     if (Return) {
-      r = Return.is(r) ? r : coerce(Return, r);
+      r = Return.is(r) ? r : Return(r);
     }
 
     return r;

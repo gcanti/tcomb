@@ -22,7 +22,7 @@
 
     TODO: better docs
 
-    Add to structs, tuples and lists a static method `update` that returns a new instance
+    Adds to structs, tuples and lists a static method `update` that returns a new instance
     without modifying the original.
 
     Example
@@ -30,7 +30,7 @@
     ```javascript
     // see http://facebook.github.io/react/docs/update.html
     options.update = React.addons.update;
-    var p1  = new Point({x: 0, y: 0});
+    var p1  = Point({x: 0, y: 0});
     var p2 = Point.update(p1, {x: {$set: 1}}); // => Point({x: 1, y: 0})
     ```
 **/

@@ -604,19 +604,19 @@ describe('union', function () {
             }, 'unimplemented T.dispatch()');
         });
         it('should build instances when dispatch() is implemented', function () {
-            var circle = new Shape({center: {x: 0, y: 0}, radius: 10});
+            var circle = Shape({center: {x: 0, y: 0}, radius: 10});
             ok(Circle.is(circle));
         });
         it('should throw if used with new and union types are not instantiables with new', function () {
             throwsWithMessage(function () {
                 var T = union([Str, Num], 'T');
                 T.dispatch = function () { return Str; }
-                new T();
+                new T('a');
             }, 'cannot use new with T');
         });
         it('should not throw if used with new and union types are instantiables with new', function () {
             doesNotThrow(function () {
-                new Shape({center: {x: 0, y: 0}, radius: 10});
+                Shape({center: {x: 0, y: 0}, radius: 10});
             });
         });
     });
@@ -672,7 +672,7 @@ describe('tuple', function () {
         var S = struct({}, 'S');
         var T = tuple([S, S], 'T');
         it('should coerce values', function () {
-            var t = new T([{}, {}]);
+            var t = T([{}, {}]);
             ok(S.is(t[0]));
             ok(S.is(t[1]));
         });
@@ -698,7 +698,7 @@ describe('tuple', function () {
     });
     describe('#update()', function () {
         var Type = tuple([Str, Num]);
-        var instance = new Type(['a', 1]);
+        var instance = Type(['a', 1]);
         it('should throw if options.update is missing', function () {
             throws(function () {
                 var newInstance = Type.update(instance, ['b', 2]);
@@ -730,7 +730,7 @@ describe('list', function () {
         var S = struct({}, 'S');
         var T = list(S, 'T');
         it('should coerce values', function () {
-            var t = new T([{}]);
+            var t = T([{}]);
             ok(S.is(t[0]));
         });
         it('should accept only valid values', function () {
@@ -752,7 +752,7 @@ describe('list', function () {
     });
     describe('#update()', function () {
         var Type = list(Str);
-        var instance = new Type(['a', 'b']);
+        var instance = Type(['a', 'b']);
         it('should throw if options.update is missing', function () {
             throws(function () {
                 var newInstance = Type.update(instance, ['b', 2]);
@@ -789,13 +789,13 @@ describe('subtype', function () {
         });
         it('should coerce values', function () {
             var T = subtype(Point, function () { return true; });
-            var p = new T({x: 0, y: 0});
+            var p = T({x: 0, y: 0});
             ok(Point.is(p));
         });
         it('should accept only valid values', function () {
             var T = subtype(Point, function (p) { return p.x > 0; }, 'T');
             throwsWithMessage(function () {
-                var p = new T({x: 0, y: 0});
+                var p = T({x: 0, y: 0});
             }, 'bad T');
         });
     });

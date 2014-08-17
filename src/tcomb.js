@@ -71,8 +71,8 @@
         dim: [2.4, 4.1]
     };
 
-    // get an immutable instance
-    var ipod = new Product(json);
+    // get an immutable instance, `new` is optional
+    var ipod = Product(json);
     ```
 
     You have existing code and you want to add safety
@@ -116,19 +116,21 @@
 
     This library uses a few ES5 methods
 
-    - `Array#forEach()`
-    - `Array#map()`
-    - `Array#some()`
-    - `Array#every()`
-    - `Object#keys()`
+    - `Array.forEach()`
+    - `Array.map()`
+    - `Array.some()`
+    - `Array.every()`
+    - `Object.keys()`
+    - `Object.freeze()`
     - `JSON.stringify()`
 
-    you can use `es5-shim` and `json2` to support old browsers
+    you can use `es5-shim`, `es5-sham` and `json2` to support old browsers
 
     ```html
     <!--[if lt IE 9]>
     <script src="json2.js"></script>
     <script src="es5-shim.min.js"></script>
+    <script src="es5-sham.min.js"></script>
     <![endif]-->
     <script type="text/javascript" src="tcomb.js"></script>
     <script type="text/javascript">
@@ -144,8 +146,8 @@
 
     What's a type? In tcomb a type is a function `T` such that
 
-    1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
-    2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
+    1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
+    2. `T` is idempotent: `T(T(value, mut), mut) "equals" T(value, mut)`
     3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
 
     **Note**: 2. implies that `T` can be used as a default JSON decoder
@@ -154,6 +156,7 @@
 **/
 
 (function (root, factory) {
+  'use strict';
   if (typeof define === 'function' && define.amd) {
     define([], factory);
   } else if (typeof exports === 'object') {
@@ -163,9 +166,10 @@
   }
 }(this, function () {
 
-    "use strict";
+    'use strict';
 
     // rigger includes (https://github.com/buildjs/rigger)
+    // to view the full library code check out build/tcomb.js
 
     //= options.js
 
@@ -200,7 +204,6 @@
         assert: assert,
         mixin: mixin,
         format: format,
-        coerce: coerce,
         getName: getName,
         
         Any: Any,

@@ -70,8 +70,8 @@ var json = {
     dim: [2.4, 4.1]
 };
 
-// get an immutable instance
-var ipod = new Product(json);
+// get an immutable instance, `new` is optional
+var ipod = Product(json);
 ```
 
 You have existing code and you want to add safety
@@ -115,19 +115,21 @@ or download the `build/tcomb.min.js` file.
 
 This library uses a few ES5 methods
 
-- `Array#forEach()`
-- `Array#map()`
-- `Array#some()`
-- `Array#every()`
-- `Object#keys()`
+- `Array.forEach()`
+- `Array.map()`
+- `Array.some()`
+- `Array.every()`
+- `Object.keys()`
+- `Object.freeze()`
 - `JSON.stringify()`
 
-you can use `es5-shim` and `json2` to support old browsers
+you can use `es5-shim`, `es5-sham` and `json2` to support old browsers
 
 ```html
 <!--[if lt IE 9]>
 <script src="json2.js"></script>
 <script src="es5-shim.min.js"></script>
+<script src="es5-sham.min.js"></script>
 <![endif]-->
 <script type="text/javascript" src="tcomb.js"></script>
 <script type="text/javascript">
@@ -143,8 +145,8 @@ Run `mocha` or `npm test` in the project root.
 
 What's a type? In tcomb a type is a function `T` such that
 
-1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
-2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
+1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
+2. `T` is idempotent: `T(T(value, mut), mut) "equals" T(value, mut)`
 3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
 
 **Note**: 2. implies that `T` can be used as a default JSON decoder
@@ -174,7 +176,7 @@ options.onFail = function (message) {
     
 TODO: better docs
     
-Add to structs, tuples and lists a static method `update` that returns a new instance
+Adds to structs, tuples and lists a static method `update` that returns a new instance
 without modifying the original.
     
 Example
@@ -182,7 +184,7 @@ Example
 ```javascript
 // see http://facebook.github.io/react/docs/update.html
 options.update = React.addons.update;
-var p1  = new Point({x: 0, y: 0});
+var p1  = Point({x: 0, y: 0});
 var p2 = Point.update(p1, {x: {$set: 1}}); // => Point({x: 1, y: 0})
 ```
 
@@ -203,7 +205,7 @@ assert(1 === 2, 'error: %s !== %s', 1, 2); // throws 'error: 1 !== 2'
     
 To customize failure behaviuor, see `options.onFail`.
 
-### Any(values, [mut])
+### Any(value, [mut])
     
 Because sometimes you really gonna need it.
     
@@ -233,11 +235,11 @@ Point.prototype.toString = function () {
 };
     
 // costructor usage, p is immutable
-var p = new Point({x: 1, y: 2});
+var p = Point({x: 1, y: 2});
     
 p.x = 2; // => TypeError
     
-p = new Point({x: 1, y: 2}, true); // now p is mutable
+p = Point({x: 1, y: 2}, true); // now p is mutable
     
 p.x = 2; // ok
 ```
@@ -281,7 +283,7 @@ var Shape = union([
 Returns `true` if `x` belongs to the union.
     
 ```javascript
-Shape.is(new Circle({center: p, radius: 10})); // => true
+Shape.is(Circle({center: p, radius: 10})); // => true
 ```
 
 ### maybe(type, [name])
@@ -354,7 +356,7 @@ Example
 var Area = tuple([Num, Num]);
     
 // constructor usage, area is immutable
-var area = new Area([1, 2]);
+var area = Area([1, 2]);
 ```
     
 #### is(x)
@@ -384,9 +386,9 @@ var Q1Point = subtype(Point, function (p) {
 });
     
 // costructor usage, p is immutable
-var p = new Q1Point({x: 1, y: 2});
+var p = Q1Point({x: 1, y: 2});
     
-p = new Q1Point({x: -1, y: -2}); // => fail!
+p = Q1Point({x: -1, y: -2}); // => fail!
 ```
     
 #### is(x)
@@ -415,7 +417,7 @@ Example
 var Path = list(Point);
     
 // costructor usage, path is immutable
-var path = new Path([
+var path = Path([
     {x: 0, y: 0}, 
     {x: 1, y: 1}
 ]);
@@ -426,8 +428,8 @@ var path = new Path([
 Returns `true` if `x` belongs to the list.
     
 ```javascript
-var p1 = new Point({x: 0, y: 0});
-var p2 = new Point({x: 1, y: 2});
+var p1 = Point({x: 0, y: 0});
+var p2 = Point({x: 1, y: 2});
 Path.is([p1, p2]); // => true
 ```
 

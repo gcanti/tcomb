@@ -3,7 +3,19 @@ Roadmap
 
 # v.0.0.11
 
+- TODO make maybe combinator idempotent, fix #9
+- TODO make maybe(T) really idempotent, fix #10
+- TODO make list(T) really idempotent, fix #11
+- TODO make tuple(Ts) really idempotent, fix #13
+- TODO make struct(T) really idempotent, fix #12
+- TODO make union(Ts) really idempotent, fix #14
+- forbid the use of `new` for all types but structs, fix #8
+- turn off jshint newcap
 - remove `freeze()` function
+
+**BREAKING**
+
+- forbid the use of `new` for all types but structs, for which is optional, fix #7
 
 # v0.0.10
 

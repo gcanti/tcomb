@@ -12,7 +12,7 @@
     var Area = tuple([Num, Num]);
 
     // constructor usage, area is immutable
-    var area = new Area([1, 2]);
+    var area = Area([1, 2]);
     ```
 
     #### is(x)
@@ -26,38 +26,40 @@
     ```
 **/
 
-function tuple(types, name) {
+function tuple(Ts, name) {
 
-  name = name || format('tuple(%s)', types.map(getName).join(', '));
+  name = name || format('tuple(%s)', Ts.map(getName).join(', '));
 
-  var len = types.length;
+  var len = Ts.length;
 
-  function Tuple(values, mut) {
+  function Tuple(value, mut) {
 
-    assert(Arr.is(values), 'bad %s', name);
+    assert(!(this instanceof Tuple), 'cannot use new with %s', name);
+    assert(Arr.is(value), 'bad %s', name);
 
     var arr = [];
     for (var i = 0 ; i < len ; i++) {
-      var Type = types[i];
-      var value = values[i];
-      arr.push(Type.is(value) ? value : coerce(Type, value, mut));
+      var T = Ts[i];
+      var v = value[i];
+      arr.push(T.is(v) ? v : T(v, mut));
     }
 
-    if (!mut) { Object.freeze(arr); }
+    if (!mut) { 
+      Object.freeze(arr); 
+    }
     return arr;
   }
 
   Tuple.meta = {
     kind: 'tuple',
-    types: types,
-    name: name,
-    ctor: true
+    types: Ts,
+    name: name
   };
 
   Tuple.is = function (x) {
     return Arr.is(x) && x.length === len && 
-      types.every(function (type, i) { 
-        return type.is(x[i]); 
+      Ts.every(function (T, i) { 
+        return T.is(x[i]); 
       });
   };
 

@@ -76,8 +76,8 @@
         dim: [2.4, 4.1]
     };
 
-    // get an immutable instance
-    var ipod = new Product(json);
+    // get an immutable instance, `new` is optional
+    var ipod = Product(json);
     ```
 
     You have existing code and you want to add safety
@@ -121,19 +121,21 @@
 
     This library uses a few ES5 methods
 
-    - `Array#forEach()`
-    - `Array#map()`
-    - `Array#some()`
-    - `Array#every()`
-    - `Object#keys()`
+    - `Array.forEach()`
+    - `Array.map()`
+    - `Array.some()`
+    - `Array.every()`
+    - `Object.keys()`
+    - `Object.freeze()`
     - `JSON.stringify()`
 
-    you can use `es5-shim` and `json2` to support old browsers
+    you can use `es5-shim`, `es5-sham` and `json2` to support old browsers
 
     ```html
     <!--[if lt IE 9]>
     <script src="json2.js"></script>
     <script src="es5-shim.min.js"></script>
+    <script src="es5-sham.min.js"></script>
     <![endif]-->
     <script type="text/javascript" src="tcomb.js"></script>
     <script type="text/javascript">
@@ -149,8 +151,8 @@
 
     What's a type? In tcomb a type is a function `T` such that
 
-    1. `T` has signature `T(values, [mut])` where `values` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
-    2. `T` is idempotent: `new T(new T(values)) "equals" new T(values)`
+    1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
+    2. `T` is idempotent: `T(T(value, mut), mut) "equals" T(value, mut)`
     3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
 
     **Note**: 2. implies that `T` can be used as a default JSON decoder
@@ -159,6 +161,7 @@
 **/
 
 (function (root, factory) {
+  'use strict';
   if (typeof define === 'function' && define.amd) {
     define([], factory);
   } else if (typeof exports === 'object') {
@@ -168,7 +171,7 @@
   }
 }(this, function () {
 
-    "use strict";
+    'use strict';
 
     // rigger includes (https://github.com/buildjs/rigger)
 
@@ -196,7 +199,7 @@
     
         TODO: better docs
     
-        Add to structs, tuples and lists a static method `update` that returns a new instance
+        Adds to structs, tuples and lists a static method `update` that returns a new instance
         without modifying the original.
     
         Example
@@ -204,7 +207,7 @@
         ```javascript
         // see http://facebook.github.io/react/docs/update.html
         options.update = React.addons.update;
-        var p1  = new Point({x: 0, y: 0});
+        var p1  = Point({x: 0, y: 0});
         var p2 = Point.update(p1, {x: {$set: 1}}); // => Point({x: 1, y: 0})
         ```
     **/
@@ -275,9 +278,9 @@
       return target;
     }
     
-    function getName(type) {
-      assert(Obj.is(type.meta), 'missing type meta hash');
-      return type.meta.name;
+    function getName(T) {
+      assert(Obj.is(T.meta), 'missing type meta hash');
+      return T.meta.name;
     }
     
     function format() {
@@ -285,13 +288,16 @@
       var len = args.length;
       var i = 1;
       var message = args[0];
-      var str = message.replace(/%([a-z%])/g, function(match, type) {
+    
+      function formatArgument(match, type) {
         if (match === '%%') { return '%'; }       // handle escaping %
         if (i >= len) { return match; }           // handle less arguments than placeholders
         var formatter = format.formatters[type];
         if (!formatter) { return match; }         // handle undefined formatters
         return formatter(args[i++]);
-      });
+      }
+    
+      var str = message.replace(/%([a-z%])/g, formatArgument);
       if (i < len) {
         str += ' ' + args.slice(i).join(' ');     // handle more arguments than placeholders
       }
@@ -303,39 +309,31 @@
       j: function (x) { return JSON.stringify(x); }
     };
     
-    function coerce(type, values, mut) {
-      return type.meta.ctor ?
-          /*jshint newcap: false*/
-          new type(values, mut) :
-          type(values, mut);
-    }
-    
     function update() {
       assert(Func.is(options.update), 'options.update is missing');
       /*jshint validthis:true*/
-      var Type = this;
+      var T = this;
       var args = slice.call(arguments);
-      var values = options.update.apply(Type, args);
-      return coerce(Type, values);
+      var value = options.update.apply(T, args);
+      return T(value);
     }
 
     /**
-        ### Any(values, [mut])
+        ### Any(value, [mut])
     
         Because sometimes you really gonna need it.
     
             Any.is(..whatever..); // => true
     **/
     
-    function Any(values) {
+    function Any(value) {
       assert(!(this instanceof Any), 'cannot use new with Any');
-      return values;
+      return value;
     }
     
     Any.meta = {
       kind: 'any',
-      name: 'Any',
-      ctor: false
+      name: 'Any'
     };
     
     Any.is = function () { return true; };
@@ -346,16 +344,16 @@
     
     function primitive(name, is) {
     
-      function Primitive(values) {
+      function Primitive(value) {
         assert(!(this instanceof Primitive), 'cannot use new with %s', name);
-        assert(Primitive.is(values), 'bad %s', name);
-        return values;
+        assert(Primitive.is(value), 'bad %s', name);
+        // all primitives types are idempotent
+        return value;
       }
     
       Primitive.meta = {
         kind: 'primitive',
-        name: name,
-        ctor: false
+        name: name
       };
     
       Primitive.is = is;
@@ -428,11 +426,11 @@
         };
     
         // costructor usage, p is immutable
-        var p = new Point({x: 1, y: 2});
+        var p = Point({x: 1, y: 2});
     
         p.x = 2; // => TypeError
     
-        p = new Point({x: 1, y: 2}, true); // now p is mutable
+        p = Point({x: 1, y: 2}, true); // now p is mutable
     
         p.x = 2; // ok
         ```
@@ -450,26 +448,31 @@
     
       name = name || 'struct()';
     
-      function Struct(values, mut) {
+      function Struct(value, mut) {
     
-        assert(Obj.is(values), 'bad %s', name);
+        // make `new` optional
+        if (!(this instanceof Struct)) { 
+          return new Struct(value, mut); 
+        }
+        assert(Obj.is(value), 'bad %s', name);
     
-        for (var prop in props) {
-          if (props.hasOwnProperty(prop)) {
-            var Type = props[prop],
-              value = values[prop];
-            this[prop] = Type.is(value) ? value : coerce(Type, value, mut);
+        for (var k in props) {
+          if (props.hasOwnProperty(k)) {
+            var T = props[k];
+            var v = value[k];
+            this[k] = T.is(v) ? v : T(v, mut);
           }
         }
     
-        if (!mut) { Object.freeze(this); }
+        if (!mut) { 
+          Object.freeze(this); 
+        }
       }
     
       Struct.meta = {
         kind: 'struct',
         props: props,
-        name: name,
-        ctor: true
+        name: name
       };
     
       Struct.is = function (x) { 
@@ -513,33 +516,30 @@
         Returns `true` if `x` belongs to the union.
     
         ```javascript
-        Shape.is(new Circle({center: p, radius: 10})); // => true
+        Shape.is(Circle({center: p, radius: 10})); // => true
         ```
     **/
     
-    function union(types, name) {
+    function union(Ts, name) {
     
-      name = name || format('union(%s)', types.map(getName).join(', '));
+      name = name || format('union(%s)', Ts.map(getName).join(', '));
     
-      function Union(values, mut) {
+      function Union(value, mut) {
+        assert(!(this instanceof Union), 'cannot use new with %s', name);
         assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
-        var Type = Union.dispatch(values);
-        if (this instanceof Union) {
-          assert(Type.meta.ctor, 'cannot use new with %s', name);
-        }
-        return coerce(Type, values, mut);
+        var T = Union.dispatch(value);
+        return T(value, mut);
       }
     
       Union.meta = {
         kind: 'union',
-        types: types,
-        name: name,
-        ctor: types.every(function (type) { return type.meta.ctor; })
+        types: Ts,
+        name: name
       };
     
       Union.is = function (x) {
-        return types.some(function (type) {
-          return type.is(x);
+        return Ts.some(function (T) {
+          return T.is(x);
         });
       };
     
@@ -587,24 +587,23 @@
         ```
     **/
     
-    function maybe(Type, name) {
+    function maybe(T, name) {
     
-      name = name || format('maybe(%s)', getName(Type));
+      name = name || format('maybe(%s)', getName(T));
     
-      function Maybe(values, mut) {
+      function Maybe(value, mut) {
         assert(!(this instanceof Maybe), 'cannot use new with %s', name);
-        return Nil.is(values) ? null : coerce(Type, values, mut);
+        return Nil.is(value) ? null : T(value, mut);
       }
     
       Maybe.meta = {
         kind: 'maybe',
-        type: Type,
-        name: name,
-        ctor: false // cannot use new with null
+        type: T,
+        name: name
       };
     
       Maybe.is = function (x) {
-        return Nil.is(x) || Type.is(x);
+        return Nil.is(x) || T.is(x);
       };
     
       return Maybe;
@@ -635,16 +634,16 @@
       name = name || 'enums()';
     
       function Enums(x) {
-        assert(Enums.is(x), 'bad %s', name);
         assert(!(this instanceof Enums), 'cannot use new with %s', name);
+        assert(Enums.is(x), 'bad %s', name);
+        // all enums types are idempotent
         return x;
       }
     
       Enums.meta = {
         kind: 'enums',
         map: map,
-        name: name,
-        ctor: false
+        name: name
       };
     
       Enums.is = function (x) {
@@ -656,11 +655,11 @@
     
     enums.of = function (keys, name) {
       keys = Str.is(keys) ? keys.split(' ') : keys;
-      var values = {};
+      var value = {};
       keys.forEach(function (k, i) {
-        values[k] = i;
+        value[k] = i;
       });
-      return enums(values, name);
+      return enums(value, name);
     };
 
     /**
@@ -677,7 +676,7 @@
         var Area = tuple([Num, Num]);
     
         // constructor usage, area is immutable
-        var area = new Area([1, 2]);
+        var area = Area([1, 2]);
         ```
     
         #### is(x)
@@ -691,21 +690,22 @@
         ```
     **/
     
-    function tuple(types, name) {
+    function tuple(Ts, name) {
     
-      name = name || format('tuple(%s)', types.map(getName).join(', '));
+      name = name || format('tuple(%s)', Ts.map(getName).join(', '));
     
-      var len = types.length;
+      var len = Ts.length;
     
-      function Tuple(values, mut) {
+      function Tuple(value, mut) {
     
-        assert(Arr.is(values), 'bad %s', name);
+        assert(!(this instanceof Tuple), 'cannot use new with %s', name);
+        assert(Arr.is(value), 'bad %s', name);
     
         var arr = [];
         for (var i = 0 ; i < len ; i++) {
-          var Type = types[i];
-          var value = values[i];
-          arr.push(Type.is(value) ? value : coerce(Type, value, mut));
+          var T = Ts[i];
+          var v = value[i];
+          arr.push(T.is(v) ? v : T(v, mut));
         }
     
         if (!mut) { Object.freeze(arr); }
@@ -714,15 +714,14 @@
     
       Tuple.meta = {
         kind: 'tuple',
-        types: types,
-        name: name,
-        ctor: true
+        types: Ts,
+        name: name
       };
     
       Tuple.is = function (x) {
         return Arr.is(x) && x.length === len && 
-          types.every(function (type, i) { 
-            return type.is(x[i]); 
+          Ts.every(function (T, i) { 
+            return T.is(x[i]); 
           });
       };
     
@@ -749,9 +748,9 @@
         });
     
         // costructor usage, p is immutable
-        var p = new Q1Point({x: 1, y: 2});
+        var p = Q1Point({x: 1, y: 2});
     
-        p = new Q1Point({x: -1, y: -2}); // => fail!
+        p = Q1Point({x: -1, y: -2}); // => fail!
         ```
     
         #### is(x)
@@ -768,29 +767,26 @@
         ```
     **/
     
-    function subtype(Type, predicate, name) {
+    function subtype(T, predicate, name) {
     
-      name = name || format('subtype(%s)', getName(Type));
+      name = name || format('subtype(%s)', getName(T));
     
-      function Subtype(values, mut) {
-        if (this instanceof Subtype) {
-          assert(Subtype.meta.ctor, 'cannot use new with %s', name);
-        }
-        var x = coerce(Type, values, mut);
+      function Subtype(value, mut) {
+        assert(!(this instanceof Subtype), 'cannot use new with %s', name);
+        var x = T(value, mut);
         assert(predicate(x), 'bad %s', name);
         return x;
       }
     
       Subtype.meta = {
         kind: 'subtype',
-        type: Type,
+        type: T,
         predicate: predicate,
-        name: name,
-        ctor: Type.meta.ctor
+        name: name
       };
     
       Subtype.is = function (x) {
-        return Type.is(x) && predicate(x);
+        return T.is(x) && predicate(x);
       };
     
       return Subtype;
@@ -810,7 +806,7 @@
         var Path = list(Point);
     
         // costructor usage, path is immutable
-        var path = new Path([
+        var path = Path([
             {x: 0, y: 0}, 
             {x: 1, y: 1}
         ]);
@@ -821,24 +817,25 @@
         Returns `true` if `x` belongs to the list.
     
         ```javascript
-        var p1 = new Point({x: 0, y: 0});
-        var p2 = new Point({x: 1, y: 2});
+        var p1 = Point({x: 0, y: 0});
+        var p2 = Point({x: 1, y: 2});
         Path.is([p1, p2]); // => true
         ```
     **/
     
-    function list(Type, name) {
+    function list(T, name) {
     
-      name = name || format('list(%s)', getName(Type));
+      name = name || format('list(%s)', getName(T));
     
-      function List(values, mut) {
+      function List(value, mut) {
     
-        assert(Arr.is(values), 'bad %s', name);
+        assert(!(this instanceof List), 'cannot use new with %s', name);
+        assert(Arr.is(value), 'bad %s', name);
     
         var arr = [];
-        for (var i = 0, len = values.length ; i < len ; i++ ) {
-          var value = values[i];
-          arr.push(Type.is(value) ? value : coerce(Type, value, mut));
+        for (var i = 0, len = value.length ; i < len ; i++ ) {
+          var v = value[i];
+          arr.push(T.is(v) ? v : T(v, mut));
         }
     
         if (!mut) { Object.freeze(arr); }
@@ -847,13 +844,12 @@
     
       List.meta = {
         kind: 'list',
-        type: Type,
-        name: name,
-        ctor: true
+        type: T,
+        name: name
       };
     
       List.is = function (x) {
-        return Arr.is(x) && x.every(Type.is);
+        return Arr.is(x) && x.every(T.is);
       };
     
     
@@ -888,14 +884,18 @@
         
       function g() {
         var args = slice.call(arguments);
-        if (args.length < f.length) args.length = f.length; // handle optional arguments
     
-        args = Arguments.is(args) ? args : coerce(Arguments, args);
+        // handle optional arguments
+        if (args.length < f.length) {
+          args.length = f.length; 
+        }
+    
+        args = Arguments.is(args) ? args : Arguments(args);
     
         var r = f.apply(null, args);
     
         if (Return) {
-          r = Return.is(r) ? r : coerce(Return, r);
+          r = Return.is(r) ? r : Return(r);
         }
     
         return r;
@@ -921,7 +921,6 @@
         assert: assert,
         mixin: mixin,
         format: format,
-        coerce: coerce,
         getName: getName,
         
         Any: Any,

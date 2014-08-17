@@ -23,11 +23,11 @@
     };
 
     // costructor usage, p is immutable
-    var p = new Point({x: 1, y: 2});
+    var p = Point({x: 1, y: 2});
 
     p.x = 2; // => TypeError
 
-    p = new Point({x: 1, y: 2}, true); // now p is mutable
+    p = Point({x: 1, y: 2}, true); // now p is mutable
 
     p.x = 2; // ok
     ```
@@ -45,26 +45,31 @@ function struct(props, name) {
 
   name = name || 'struct()';
 
-  function Struct(values, mut) {
+  function Struct(value, mut) {
 
-    assert(Obj.is(values), 'bad %s', name);
+    // make `new` optional
+    if (!(this instanceof Struct)) { 
+      return new Struct(value, mut); 
+    }
+    assert(Obj.is(value), 'bad %s', name);
 
-    for (var prop in props) {
-      if (props.hasOwnProperty(prop)) {
-        var Type = props[prop],
-          value = values[prop];
-        this[prop] = Type.is(value) ? value : coerce(Type, value, mut);
+    for (var k in props) {
+      if (props.hasOwnProperty(k)) {
+        var T = props[k];
+        var v = value[k];
+        this[k] = T.is(v) ? v : T(v, mut);
       }
     }
 
-    if (!mut) { Object.freeze(this); }
+    if (!mut) { 
+      Object.freeze(this); 
+    }
   }
 
   Struct.meta = {
     kind: 'struct',
     props: props,
-    name: name,
-    ctor: true
+    name: name
   };
 
   Struct.is = function (x) { 

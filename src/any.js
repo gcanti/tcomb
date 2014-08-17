@@ -1,20 +1,19 @@
 /**
-    ### Any(values, [mut])
+    ### Any(value, [mut])
 
     Because sometimes you really gonna need it.
 
         Any.is(..whatever..); // => true
 **/
 
-function Any(values) {
+function Any(value) {
   assert(!(this instanceof Any), 'cannot use new with Any');
-  return values;
+  return value;
 }
 
 Any.meta = {
   kind: 'any',
-  name: 'Any',
-  ctor: false
+  name: 'Any'
 };
 
 Any.is = function () { return true; };

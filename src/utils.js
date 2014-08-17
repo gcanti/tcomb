@@ -16,9 +16,9 @@ function mixin(target, source, overwrite) {
   return target;
 }
 
-function getName(type) {
-  assert(Obj.is(type.meta), 'missing type meta hash');
-  return type.meta.name;
+function getName(T) {
+  assert(Obj.is(T.meta), 'missing type meta hash');
+  return T.meta.name;
 }
 
 function format() {
@@ -26,13 +26,16 @@ function format() {
   var len = args.length;
   var i = 1;
   var message = args[0];
-  var str = message.replace(/%([a-z%])/g, function(match, type) {
+
+  function formatArgument(match, type) {
     if (match === '%%') { return '%'; }       // handle escaping %
     if (i >= len) { return match; }           // handle less arguments than placeholders
     var formatter = format.formatters[type];
     if (!formatter) { return match; }         // handle undefined formatters
     return formatter(args[i++]);
-  });
+  }
+
+  var str = message.replace(/%([a-z%])/g, formatArgument);
   if (i < len) {
     str += ' ' + args.slice(i).join(' ');     // handle more arguments than placeholders
   }
@@ -44,18 +47,11 @@ format.formatters = {
   j: function (x) { return JSON.stringify(x); }
 };
 
-function coerce(type, values, mut) {
-  return type.meta.ctor ?
-      /*jshint newcap: false*/
-      new type(values, mut) :
-      type(values, mut);
-}
-
 function update() {
   assert(Func.is(options.update), 'options.update is missing');
   /*jshint validthis:true*/
-  var Type = this;
+  var T = this;
   var args = slice.call(arguments);
-  var values = options.update.apply(Type, args);
-  return coerce(Type, values);
+  var value = options.update.apply(T, args);
+  return T(value);
 }

@@ -16,9 +16,9 @@
     });
 
     // costructor usage, p is immutable
-    var p = new Q1Point({x: 1, y: 2});
+    var p = Q1Point({x: 1, y: 2});
 
-    p = new Q1Point({x: -1, y: -2}); // => fail!
+    p = Q1Point({x: -1, y: -2}); // => fail!
     ```
 
     #### is(x)
@@ -35,29 +35,27 @@
     ```
 **/
 
-function subtype(Type, predicate, name) {
+function subtype(T, predicate, name) {
 
-  name = name || format('subtype(%s)', getName(Type));
+  name = name || format('subtype(%s)', getName(T));
 
-  function Subtype(values, mut) {
-    if (this instanceof Subtype) {
-      assert(Subtype.meta.ctor, 'cannot use new with %s', name);
-    }
-    var x = coerce(Type, values, mut);
+  function Subtype(value, mut) {
+    assert(!(this instanceof Subtype), 'cannot use new with %s', name);
+    // a subtype type is idempotent iif T is idempotent
+    var x = T(value, mut);
     assert(predicate(x), 'bad %s', name);
     return x;
   }
 
   Subtype.meta = {
     kind: 'subtype',
-    type: Type,
+    type: T,
     predicate: predicate,
-    name: name,
-    ctor: Type.meta.ctor
+    name: name
   };
 
   Subtype.is = function (x) {
-    return Type.is(x) && predicate(x);
+    return T.is(x) && predicate(x);
   };
 
   return Subtype;

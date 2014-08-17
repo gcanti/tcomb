@@ -30,33 +30,30 @@
     Returns `true` if `x` belongs to the union.
 
     ```javascript
-    Shape.is(new Circle({center: p, radius: 10})); // => true
+    Shape.is(Circle({center: p, radius: 10})); // => true
     ```
 **/
 
-function union(types, name) {
+function union(Ts, name) {
 
-  name = name || format('union(%s)', types.map(getName).join(', '));
+  name = name || format('union(%s)', Ts.map(getName).join(', '));
 
-  function Union(values, mut) {
+  function Union(value, mut) {
+    assert(!(this instanceof Union), 'cannot use new with %s', name);
     assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
-    var Type = Union.dispatch(values);
-    if (this instanceof Union) {
-      assert(Type.meta.ctor, 'cannot use new with %s', name);
-    }
-    return coerce(Type, values, mut);
+    var T = Union.dispatch(value);
+    return T(value, mut);
   }
 
   Union.meta = {
     kind: 'union',
-    types: types,
-    name: name,
-    ctor: types.every(function (type) { return type.meta.ctor; })
+    types: Ts,
+    name: name
   };
 
   Union.is = function (x) {
-    return types.some(function (type) {
-      return type.is(x);
+    return Ts.some(function (T) {
+      return T.is(x);
     });
   };
 

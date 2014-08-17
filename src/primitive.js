@@ -4,16 +4,16 @@
 
 function primitive(name, is) {
 
-  function Primitive(values) {
+  function Primitive(value) {
     assert(!(this instanceof Primitive), 'cannot use new with %s', name);
-    assert(Primitive.is(values), 'bad %s', name);
-    return values;
+    assert(Primitive.is(value), 'bad %s', name);
+    // all primitives types are idempotent
+    return value;
   }
 
   Primitive.meta = {
     kind: 'primitive',
-    name: name,
-    ctor: false
+    name: name
   };
 
   Primitive.is = is;
