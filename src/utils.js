@@ -6,7 +6,7 @@ var slice = Array.prototype.slice;
 
 var errs = {
   ERR_OPTIONS_UPDATE_MISSING: '`options.update` is missing',
-  ERR_NEW_OPERATOR_FORBIDDEN: '`new` is forbidden for `%s`'
+  ERR_NEW_OPERATOR_FORBIDDEN: '`new` operator is forbidden for `%s`'
 };
 
 function mixin(target, source, overwrite) {
@@ -47,11 +47,17 @@ format.formatters = {
   j: function (x) { return JSON.stringify(x); }
 };
 
+function isType(T) {
+  return Func.is(T) && Obj.is(T.meta);
+}
+
 function getName(T) {
-  assert(Obj.is(T.meta), 'missing type meta hash');
+  assert(isType(T), 'bad type');
   return T.meta.name;
 }
 
+// since in tcomb the only real constructors are those provided
+// by `struct()`, the `new` operator is forbidden for all types
 function forbidNewOperator(x, T) {
   assert(!(x instanceof T), errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T));
 }
