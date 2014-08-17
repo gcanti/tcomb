@@ -42,7 +42,7 @@ function list(T, name) {
     assert(Arr.is(value), 'bad %s', name);
 
     // makes List idempotent
-    if (value.every(T.is)) {
+    if (List.isList(value)) {
       return value;
     }
 
@@ -64,8 +64,12 @@ function list(T, name) {
     name: name
   };
 
+  List.isList = function (x) {
+    return x.every(T.is);
+  };
+
   List.is = function (x) {
-    return Arr.is(x) && x.every(T.is);
+    return Arr.is(x) && this.isList(x);
   };
 
 

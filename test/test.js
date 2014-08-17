@@ -695,6 +695,12 @@ describe('tuple', function () {
                 T([1, 1]);
             }, 'bad S');
         });
+        it('should be idempotent', function () {
+            var T = tuple([Str, Num]);
+            var p1 = T(['a', 1]);
+            var p2 = T(p1);
+            eq(p2, p1);
+        });    
     });
     describe('#is(x)', function () {
         var Area = tuple([Num, Num]);

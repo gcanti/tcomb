@@ -28,6 +28,8 @@
 
 function tuple(Ts, name) {
 
+  assert(Arr.is(Ts) && Ts.every(isType), 'bad types');
+
   name = name || format('tuple(%s)', Ts.map(getName).join(', '));
 
   var len = Ts.length;
@@ -35,7 +37,13 @@ function tuple(Ts, name) {
   function Tuple(value, mut) {
 
     forbidNewOperator(this, Tuple);
-    assert(Arr.is(value), 'bad %s', name);
+
+    assert(Arr.is(value) && value.length === len, 'bad %s', name);
+
+    // makes Tuple idempotent
+    if (Tuple.isTuple(value)) {
+      return value;
+    }
 
     var arr = [];
     for (var i = 0 ; i < len ; i++) {
@@ -56,11 +64,14 @@ function tuple(Ts, name) {
     name: name
   };
 
+  Tuple.isTuple = function (x) {
+    return Ts.every(function (T, i) { 
+      return T.is(x[i]); 
+    });
+  };
+
   Tuple.is = function (x) {
-    return Arr.is(x) && x.length === len && 
-      Ts.every(function (T, i) { 
-        return T.is(x[i]); 
-      });
+    return Arr.is(x) && x.length === len && this.isTuple(x);
   };
 
   Tuple.update = update;
