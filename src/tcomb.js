@@ -1,7 +1,9 @@
 /**
     # tcomb
 
-    tcomb is a library for Node.js and the browser which allows you to **check the types** of JavaScript values at runtime with a simple syntax. It is great for checking external input, for testing and for **adding safety** to your internal code. 
+    tcomb is a library for Node.js and the browser (2K gzipped) which allows you to **check the types** of 
+    JavaScript values at runtime with a simple syntax. It is great for checking external input, 
+    for testing and for **adding safety** to your internal code. 
 
     Some features include:
 
@@ -151,7 +153,7 @@
 
     1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
     2. `T` is idempotent: `T(T(value, mut), mut) === T(value, mut)`
-    3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
+    3. `T` owns a static function `T.is(x)` returning `true` if `x` is an instance of `T`
 
     **Note**: 2. implies that `T` can be used as a default JSON decoder
 

@@ -32,7 +32,6 @@ var format = t.format;
 
 var ok = function (x) { assert.strictEqual(true, x); };
 var ko = function (x) { assert.strictEqual(false, x); };
-var throws = assert['throws'];
 var eq = assert.strictEqual;
 var throwsWithMessage = function (f, message) {
     assert['throws'](f, function (err) {
@@ -135,15 +134,11 @@ describe('mixin', function () {
         eq(o3.b, 2);
     });
     it('should throw if a property already exists', function () {
-        throws(function () {
+        throwsWithMessage(function () {
             var o1 = {a: 1};
             var o2 = {a: 2, b: 2}
             var o3 = mixin(o1, o2);
-        }, function (err) {
-            if (err instanceof Error && err.message === 'cannot overwrite property a') {
-                return true;
-            }
-        });
+        }, 'cannot overwrite property a');
     });
     it('should not throw if a property already exists but overwrite = true', function () {
         var o1 = {a: 1};
@@ -877,17 +872,17 @@ describe('func', function () {
             ko(sum.is(noop));
         });
         it("should throw with wrong arguments", function () {
-            throws(function () {
+            throwsWithMessage(function () {
                 sum(1, 'a');
-            });
+            }, 'bad type value `Num`');
         });
         it("should throw with wrong return", function () {
             var bad = func(tuple([Num, Num]), function (a, b) {
                 return a + String(b);
             }, Num);
-            throws(function () {
+            throwsWithMessage(function () {
                 bad(1, 2);
-            });
+            }, 'bad type value `Num`');
         });
         it("Return should be optional", function () {
             var bad = func(tuple([Num, Num]), function (a, b) {

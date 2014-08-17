@@ -20,6 +20,7 @@
 
     p = Q1Point({x: -1, y: -2}); // => fail!
     ```
+    **Note**. You can't add methods to `Q1Point` `prototype`, add them to the supertype `prototype` if needed.
 
     #### is(x)
 

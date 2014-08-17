@@ -4,7 +4,7 @@
     If `guard !== true` the debugger kicks in.
 
     - `guard` boolean condition
-    - `message` optional string useful for debugging, formatted with values like [util.format in Node][http://nodejs.org/api/util.html#util_util_format_format]
+    - `message` optional string useful for debugging, formatted with values like [util.format in Node](http://nodejs.org/api/util.html#util_util_format_format)
 
     Example
 
