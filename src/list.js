@@ -38,7 +38,6 @@ function list(T, name) {
   function List(value, mut) {
 
     forbidNewOperator(this, List);
-
     assert(Arr.is(value), 'bad %s', name);
 
     // makes List idempotent

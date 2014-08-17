@@ -21,8 +21,20 @@
 **/
 
 function func(Arguments, f, Return, name) {
-    
-  function g() {
+
+  Return = Return || null;
+
+  assert(isType(Arguments), 'bad arguments');
+  assert(Func.is(f), 'bad f');
+  assert(Nil.is(Return) || isType(Return), 'bad return');
+
+  // makes the combinator idempotent
+  if (isType(f) && f.meta.Arguments === Arguments && f.meta.Return === Return) {
+    return f;
+  }
+
+  function fn() {
+
     var args = slice.call(arguments);
 
     // handle optional arguments
@@ -41,9 +53,11 @@ function func(Arguments, f, Return, name) {
     return r;
   }
 
-  g.is = function (x) { return x === g; };
+  fn.is = function (x) { 
+    return x === fn; 
+  };
 
-  g.meta = {
+  fn.meta = {
     kind: 'func',
     Arguments: Arguments,
     f: f,
@@ -51,6 +65,6 @@ function func(Arguments, f, Return, name) {
     name: name
   };
 
-  return g;
+  return fn;
 }
 

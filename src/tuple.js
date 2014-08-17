@@ -37,7 +37,6 @@ function tuple(Ts, name) {
   function Tuple(value, mut) {
 
     forbidNewOperator(this, Tuple);
-
     assert(Arr.is(value) && value.length === len, 'bad %s', name);
 
     // makes Tuple idempotent

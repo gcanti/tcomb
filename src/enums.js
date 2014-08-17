@@ -45,6 +45,8 @@
 
 function enums(map, name) {
 
+  assert(Obj.is(map), 'bad map');
+
   name = name || 'enums()';
 
   function Enums(x) {

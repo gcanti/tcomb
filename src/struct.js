@@ -43,22 +43,24 @@
 
 function struct(props, name) {
 
+  assert(Obj.is(props), 'bad props');
+
   name = name || 'struct()';
 
   function Struct(value, mut) {
+
+    assert(Obj.is(value), 'bad %s', name);
+
+    // makes Struct idempotent
+    if (Struct.is(value)) {
+      return value;
+    }
 
     // makes `new` optional
     if (!(this instanceof Struct)) { 
       return new Struct(value, mut); 
     }
     
-    // makes Struct idempotent
-    if (Struct.is(value)) {
-      return value;
-    }
-
-    assert(Obj.is(value), 'bad %s', name);
-
     for (var k in props) {
       if (props.hasOwnProperty(k)) {
         var T = props[k];

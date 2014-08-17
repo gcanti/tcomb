@@ -627,6 +627,11 @@ describe('union', function () {
                 Shape({center: {x: 0, y: 0}, radius: 10});
             });
         });
+        it('should be idempotent', function () {
+            var p1 = Shape({center: {x: 0, y: 0}, radius: 10});
+            var p2 = Shape(p1);
+            eq(p2, p1);
+        });
     });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the union', function () {
@@ -844,6 +849,24 @@ describe('func', function () {
     var sum = func(tuple([Num, Num]), function (a, b) {
         return a + b;
     }, Num);
+
+
+    describe('should be idempotent', function () {
+        it('when Arguments and Return are the same', function () {
+            var Arguments = tuple([Str]);
+            var f = function (s) { return s; };
+            var g = func(Arguments, f, Str);
+            var h = func(Arguments, g, Str);
+            eq(h, g);
+        });
+        it('when Arguments are the same and Return is not defined', function () {
+            var Arguments = tuple([Str]);
+            var f = function (s) { return s; };
+            var g = func(Arguments, f, null);
+            var h = func(Arguments, g);
+            eq(h, g);
+        });
+    });
 
     describe('#is(x)', function () {
         it('should return true when x is the func', function () {
