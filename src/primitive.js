@@ -42,7 +42,7 @@ var Arr = primitive('Arr', function (x) {
 });
 
 var Obj = primitive('Obj', function (x) {
-  return !Nil.is(x) && x.constructor === Object && !Arr.is(x);
+  return !Nil.is(x) && typeof x === 'object' && !Arr.is(x);
 });
 
 var Func = primitive('Func', function (x) {
