@@ -169,68 +169,68 @@
   }
 }(this, function () {
 
-    'use strict';
+  'use strict';
 
-    // rigger includes (https://github.com/buildjs/rigger)
-    // to view the full library code check out build/tcomb.js
+  // rigger includes (https://github.com/buildjs/rigger)
+  // to view the full library code check out build/tcomb.js
 
-    //= options.js
+  //= options.js
 
-    //= assert.js
+  //= assert.js
 
-    //= utils.js
+  //= utils.js
 
-    //= any.js
+  //= any.js
 
-    //= primitive.js
+  //= primitive.js
 
-    //= struct.js
+  //= struct.js
 
-    //= union.js
+  //= union.js
 
-    //= maybe.js
+  //= maybe.js
 
-    //= enums.js
+  //= enums.js
 
-    //= tuple.js
+  //= tuple.js
 
-    //= subtype.js
+  //= subtype.js
 
-    //= list.js
+  //= list.js
 
-    //= func.js
+  //= func.js
 
-    return {
-        errs: errs,
-        options: options,
-        assert: assert,
-        mixin: mixin,
-        format: format,
-        isType: isType,
-        getName: getName,
-        fail: fail,
-        
-        Any: Any,
-        Nil: Nil,
-        Str: Str,
-        Num: Num,
-        Bool: Bool,
-        Arr: Arr,
-        Obj: Obj,
-        Func: Func,
-        Err: Err,
-        Re: Re,
-        Dat: Dat,
+  return {
+    errs: errs,
+    options: options,
+    assert: assert,
+    mixin: mixin,
+    format: format,
+    isType: isType,
+    getName: getName,
+    fail: fail,
+    
+    Any: Any,
+    Nil: Nil,
+    Str: Str,
+    Num: Num,
+    Bool: Bool,
+    Arr: Arr,
+    Obj: Obj,
+    Func: Func,
+    Err: Err,
+    Re: Re,
+    Dat: Dat,
 
-        struct: struct,
-        enums: enums,
-        union: union,
-        maybe: maybe,
-        tuple: tuple,
-        subtype: subtype,
-        list: list,
-        func: func
-    };
+    struct: struct,
+    enums: enums,
+    union: union,
+    maybe: maybe,
+    tuple: tuple,
+    subtype: subtype,
+    list: list,
+    func: func
+  };
 }));
 
 /**
