@@ -6,7 +6,7 @@ Roadmap
 - forbid the use of `new` for all types but structs, fix #8
 - make maybe combinator idempotent, fix #9
 - make maybe(T) really idempotent
-- TODO make list(T) really idempotent, fix #11
+- make list(T) really idempotent, fix #11
 - TODO make struct(T) really idempotent, fix #12
 - TODO make tuple(Ts) really idempotent, fix #13
 - TODO make union(Ts) really idempotent, fix #14

@@ -748,6 +748,12 @@ describe('list', function () {
                 T([1]);
             }, 'bad S');
         });
+        it('should be idempotent', function () {
+            var T = list(Point);
+            var p1 = T([{x: 0, y: 0}]);
+            var p2 = T(p1);
+            eq(p2, p1);
+        });    
     });
     describe('#is(x)', function () {
         var Path = list(Point);

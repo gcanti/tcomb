@@ -856,7 +856,13 @@
       function List(value, mut) {
     
         forbidNewOperator(this, List);
+    
         assert(Arr.is(value), 'bad %s', name);
+    
+        // make lists idempotents
+        if (value.every(T.is)) {
+          return value;
+        }
     
         var arr = [];
         for (var i = 0, len = value.length ; i < len ; i++ ) {
