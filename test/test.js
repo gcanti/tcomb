@@ -497,6 +497,14 @@ describe('Dat', function () {
 //
 
 describe('struct', function () {
+    describe('constructor', function () {
+        it('should be idempotent', function () {
+            var T = Point;
+            var p1 = T({x: 0, y: 0});
+            var p2 = T(p1);
+            eq(p2, p1);
+        });
+    });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the struct', function () {
             var p = new Point({ x: 1, y: 2 });
@@ -657,7 +665,7 @@ describe('maybe', function () {
             eq(T(undefined), null);
             ok(Point.is(T({x: 0, y: 0})));
         });
-        it.skip('should be idempotent', function () {
+        it('should be idempotent', function () {
             var T = maybe(Point);
             var p1 = T({x: 0, y: 0});
             var p2 = T(p1);

@@ -47,10 +47,16 @@ function struct(props, name) {
 
   function Struct(value, mut) {
 
-    // make `new` optional
+    // makes `new` optional
     if (!(this instanceof Struct)) { 
       return new Struct(value, mut); 
     }
+    
+    // makes Struct idempotent
+    if (Struct.is(value)) {
+      return value;
+    }
+
     assert(Obj.is(value), 'bad %s', name);
 
     for (var k in props) {

@@ -7,8 +7,8 @@ Roadmap
 - make maybe combinator idempotent, fix #9
 - make maybe(T) really idempotent
 - make list(T) really idempotent, fix #11
-- TODO make struct(T) really idempotent, fix #12
-- TODO make tuple(Ts) really idempotent, fix #13
+- make struct(T) really idempotent, fix #12
+- make tuple(Ts) really idempotent, fix #13
 - TODO make union(Ts) really idempotent, fix #14
 - export fail(), fix #15
 - TODO create constants for string messages, fix #16
