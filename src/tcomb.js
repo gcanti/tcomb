@@ -25,6 +25,9 @@
     - Obj: plain objects
     - Func: functions
     - Err: errors
+    - Re: regular expressions
+    - Dat: dates
+    - Any: *
 
     **type combinators** (build new types from those already defined)
 

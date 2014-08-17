@@ -1,9 +1,9 @@
 /**
-    ### union(types, [name])
+    ### union(Ts, [name])
 
     Defines a union of types.
 
-    - `types` array of types
+    - `Ts` array of types
     - `name` optional string useful for debugging
 
     Example
@@ -36,7 +36,7 @@
 
 function union(Ts, name) {
 
-  assert(Arr.is(Ts) && Ts.every(isType), 'bad types');
+  assert(Arr.is(Ts) && Ts.every(isType), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Ts');
 
   name = name || format('union(%s)', Ts.map(getName).join(', '));
 

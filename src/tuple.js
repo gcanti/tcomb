@@ -1,9 +1,9 @@
 /**
-    ### tuple(types, [name])
+    ### tuple(Ts, [name])
 
     Defines a tuple whose coordinates have the specified types.
 
-    - `types` array of coordinates types
+    - `Ts` array of coordinates types
     - `name` optional string useful for debugging
 
     Example
@@ -28,7 +28,7 @@
 
 function tuple(Ts, name) {
 
-  assert(Arr.is(Ts) && Ts.every(isType), 'bad types');
+  assert(Arr.is(Ts) && Ts.every(isType), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Ts');
 
   name = name || format('tuple(%s)', Ts.map(getName).join(', '));
 
@@ -37,7 +37,7 @@ function tuple(Ts, name) {
   function Tuple(value, mut) {
 
     forbidNewOperator(this, Tuple);
-    assert(Arr.is(value) && value.length === len, 'bad %s', name);
+    assert(Arr.is(value) && value.length === len, errs.ERR_BAD_TYPE_VALUE, name);
 
     // makes Tuple idempotent
     if (Tuple.isTuple(value)) {

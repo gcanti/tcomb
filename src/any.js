@@ -1,10 +1,6 @@
-/**
-    ### Any(value, [mut])
-
-    Because sometimes you really gonna need it.
-
-        Any.is(..whatever..); // => true
-**/
+//
+// Any - Because sometimes you really gonna need it.
+//
 
 function Any(value) {
   forbidNewOperator(this, Any);

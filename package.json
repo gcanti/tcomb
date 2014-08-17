@@ -1,6 +1,6 @@
 {
   "name": "tcomb",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Runtime types checking for JavaScript ",
   "main": "build/tcomb.js",
   "scripts": {

@@ -1,4 +1,4 @@
-//     tcomb 0.0.10
+//     tcomb 0.0.11
 //     https://github.com/gcanti/tcomb
 //     (c) 2014 Giulio Canti <giulio.canti@gmail.com>
 //     tcomb may be freely distributed under the MIT license.
@@ -30,6 +30,9 @@
     - Obj: plain objects
     - Func: functions
     - Err: errors
+    - Re: regular expressions
+    - Dat: dates
+    - Any: *
 
     **type combinators** (build new types from those already defined)
 
@@ -246,7 +249,7 @@
         assert(1 === 2, 'error: %s !== %s', 1, 2); // throws 'error: 1 !== 2'
         ```
     
-        To customize failure behaviuor, see `options.onFail`.
+        To customize failure behaviour, see `options.onFail`.
     **/
     
     function fail(message) {
@@ -256,7 +259,7 @@
     function assert(guard) {
       if (guard !== true) {
         var args = slice.call(arguments, 1);
-        var message = args[0] ? format.apply(null, args) : 'assert(): failed';
+        var message = args[0] ? format.apply(null, args) : 'assert failed';
         fail(message); 
       }
     }
@@ -268,6 +271,8 @@
     var slice = Array.prototype.slice;
     
     var errs = {
+      ERR_BAD_TYPE_VALUE: 'bad type value `%s`',
+      ERR_BAD_COMBINATOR_ARGUMENT: 'bad combinator argument `%s`',
       ERR_OPTIONS_UPDATE_MISSING: '`options.update` is missing',
       ERR_NEW_OPERATOR_FORBIDDEN: '`new` operator is forbidden for `%s`'
     };
@@ -334,13 +339,9 @@
       return T(value);
     }
 
-    /**
-        ### Any(value, [mut])
-    
-        Because sometimes you really gonna need it.
-    
-            Any.is(..whatever..); // => true
-    **/
+    //
+    // Any - Because sometimes you really gonna need it.
+    //
     
     function Any(value) {
       forbidNewOperator(this, Any);
@@ -362,7 +363,7 @@
     
       function Primitive(value) {
         forbidNewOperator(this, Primitive);
-        assert(Primitive.is(value), 'bad %s', name);
+        assert(Primitive.is(value), errs.ERR_BAD_TYPE_VALUE, name);
         // all primitives types are idempotent
         return value;
       }
@@ -462,16 +463,24 @@
     
     function struct(props, name) {
     
+      assert(Obj.is(props), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'props');
+    
       name = name || 'struct()';
     
       function Struct(value, mut) {
     
-        // make `new` optional
+        assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, name);
+    
+        // makes Struct idempotent
+        if (Struct.is(value)) {
+          return value;
+        }
+    
+        // makes `new` optional
         if (!(this instanceof Struct)) { 
           return new Struct(value, mut); 
         }
-        assert(Obj.is(value), 'bad %s', name);
-    
+        
         for (var k in props) {
           if (props.hasOwnProperty(k)) {
             var T = props[k];
@@ -501,11 +510,11 @@
     }
 
     /**
-        ### union(types, [name])
+        ### union(Ts, [name])
     
         Defines a union of types.
     
-        - `types` array of types
+        - `Ts` array of types
         - `name` optional string useful for debugging
     
         Example
@@ -538,12 +547,15 @@
     
     function union(Ts, name) {
     
+      assert(Arr.is(Ts) && Ts.every(isType), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Ts');
+    
       name = name || format('union(%s)', Ts.map(getName).join(', '));
     
       function Union(value, mut) {
         forbidNewOperator(this, Union);
         assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
         var T = Union.dispatch(value);
+        // a union type is idempotent iif every T in Ts is idempotent
         return T(value, mut);
       }
     
@@ -563,9 +575,9 @@
     }
 
     /**
-        ### maybe(type, [name])
+        ### maybe(T, [name])
     
-        Same as `union([Nil, type])`.
+        Same as `union([Nil, T])`.
     
         ```javascript
         // the value of a radio input where null = no selection
@@ -579,7 +591,7 @@
     
     function maybe(T, name) {
     
-      assert(isType(T), 'bad type');
+      assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
     
       // makes the combinator idempotent
       if (T.meta.kind === 'maybe') {
@@ -654,13 +666,15 @@
     
     function enums(map, name) {
     
+      assert(Obj.is(map), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'map');
+    
       name = name || 'enums()';
     
-      function Enums(x) {
+      function Enums(value) {
         forbidNewOperator(this, Enums);
-        assert(Enums.is(x), 'bad %s', name);
+        assert(Enums.is(value), errs.ERR_BAD_TYPE_VALUE, name);
         // all enums types are idempotent
-        return x;
+        return value;
       }
     
       Enums.meta = {
@@ -686,11 +700,11 @@
     };
 
     /**
-        ### tuple(types, [name])
+        ### tuple(Ts, [name])
     
         Defines a tuple whose coordinates have the specified types.
     
-        - `types` array of coordinates types
+        - `Ts` array of coordinates types
         - `name` optional string useful for debugging
     
         Example
@@ -715,6 +729,8 @@
     
     function tuple(Ts, name) {
     
+      assert(Arr.is(Ts) && Ts.every(isType), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Ts');
+    
       name = name || format('tuple(%s)', Ts.map(getName).join(', '));
     
       var len = Ts.length;
@@ -722,7 +738,12 @@
       function Tuple(value, mut) {
     
         forbidNewOperator(this, Tuple);
-        assert(Arr.is(value), 'bad %s', name);
+        assert(Arr.is(value) && value.length === len, errs.ERR_BAD_TYPE_VALUE, name);
+    
+        // makes Tuple idempotent
+        if (Tuple.isTuple(value)) {
+          return value;
+        }
     
         var arr = [];
         for (var i = 0 ; i < len ; i++) {
@@ -743,11 +764,14 @@
         name: name
       };
     
+      Tuple.isTuple = function (x) {
+        return Ts.every(function (T, i) { 
+          return T.is(x[i]); 
+        });
+      };
+    
       Tuple.is = function (x) {
-        return Arr.is(x) && x.length === len && 
-          Ts.every(function (T, i) { 
-            return T.is(x[i]); 
-          });
+        return Arr.is(x) && x.length === len && this.isTuple(x);
       };
     
       Tuple.update = update;
@@ -756,11 +780,11 @@
     }
 
     /**
-        ### subtype(type, predicate, [name])
+        ### subtype(T, predicate, [name])
     
         Defines a subtype of an existing type.
     
-        - `type` the supertype
+        - `T` the supertype
         - `predicate` a function with signature `(x) -> boolean`
         - `name` optional string useful for debugging
     
@@ -794,13 +818,16 @@
     
     function subtype(T, predicate, name) {
     
+      assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
+      assert(Func.is(predicate), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'predicate');
+    
       name = name || format('subtype(%s)', getName(T));
     
       function Subtype(value, mut) {
         forbidNewOperator(this, Subtype);
         // a subtype type is idempotent iif T is idempotent
         var x = T(value, mut);
-        assert(predicate(x), 'bad %s', name);
+        assert(predicate(x), errs.ERR_BAD_TYPE_VALUE, name);
         return x;
       }
     
@@ -819,11 +846,11 @@
     }
 
     /**
-        ### list(type, [name])
+        ### list(T, [name])
     
-        Defines an array where all the elements are of type `type`.
+        Defines an array where all the elements are of type `T`.
     
-        - `type` type of all the elements
+        - `T` type of all the elements
         - `name` optional string useful for debugging
     
         Example
@@ -851,16 +878,17 @@
     
     function list(T, name) {
     
+      assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
+    
       name = name || format('list(%s)', getName(T));
     
       function List(value, mut) {
     
         forbidNewOperator(this, List);
+        assert(Arr.is(value), errs.ERR_BAD_TYPE_VALUE, name);
     
-        assert(Arr.is(value), 'bad %s', name);
-    
-        // make lists idempotents
-        if (value.every(T.is)) {
+        // makes List idempotent
+        if (List.isList(value)) {
           return value;
         }
     
@@ -882,8 +910,12 @@
         name: name
       };
     
+      List.isList = function (x) {
+        return x.every(T.is);
+      };
+    
       List.is = function (x) {
-        return Arr.is(x) && x.every(T.is);
+        return Arr.is(x) && this.isList(x);
       };
     
     
@@ -915,8 +947,20 @@
     **/
     
     function func(Arguments, f, Return, name) {
-        
-      function g() {
+    
+      Return = Return || null;
+    
+      assert(isType(Arguments), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Arguments');
+      assert(Func.is(f), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'f');
+      assert(Nil.is(Return) || isType(Return), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Return');
+    
+      // makes the combinator idempotent
+      if (isType(f) && f.meta.Arguments === Arguments && f.meta.Return === Return) {
+        return f;
+      }
+    
+      function fn() {
+    
         var args = slice.call(arguments);
     
         // handle optional arguments
@@ -935,9 +979,11 @@
         return r;
       }
     
-      g.is = function (x) { return x === g; };
+      fn.is = function (x) { 
+        return x === fn; 
+      };
     
-      g.meta = {
+      fn.meta = {
         kind: 'func',
         Arguments: Arguments,
         f: f,
@@ -945,7 +991,7 @@
         name: name
       };
     
-      return g;
+      return fn;
     }
 
     return {

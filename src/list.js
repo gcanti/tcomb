@@ -1,9 +1,9 @@
 /**
-    ### list(type, [name])
+    ### list(T, [name])
 
-    Defines an array where all the elements are of type `type`.
+    Defines an array where all the elements are of type `T`.
 
-    - `type` type of all the elements
+    - `T` type of all the elements
     - `name` optional string useful for debugging
 
     Example
@@ -31,14 +31,14 @@
 
 function list(T, name) {
 
-  assert(isType(T), 'bad type');
+  assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
 
   name = name || format('list(%s)', getName(T));
 
   function List(value, mut) {
 
     forbidNewOperator(this, List);
-    assert(Arr.is(value), 'bad %s', name);
+    assert(Arr.is(value), errs.ERR_BAD_TYPE_VALUE, name);
 
     // makes List idempotent
     if (List.isList(value)) {

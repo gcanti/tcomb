@@ -64,7 +64,7 @@ describe('assert', function () {
     it('should throw a default message', function () {
         throwsWithMessage(function () {
             assert(1 === 2);
-        }, 'assert(): failed');
+        }, 'assert failed');
     });
     it('should throw the specified message', function () {
         throwsWithMessage(function () {
@@ -548,7 +548,7 @@ describe('enums', function () {
             eq(T('a'), 'a');
             throwsWithMessage(function () {
                 T('b')
-            }, 'bad T');
+            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
         });
     });
     describe('#is(x)', function () {
@@ -660,9 +660,9 @@ describe('maybe', function () {
         });
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
-                var T = maybe(Str);
-                T(1)
-            }, 'bad Str');
+                var T = maybe(Str, 'T');
+                T(1);
+            }, format(errs.ERR_BAD_TYPE_VALUE, 'Str'));
         });
         it('should coerce values', function () {
             var T = maybe(Point);
@@ -703,10 +703,10 @@ describe('tuple', function () {
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
                 T(1);
-            }, 'bad T');
+            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
             throwsWithMessage(function () {
                 T([1, 1]);
-            }, 'bad S');
+            }, format(errs.ERR_BAD_TYPE_VALUE, 'S'));
         });
         it('should be idempotent', function () {
             var T = tuple([Str, Num]);
@@ -762,10 +762,10 @@ describe('list', function () {
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
                 T(1);
-            }, 'bad T');
+            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
             throwsWithMessage(function () {
                 T([1]);
-            }, 'bad S');
+            }, format(errs.ERR_BAD_TYPE_VALUE, 'S'));
         });
         it('should be idempotent', function () {
             var T = list(Point);
@@ -824,7 +824,7 @@ describe('subtype', function () {
             var T = subtype(Point, function (p) { return p.x > 0; }, 'T');
             throwsWithMessage(function () {
                 var p = T({x: 0, y: 0});
-            }, 'bad T');
+            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
         });
     });
     describe('#is(x)', function () {

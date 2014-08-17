@@ -24,9 +24,9 @@ function func(Arguments, f, Return, name) {
 
   Return = Return || null;
 
-  assert(isType(Arguments), 'bad arguments');
-  assert(Func.is(f), 'bad f');
-  assert(Nil.is(Return) || isType(Return), 'bad return');
+  assert(isType(Arguments), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Arguments');
+  assert(Func.is(f), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'f');
+  assert(Nil.is(Return) || isType(Return), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Return');
 
   // makes the combinator idempotent
   if (isType(f) && f.meta.Arguments === Arguments && f.meta.Return === Return) {

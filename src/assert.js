@@ -14,7 +14,7 @@
     assert(1 === 2, 'error: %s !== %s', 1, 2); // throws 'error: 1 !== 2'
     ```
 
-    To customize failure behaviuor, see `options.onFail`.
+    To customize failure behaviour, see `options.onFail`.
 **/
 
 function fail(message) {
@@ -24,7 +24,7 @@ function fail(message) {
 function assert(guard) {
   if (guard !== true) {
     var args = slice.call(arguments, 1);
-    var message = args[0] ? format.apply(null, args) : 'assert(): failed';
+    var message = args[0] ? format.apply(null, args) : 'assert failed';
     fail(message); 
   }
 }

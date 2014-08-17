@@ -45,15 +45,15 @@
 
 function enums(map, name) {
 
-  assert(Obj.is(map), 'bad map');
+  assert(Obj.is(map), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'map');
 
   name = name || 'enums()';
 
-  function Enums(x) {
+  function Enums(value) {
     forbidNewOperator(this, Enums);
-    assert(Enums.is(x), 'bad %s', name);
+    assert(Enums.is(value), errs.ERR_BAD_TYPE_VALUE, name);
     // all enums types are idempotent
-    return x;
+    return value;
   }
 
   Enums.meta = {

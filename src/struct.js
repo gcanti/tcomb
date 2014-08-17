@@ -43,13 +43,13 @@
 
 function struct(props, name) {
 
-  assert(Obj.is(props), 'bad props');
+  assert(Obj.is(props), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'props');
 
   name = name || 'struct()';
 
   function Struct(value, mut) {
 
-    assert(Obj.is(value), 'bad %s', name);
+    assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, name);
 
     // makes Struct idempotent
     if (Struct.is(value)) {

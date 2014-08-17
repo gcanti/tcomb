@@ -5,6 +5,8 @@
 var slice = Array.prototype.slice;
 
 var errs = {
+  ERR_BAD_TYPE_VALUE: 'bad type value `%s`',
+  ERR_BAD_COMBINATOR_ARGUMENT: 'bad combinator argument `%s`',
   ERR_OPTIONS_UPDATE_MISSING: '`options.update` is missing',
   ERR_NEW_OPERATOR_FORBIDDEN: '`new` operator is forbidden for `%s`'
 };

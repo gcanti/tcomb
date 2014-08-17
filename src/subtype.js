@@ -1,9 +1,9 @@
 /**
-    ### subtype(type, predicate, [name])
+    ### subtype(T, predicate, [name])
 
     Defines a subtype of an existing type.
 
-    - `type` the supertype
+    - `T` the supertype
     - `predicate` a function with signature `(x) -> boolean`
     - `name` optional string useful for debugging
 
@@ -37,13 +37,16 @@
 
 function subtype(T, predicate, name) {
 
+  assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
+  assert(Func.is(predicate), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'predicate');
+
   name = name || format('subtype(%s)', getName(T));
 
   function Subtype(value, mut) {
     forbidNewOperator(this, Subtype);
     // a subtype type is idempotent iif T is idempotent
     var x = T(value, mut);
-    assert(predicate(x), 'bad %s', name);
+    assert(predicate(x), errs.ERR_BAD_TYPE_VALUE, name);
     return x;
   }
 

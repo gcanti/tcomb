@@ -1,7 +1,7 @@
 /**
-    ### maybe(type, [name])
+    ### maybe(T, [name])
 
-    Same as `union([Nil, type])`.
+    Same as `union([Nil, T])`.
 
     ```javascript
     // the value of a radio input where null = no selection
@@ -15,7 +15,7 @@
 
 function maybe(T, name) {
 
-  assert(isType(T), 'bad type');
+  assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
 
   // makes the combinator idempotent
   if (T.meta.kind === 'maybe') {
