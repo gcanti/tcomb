@@ -5,7 +5,7 @@
 function primitive(name, is) {
 
   function Primitive(value) {
-    assert(!(this instanceof Primitive), 'cannot use new with %s', name);
+    forbidNewOperator(this, Primitive);
     assert(Primitive.is(value), 'bad %s', name);
     // all primitives types are idempotent
     return value;

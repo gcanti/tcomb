@@ -48,7 +48,7 @@ function enums(map, name) {
   name = name || 'enums()';
 
   function Enums(x) {
-    assert(!(this instanceof Enums), 'cannot use new with %s', name);
+    forbidNewOperator(this, Enums);
     assert(Enums.is(x), 'bad %s', name);
     // all enums types are idempotent
     return x;

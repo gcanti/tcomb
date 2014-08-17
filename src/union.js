@@ -39,7 +39,7 @@ function union(Ts, name) {
   name = name || format('union(%s)', Ts.map(getName).join(', '));
 
   function Union(value, mut) {
-    assert(!(this instanceof Union), 'cannot use new with %s', name);
+    forbidNewOperator(this, Union);
     assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
     var T = Union.dispatch(value);
     return T(value, mut);

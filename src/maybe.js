@@ -18,7 +18,7 @@ function maybe(T, name) {
   name = name || format('maybe(%s)', getName(T));
 
   function Maybe(value, mut) {
-    assert(!(this instanceof Maybe), 'cannot use new with %s', name);
+    forbidNewOperator(this, Maybe);
     return Nil.is(value) ? null : T(value, mut);
   }
 

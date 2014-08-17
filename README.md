@@ -297,8 +297,8 @@ var Radio = maybe(Str);
 Radio.is('a');     // => true
 Radio.is(null);    // => true
 Radio.is(1);       // => false
-```    
-    
+```
+
 ### enums(map, [name])
     
 Defines an enum of strings.
@@ -324,7 +324,6 @@ Returns `true` if `x` belongs to the enum.
 ```javascript
 Direction.is('North'); // => true
 ```
-
 #### enums.of(keys, [name])
     
 Returns an enums of an array of keys, useful when you don't mind to define

@@ -199,6 +199,8 @@
 
     return {
 
+        errs: errs,
+
         options: options,
 
         assert: assert,

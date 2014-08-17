@@ -34,7 +34,7 @@ function tuple(Ts, name) {
 
   function Tuple(value, mut) {
 
-    assert(!(this instanceof Tuple), 'cannot use new with %s', name);
+    forbidNewOperator(this, Tuple);
     assert(Arr.is(value), 'bad %s', name);
 
     var arr = [];

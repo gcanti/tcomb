@@ -7,7 +7,7 @@
 **/
 
 function Any(value) {
-  assert(!(this instanceof Any), 'cannot use new with Any');
+  forbidNewOperator(this, Any);
   return value;
 }
 

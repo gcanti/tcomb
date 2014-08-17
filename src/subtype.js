@@ -40,7 +40,7 @@ function subtype(T, predicate, name) {
   name = name || format('subtype(%s)', getName(T));
 
   function Subtype(value, mut) {
-    assert(!(this instanceof Subtype), 'cannot use new with %s', name);
+    forbidNewOperator(this, Subtype);
     // a subtype type is idempotent iif T is idempotent
     var x = T(value, mut);
     assert(predicate(x), 'bad %s', name);

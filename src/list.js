@@ -35,7 +35,7 @@ function list(T, name) {
 
   function List(value, mut) {
 
-    assert(!(this instanceof List), 'cannot use new with %s', name);
+    forbidNewOperator(this, List);
     assert(Arr.is(value), 'bad %s', name);
 
     var arr = [];

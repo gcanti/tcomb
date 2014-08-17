@@ -174,6 +174,7 @@
     'use strict';
 
     // rigger includes (https://github.com/buildjs/rigger)
+    // to view the full library code check out build/tcomb.js
 
     /**
         ### options
@@ -266,6 +267,11 @@
     
     var slice = Array.prototype.slice;
     
+    var errs = {
+      ERR_OPTIONS_UPDATE_MISSING: '`options.update` is missing',
+      ERR_NEW_OPERATOR_FORBIDDEN: '`new` is forbidden for `%s`'
+    };
+    
     function mixin(target, source, overwrite) {
       for (var k in source) {
         if (source.hasOwnProperty(k)) {
@@ -276,11 +282,6 @@
         }
       }
       return target;
-    }
-    
-    function getName(T) {
-      assert(Obj.is(T.meta), 'missing type meta hash');
-      return T.meta.name;
     }
     
     function format() {
@@ -309,8 +310,17 @@
       j: function (x) { return JSON.stringify(x); }
     };
     
+    function getName(T) {
+      assert(Obj.is(T.meta), 'missing type meta hash');
+      return T.meta.name;
+    }
+    
+    function forbidNewOperator(x, T) {
+      assert(!(x instanceof T), errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T));
+    }
+    
     function update() {
-      assert(Func.is(options.update), 'options.update is missing');
+      assert(Func.is(options.update), errs.ERR_OPTIONS_UPDATE_MISSING);
       /*jshint validthis:true*/
       var T = this;
       var args = slice.call(arguments);
@@ -327,7 +337,7 @@
     **/
     
     function Any(value) {
-      assert(!(this instanceof Any), 'cannot use new with Any');
+      forbidNewOperator(this, Any);
       return value;
     }
     
@@ -345,7 +355,7 @@
     function primitive(name, is) {
     
       function Primitive(value) {
-        assert(!(this instanceof Primitive), 'cannot use new with %s', name);
+        forbidNewOperator(this, Primitive);
         assert(Primitive.is(value), 'bad %s', name);
         // all primitives types are idempotent
         return value;
@@ -525,7 +535,7 @@
       name = name || format('union(%s)', Ts.map(getName).join(', '));
     
       function Union(value, mut) {
-        assert(!(this instanceof Union), 'cannot use new with %s', name);
+        forbidNewOperator(this, Union);
         assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
         var T = Union.dispatch(value);
         return T(value, mut);
@@ -559,7 +569,31 @@
         Radio.is(null);    // => true
         Radio.is(1);       // => false
         ```    
+    **/
     
+    function maybe(T, name) {
+    
+      name = name || format('maybe(%s)', getName(T));
+    
+      function Maybe(value, mut) {
+        forbidNewOperator(this, Maybe);
+        return Nil.is(value) ? null : T(value, mut);
+      }
+    
+      Maybe.meta = {
+        kind: 'maybe',
+        type: T,
+        name: name
+      };
+    
+      Maybe.is = function (x) {
+        return Nil.is(x) || T.is(x);
+      };
+    
+      return Maybe;
+    }
+
+    /**
         ### enums(map, [name])
     
         Defines an enum of strings.
@@ -585,31 +619,6 @@
         ```javascript
         Direction.is('North'); // => true
         ```
-    **/
-    
-    function maybe(T, name) {
-    
-      name = name || format('maybe(%s)', getName(T));
-    
-      function Maybe(value, mut) {
-        assert(!(this instanceof Maybe), 'cannot use new with %s', name);
-        return Nil.is(value) ? null : T(value, mut);
-      }
-    
-      Maybe.meta = {
-        kind: 'maybe',
-        type: T,
-        name: name
-      };
-    
-      Maybe.is = function (x) {
-        return Nil.is(x) || T.is(x);
-      };
-    
-      return Maybe;
-    }
-
-    /**
         #### enums.of(keys, [name])
     
         Returns an enums of an array of keys, useful when you don't mind to define
@@ -634,7 +643,7 @@
       name = name || 'enums()';
     
       function Enums(x) {
-        assert(!(this instanceof Enums), 'cannot use new with %s', name);
+        forbidNewOperator(this, Enums);
         assert(Enums.is(x), 'bad %s', name);
         // all enums types are idempotent
         return x;
@@ -698,7 +707,7 @@
     
       function Tuple(value, mut) {
     
-        assert(!(this instanceof Tuple), 'cannot use new with %s', name);
+        forbidNewOperator(this, Tuple);
         assert(Arr.is(value), 'bad %s', name);
     
         var arr = [];
@@ -708,7 +717,9 @@
           arr.push(T.is(v) ? v : T(v, mut));
         }
     
-        if (!mut) { Object.freeze(arr); }
+        if (!mut) { 
+          Object.freeze(arr); 
+        }
         return arr;
       }
     
@@ -772,7 +783,8 @@
       name = name || format('subtype(%s)', getName(T));
     
       function Subtype(value, mut) {
-        assert(!(this instanceof Subtype), 'cannot use new with %s', name);
+        forbidNewOperator(this, Subtype);
+        // a subtype type is idempotent iif T is idempotent
         var x = T(value, mut);
         assert(predicate(x), 'bad %s', name);
         return x;
@@ -829,7 +841,7 @@
     
       function List(value, mut) {
     
-        assert(!(this instanceof List), 'cannot use new with %s', name);
+        forbidNewOperator(this, List);
         assert(Arr.is(value), 'bad %s', name);
     
         var arr = [];
@@ -838,7 +850,9 @@
           arr.push(T.is(v) ? v : T(v, mut));
         }
     
-        if (!mut) { Object.freeze(arr); }
+        if (!mut) { 
+          Object.freeze(arr); 
+        }
         return arr;
       }
     
@@ -915,6 +929,8 @@
     }
 
     return {
+
+        errs: errs,
 
         options: options,
 

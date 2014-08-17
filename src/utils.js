@@ -4,6 +4,11 @@
 
 var slice = Array.prototype.slice;
 
+var errs = {
+  ERR_OPTIONS_UPDATE_MISSING: '`options.update` is missing',
+  ERR_NEW_OPERATOR_FORBIDDEN: '`new` is forbidden for `%s`'
+};
+
 function mixin(target, source, overwrite) {
   for (var k in source) {
     if (source.hasOwnProperty(k)) {
@@ -14,11 +19,6 @@ function mixin(target, source, overwrite) {
     }
   }
   return target;
-}
-
-function getName(T) {
-  assert(Obj.is(T.meta), 'missing type meta hash');
-  return T.meta.name;
 }
 
 function format() {
@@ -47,8 +47,17 @@ format.formatters = {
   j: function (x) { return JSON.stringify(x); }
 };
 
+function getName(T) {
+  assert(Obj.is(T.meta), 'missing type meta hash');
+  return T.meta.name;
+}
+
+function forbidNewOperator(x, T) {
+  assert(!(x instanceof T), errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T));
+}
+
 function update() {
-  assert(Func.is(options.update), 'options.update is missing');
+  assert(Func.is(options.update), errs.ERR_OPTIONS_UPDATE_MISSING);
   /*jshint validthis:true*/
   var T = this;
   var args = slice.call(arguments);

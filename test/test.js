@@ -2,6 +2,7 @@
 var assert = require('assert');
 var t = require('../build/tcomb');
 
+var errs = t.errs;
 var Any = t.Any;
 var Nil = t.Nil;
 var Bool = t.Bool;
@@ -32,15 +33,15 @@ var format = t.format;
 var ok = function (x) { assert.strictEqual(true, x); };
 var ko = function (x) { assert.strictEqual(false, x); };
 var throws = assert['throws'];
+var eq = assert.strictEqual;
 var throwsWithMessage = function (f, message) {
-    assert['throws'](f, function (e) {
-        if (e instanceof Error && e.message === message) {
-            return true;
-        }
+    assert['throws'](f, function (err) {
+        ok(err instanceof Error);
+        eq(err.message, message);
+        return true;
     });
 };
 var doesNotThrow = assert.doesNotThrow;
-var eq = assert.strictEqual;
 
 // used all over the place
 var noop = function () {};
@@ -199,7 +200,7 @@ describe('getName', function () {
 });
 
 //
-// Ant
+// Any
 //
 
 describe('Any', function () {
@@ -211,7 +212,7 @@ describe('Any', function () {
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
                 new T();
-            }, 'cannot use new with Any');
+            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'Any'));
         });
     });
     describe('#is(x)', function () {
@@ -231,6 +232,10 @@ describe('Any', function () {
     });
 });
 
+//
+// primitives types
+//
+
 describe('primitives types constructors', function () {
     [
         {T: Nil, x: null},
@@ -241,7 +246,8 @@ describe('primitives types constructors', function () {
         {T: Obj, x: {}},
         {T: Func, x: noop},
         {T: Err, x: new Error()},
-        {T: Re, x: /a/}
+        {T: Re, x: /a/},
+        {T: Dat, x: new Date()}
     ].forEach(function (o) {
         var T = o.T;
         var x = o.x;
@@ -251,14 +257,10 @@ describe('primitives types constructors', function () {
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
                 new T();
-            }, 'cannot use new with ' + T.meta.name);
+            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T)));
         });
     });
 });
-
-//
-// primitives types
-//
 
 describe('Nil', function () {
     describe('#is(x)', function () {
@@ -503,13 +505,9 @@ describe('struct', function () {
         var Type = struct({name: Str});
         var instance = new Type({name: 'Giulio'});
         it('should throw if options.update is missing', function () {
-            throws(function () {
+            throwsWithMessage(function () {
                 var newInstance = Type.update(instance, {name: 'Canti'});
-            }, function (err) {
-                if ( (err instanceof Error) && err.message === 'options.update is missing' ) {
-                  return true;
-                }
-            });
+            }, errs.ERR_OPTIONS_UPDATE_MISSING);
         });
         it('should return a new instance if options.update is defined', function () {
             t.options.update = function (instance, updates) {
@@ -534,7 +532,7 @@ describe('enums', function () {
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
                 new T('a');
-            }, 'cannot use new with T');
+            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
         });
         it('should accept only valid values', function () {
             eq(T('a'), 'a');
@@ -612,7 +610,7 @@ describe('union', function () {
                 var T = union([Str, Num], 'T');
                 T.dispatch = function () { return Str; }
                 new T('a');
-            }, 'cannot use new with T');
+            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
         });
         it('should not throw if used with new and union types are instantiables with new', function () {
             doesNotThrow(function () {
@@ -638,7 +636,7 @@ describe('maybe', function () {
             throwsWithMessage(function () {
                 var T = maybe(Str, 'T');
                 new T();
-            }, 'cannot use new with T');
+            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
         });
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
@@ -700,13 +698,9 @@ describe('tuple', function () {
         var Type = tuple([Str, Num]);
         var instance = Type(['a', 1]);
         it('should throw if options.update is missing', function () {
-            throws(function () {
+            throwsWithMessage(function () {
                 var newInstance = Type.update(instance, ['b', 2]);
-            }, function (err) {
-                if ( (err instanceof Error) && err.message === 'options.update is missing' ) {
-                  return true;
-                }
-            });
+            }, errs.ERR_OPTIONS_UPDATE_MISSING);
         });
         it('should return a new instance if options.update is defined', function () {
             t.options.update = function (instance, updates) {
@@ -754,13 +748,9 @@ describe('list', function () {
         var Type = list(Str);
         var instance = Type(['a', 'b']);
         it('should throw if options.update is missing', function () {
-            throws(function () {
+            throwsWithMessage(function () {
                 var newInstance = Type.update(instance, ['b', 2]);
-            }, function (err) {
-                if ( (err instanceof Error) && err.message === 'options.update is missing' ) {
-                  return true;
-                }
-            });
+            }, errs.ERR_OPTIONS_UPDATE_MISSING);
         });
         it('should return a new instance if options.update is defined', function () {
             t.options.update = function (instance, updates) {
@@ -785,7 +775,7 @@ describe('subtype', function () {
             throwsWithMessage(function () {
                 var T = subtype(Str, function () { return true; }, 'T');
                 new T();
-            }, 'cannot use new with T');
+            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
         });
         it('should coerce values', function () {
             var T = subtype(Point, function () { return true; });
