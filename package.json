@@ -29,7 +29,6 @@
     "grunt-mocha-test": "*",
     "grunt-contrib-uglify": "*",
     "grunt-contrib-watch": "*",
-    "grunt-contrib-clean": "*",
     "grunt-cli": "*",
     "jshint-stylish": "*",
     "istanbul": "*",
