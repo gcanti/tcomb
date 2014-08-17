@@ -147,7 +147,7 @@
     What's a type? In tcomb a type is a function `T` such that
 
     1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
-    2. `T` is idempotent: `T(T(value, mut), mut) "equals" T(value, mut)`
+    2. `T` is idempotent: `T(T(value, mut), mut) === T(value, mut)`
     3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
 
     **Note**: 2. implies that `T` can be used as a default JSON decoder
@@ -198,15 +198,14 @@
     //= func.js
 
     return {
-
         errs: errs,
-
         options: options,
-
         assert: assert,
         mixin: mixin,
         format: format,
+        isType: isType,
         getName: getName,
+        fail: fail,
         
         Any: Any,
         Nil: Nil,

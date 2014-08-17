@@ -152,7 +152,7 @@
     What's a type? In tcomb a type is a function `T` such that
 
     1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
-    2. `T` is idempotent: `T(T(value, mut), mut) "equals" T(value, mut)`
+    2. `T` is idempotent: `T(T(value, mut), mut) === T(value, mut)`
     3. `T` owns a static function `T.is(x)` returning `true` if `x` is a instance of `T`
 
     **Note**: 2. implies that `T` can be used as a default JSON decoder
@@ -269,7 +269,7 @@
     
     var errs = {
       ERR_OPTIONS_UPDATE_MISSING: '`options.update` is missing',
-      ERR_NEW_OPERATOR_FORBIDDEN: '`new` is forbidden for `%s`'
+      ERR_NEW_OPERATOR_FORBIDDEN: '`new` operator is forbidden for `%s`'
     };
     
     function mixin(target, source, overwrite) {
@@ -310,11 +310,17 @@
       j: function (x) { return JSON.stringify(x); }
     };
     
+    function isType(T) {
+      return Func.is(T) && Obj.is(T.meta);
+    }
+    
     function getName(T) {
-      assert(Obj.is(T.meta), 'missing type meta hash');
+      assert(isType(T), 'bad type');
       return T.meta.name;
     }
     
+    // since in tcomb the only real constructors are those provided
+    // by `struct()`, the `new` operator is forbidden for all types
     function forbidNewOperator(x, T) {
       assert(!(x instanceof T), errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T));
     }
@@ -392,7 +398,7 @@
     });
     
     var Obj = primitive('Obj', function (x) {
-      return !Nil.is(x) && x.constructor === Object && !Arr.is(x);
+      return !Nil.is(x) && typeof x === 'object' && !Arr.is(x);
     });
     
     var Func = primitive('Func', function (x) {
@@ -573,10 +579,18 @@
     
     function maybe(T, name) {
     
+      assert(isType(T), 'bad type');
+    
+      // makes the combinator idempotent
+      if (T.meta.kind === 'maybe') {
+        return T;
+      }
+    
       name = name || format('maybe(%s)', getName(T));
     
       function Maybe(value, mut) {
         forbidNewOperator(this, Maybe);
+        // a maybe type is idempotent iif T is idempotent
         return Nil.is(value) ? null : T(value, mut);
       }
     
@@ -929,15 +943,14 @@
     }
 
     return {
-
         errs: errs,
-
         options: options,
-
         assert: assert,
         mixin: mixin,
         format: format,
+        isType: isType,
         getName: getName,
+        fail: fail,
         
         Any: Any,
         Nil: Nil,

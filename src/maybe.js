@@ -15,10 +15,18 @@
 
 function maybe(T, name) {
 
+  assert(isType(T), 'bad type');
+
+  // makes the combinator idempotent
+  if (T.meta.kind === 'maybe') {
+    return T;
+  }
+
   name = name || format('maybe(%s)', getName(T));
 
   function Maybe(value, mut) {
     forbidNewOperator(this, Maybe);
+    // a maybe type is idempotent iif T is idempotent
     return Nil.is(value) ? null : T(value, mut);
   }
 

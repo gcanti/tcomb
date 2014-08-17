@@ -383,23 +383,25 @@ describe('Arr', function () {
 
 describe('Obj', function () {
     describe('#is(x)', function () {
-        it('should return true when x is an object literal', function () {
+        it('should return true when x is an object', function () {
+            function A() {}
             ok(Obj.is({}));
+            ok(Obj.is(new A()));
         });
-        it('should return false when x is not an object literal', function () {
+        it('should return false when x is not an object', function () {
             ko(Obj.is(null));
             ko(Obj.is(undefined));
             ko(Obj.is(0));
             ko(Obj.is(''));
             ko(Obj.is([]));
             ko(Obj.is(noop));
-            ko(Obj.is(new String('1')));
-            ko(Obj.is(new Number(1)));
-            ko(Obj.is(new Boolean()));
-            ko(Obj.is(/a/));
-            ko(Obj.is(new RegExp('a')));
-            ko(Obj.is(new Error()));
-            ko(Obj.is(new Date()));
+            //ko(Obj.is(new String('1')));
+            //ko(Obj.is(new Number(1)));
+            //ko(Obj.is(new Boolean()));
+            //ko(Obj.is(/a/));
+            //ko(Obj.is(new RegExp('a')));
+            //ko(Obj.is(new Error()));
+            //ko(Obj.is(new Date()));
         });
     });
 });
@@ -631,6 +633,11 @@ describe('union', function () {
 //
 
 describe('maybe', function () {
+    it('should be idempotent', function () {
+        var A = maybe(Point);
+        var B = maybe(A);
+        eq(A, B); 
+    });
     describe('constructor', function () {
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
@@ -649,6 +656,12 @@ describe('maybe', function () {
             eq(T(null), null);
             eq(T(undefined), null);
             ok(Point.is(T({x: 0, y: 0})));
+        });
+        it.skip('should be idempotent', function () {
+            var T = maybe(Point);
+            var p1 = T({x: 0, y: 0});
+            var p2 = T(p1);
+            eq(p2, p1);
         });
     });
     describe('#is(x)', function () {
