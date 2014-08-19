@@ -211,6 +211,7 @@
     isType: isType,
     getName: getName,
     fail: fail,
+    slice: slice,
     
     Any: Any,
     Nil: Nil,
