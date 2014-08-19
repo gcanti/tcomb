@@ -62,6 +62,13 @@ function subtype(T, predicate, name) {
     return T.is(x) && predicate(x);
   };
 
+  /* fix #22
+  if (T.meta.kind === 'struct') {
+    // keep a reference to prototype to easily define new methods and attach them to supertype
+    Subtype.prototype = T.prototype;
+  }
+  */
+
   return Subtype;
 }
 

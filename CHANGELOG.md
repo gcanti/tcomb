@@ -3,7 +3,7 @@ Roadmap
 
 # v.0.0.12
 
-TODO
+- `enums.of()` should generate values equals to keys, fix #23
 
 # v.0.0.11
 

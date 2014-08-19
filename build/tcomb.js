@@ -695,8 +695,8 @@
   enums.of = function (keys, name) {
     keys = Str.is(keys) ? keys.split(' ') : keys;
     var value = {};
-    keys.forEach(function (k, i) {
-      value[k] = i;
+    keys.forEach(function (k) {
+      value[k] = k;
     });
     return enums(value, name);
   };
@@ -844,6 +844,13 @@
     Subtype.is = function (x) {
       return T.is(x) && predicate(x);
     };
+  
+    /* fix #22
+    if (T.meta.kind === 'struct') {
+      // keep a reference to prototype to easily define new methods and attach them to supertype
+      Subtype.prototype = T.prototype;
+    }
+    */
   
     return Subtype;
   }

@@ -563,13 +563,13 @@ describe('enums', function () {
     describe('#of(keys)', function () {
         it('should return an enum', function () {
             var Size = enums.of(['large', 'small']);
-            ok(Size.meta.map.large === 0);
-            ok(Size.meta.map.small === 1);
+            ok(Size.meta.map.large === 'large');
+            ok(Size.meta.map.small === 'small');
         });
         it('should handle a string', function () {
             var Size = enums.of('large small');
-            ok(Size.meta.map.large === 0);
-            ok(Size.meta.map.small === 1);
+            ok(Size.meta.map.large === 'large');
+            ok(Size.meta.map.small === 'small');
         });
     });
 });

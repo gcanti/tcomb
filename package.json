@@ -1,7 +1,7 @@
 {
   "name": "tcomb",
   "version": "0.0.11",
-  "description": "Runtime types checking for JavaScript ",
+  "description": "Pragmatic runtime type checking for JavaScript",
   "main": "build/tcomb.js",
   "scripts": {
     "test": "grunt test",

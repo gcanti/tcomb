@@ -72,8 +72,8 @@ function enums(map, name) {
 enums.of = function (keys, name) {
   keys = Str.is(keys) ? keys.split(' ') : keys;
   var value = {};
-  keys.forEach(function (k, i) {
-    value[k] = i;
+  keys.forEach(function (k) {
+    value[k] = k;
   });
   return enums(value, name);
 };
