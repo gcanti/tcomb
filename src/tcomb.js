@@ -117,7 +117,7 @@
 
         bower install tcomb
 
-    or download the `build/tcomb.min.js` file.
+    or download the `build/tcomb.js` file.
 
     ### Requirements
 
