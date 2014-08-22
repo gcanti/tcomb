@@ -173,7 +173,7 @@
     module.exports = factory();
   } else if (root.angular) {
 		root.angular.module('tcomb', [])
-	  .factory('tcomb', function() {
+		.factory('tcomb', function() {
 		  return factory();
 		});
   } else {
