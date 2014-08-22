@@ -166,6 +166,11 @@
     define([], factory);
   } else if (typeof exports === 'object') {
     module.exports = factory();
+  } else if (root.angular) {
+		root.angular.module('tcomb', [])
+	  .factory('tcomb', function() {
+		  return factory();
+		});
   } else {
     root.t = factory();
   }
