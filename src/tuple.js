@@ -70,7 +70,7 @@ function tuple(Ts, name) {
   };
 
   Tuple.is = function (x) {
-    return Arr.is(x) && x.length === len && this.isTuple(x);
+    return Arr.is(x) && x.length === len && Tuple.isTuple(x);
   };
 
   Tuple.update = update;
