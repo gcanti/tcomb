@@ -1,7 +1,7 @@
 /**
-    ### maybe(T, [name])
+    ### maybe(type, [name])
 
-    Same as `union([Nil, T])`.
+    Same as `union([Nil, type])`.
 
     ```javascript
     // the value of a radio input where null = no selection
@@ -13,31 +13,32 @@
     ```    
 **/
 
-function maybe(T, name) {
+function maybe(type, name) {
 
-  assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
+  // check combinator args
+  var combinator = 'maybe';
+  name = ensureName(name, combinator, [type]);
+  assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
 
   // makes the combinator idempotent
-  if (T.meta.kind === 'maybe') {
-    return T;
+  if (type.meta.kind === 'maybe') {
+    return type;
   }
-
-  name = name || format('maybe(%s)', getName(T));
 
   function Maybe(value, mut) {
     forbidNewOperator(this, Maybe);
-    // a maybe type is idempotent iif T is idempotent
-    return Nil.is(value) ? null : T(value, mut);
+    // a maybe type is idempotent iif type is idempotent
+    return Nil.is(value) ? null : type(value, mut);
   }
 
   Maybe.meta = {
     kind: 'maybe',
-    type: T,
+    type: type,
     name: name
   };
 
   Maybe.is = function (x) {
-    return Nil.is(x) || T.is(x);
+    return Nil.is(x) || type.is(x);
   };
 
   return Maybe;

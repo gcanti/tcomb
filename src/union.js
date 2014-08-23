@@ -1,9 +1,9 @@
 /**
-    ### union(Ts, [name])
+    ### union(types, [name])
 
     Defines a union of types.
 
-    - `Ts` array of types
+    - `types` array of types
     - `name` optional string useful for debugging
 
     Example
@@ -34,28 +34,29 @@
     ```
 **/
 
-function union(Ts, name) {
+function union(types, name) {
 
-  assert(Arr.is(Ts) && Ts.every(isType), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Ts');
-
-  name = name || format('union(%s)', Ts.map(getName).join(', '));
+  // check combinator args
+  var combinator = 'union';
+  name = ensureName(name, combinator, types);
+  assert(areTypes(types) && types.length >= 2, errs.ERR_BAD_COMBINATOR_ARGUMENT, 'types', types, combinator, 'a list(type) of length >= 2');
 
   function Union(value, mut) {
     forbidNewOperator(this, Union);
     assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
     var T = Union.dispatch(value);
-    // a union type is idempotent iif every T in Ts is idempotent
+    // a union type is idempotent iif every T in types is idempotent
     return T(value, mut);
   }
 
   Union.meta = {
     kind: 'union',
-    types: Ts,
+    types: types,
     name: name
   };
 
   Union.is = function (x) {
-    return Ts.some(function (T) {
+    return types.some(function (T) {
       return T.is(x);
     });
   };

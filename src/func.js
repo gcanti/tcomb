@@ -22,13 +22,13 @@
 
 function func(Arguments, f, Return, name) {
 
-  Return = Return || null;
-
-  assert(isType(Arguments), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Arguments');
-  assert(Func.is(f), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'f');
-  assert(Nil.is(Return) || isType(Return), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Return');
+  name = name || 'func()';
+  assert(isType(Arguments), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Arguments', Arguments, name, 'a type');
+  assert(Func.is(f), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'f', f, name, 'a `Func`');
+  assert(Nil.is(Return) || isType(Return), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Return', Return, name, 'a type');
 
   // makes the combinator idempotent
+  Return = Return || null;
   if (isType(f) && f.meta.Arguments === Arguments && f.meta.Return === Return) {
     return f;
   }

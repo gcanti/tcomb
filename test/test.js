@@ -175,22 +175,22 @@ describe('getName', function () {
     var NamedList = list(Str, 'NamedList');
 
     it('should return the name of a named type', function () {
-        ok(getName(NamedStruct) === 'NamedStruct');
-        ok(getName(NamedUnion) === 'NamedUnion');
-        ok(getName(NamedMaybe) === 'NamedMaybe');
-        ok(getName(NamedEnums) === 'NamedEnums');
-        ok(getName(NamedTuple) === 'NamedTuple');
-        ok(getName(NamedSubtype) === 'NamedSubtype');
-        ok(getName(NamedList) === 'NamedList');
+        eq(getName(NamedStruct), 'NamedStruct');
+        eq(getName(NamedUnion), 'NamedUnion');
+        eq(getName(NamedMaybe), 'NamedMaybe');
+        eq(getName(NamedEnums), 'NamedEnums');
+        eq(getName(NamedTuple), 'NamedTuple');
+        eq(getName(NamedSubtype), 'NamedSubtype');
+        eq(getName(NamedList), 'NamedList');
     });
     it('should return a meaningful name of a unnamed type', function () {
-        ok(getName(UnnamedStruct) === 'struct()');
-        ok(getName(UnnamedUnion) === 'union(Str, Num)');
-        ok(getName(UnnamedMaybe) === 'maybe(Str)');
-        ok(getName(UnnamedEnums) === 'enums()');
-        ok(getName(UnnamedTuple) === 'tuple(Str, Num)');
-        ok(getName(UnnamedSubtype) === 'subtype(Str)');
-        ok(getName(UnnamedList) === 'list(Str)');
+        eq(getName(UnnamedStruct), 'struct');
+        eq(getName(UnnamedUnion), 'union([Str, Num])');
+        eq(getName(UnnamedMaybe), 'maybe(Str)');
+        eq(getName(UnnamedEnums), 'enums');
+        eq(getName(UnnamedTuple), 'tuple([Str, Num])');
+        eq(getName(UnnamedSubtype), 'subtype(Str)');
+        eq(getName(UnnamedList), 'list(Str)');
     });
 });
 
@@ -492,6 +492,16 @@ describe('Dat', function () {
 //
 
 describe('struct', function () {
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                struct();
+            }, 'Invalid combinator argument `props` of value `undefined` supplied to `struct`, expected an `Obj`.');
+            throwsWithMessage(function () {
+                struct({}, 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `struct`, expected a `maybe(Str)`.');
+        });
+    });
     describe('constructor', function () {
         it('should be idempotent', function () {
             var T = Point;
@@ -532,6 +542,16 @@ describe('struct', function () {
 //
 
 describe('enums', function () {
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                enums();
+            }, 'Invalid combinator argument `map` of value `undefined` supplied to `enums`, expected an `Obj`.');
+            throwsWithMessage(function () {
+                enums({}, 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `enums`, expected a `maybe(Str)`.');
+        });
+    });
     describe('constructor', function () {
         var T = enums({a: 0}, 'T');
         it('should throw if used with new', function () {
@@ -583,7 +603,7 @@ describe('union', function () {
     var Circle = struct({
         center: Point,
         radius: Num
-    });
+    }, 'Circle');
 
     var Rectangle = struct({
         a: Point,
@@ -599,6 +619,22 @@ describe('union', function () {
             Rectangle;   
     };
 
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                union();
+            }, 'Invalid combinator argument `types` of value `undefined` supplied to `union`, expected a list(type) of length >= 2.');
+            throwsWithMessage(function () {
+                union([]);
+            }, 'Invalid combinator argument `types` of value `[]` supplied to `union`, expected a list(type) of length >= 2.');
+            throwsWithMessage(function () {
+                union([Circle]);
+            }, 'Invalid combinator argument `types` of value `["Func Struct"]` supplied to `union`, expected a list(type) of length >= 2.');
+            throwsWithMessage(function () {
+                union([Circle, Point], 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `union`, expected a `maybe(Str)`.');
+        });
+    });
     describe('constructor', function () {
         it('should throw when dispatch() is not implemented', function () {
             throwsWithMessage(function () {
@@ -641,10 +677,20 @@ describe('union', function () {
 //
 
 describe('maybe', function () {
-    it('should be idempotent', function () {
-        var A = maybe(Point);
-        var B = maybe(A);
-        eq(A, B); 
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                maybe();
+            }, 'Invalid combinator argument `type` of value `undefined` supplied to `maybe`, expected a type.');
+            throwsWithMessage(function () {
+                maybe(Point, 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `maybe`, expected a `maybe(Str)`.');
+        });
+        it('should be idempotent', function () {
+            var A = maybe(Point);
+            var B = maybe(A);
+            eq(A, B); 
+        });
     });
     describe('constructor', function () {
         it('should throw if used with new', function () {
@@ -687,6 +733,25 @@ describe('maybe', function () {
 //
 
 describe('tuple', function () {
+
+    var Area = tuple([Num, Num], 'Area');
+
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                tuple();
+            }, 'Invalid combinator argument `types` of value `undefined` supplied to `tuple`, expected a list(type) of length >= 2.');
+            throwsWithMessage(function () {
+                tuple([]);
+            }, 'Invalid combinator argument `types` of value `[]` supplied to `tuple`, expected a list(type) of length >= 2.');
+            throwsWithMessage(function () {
+                tuple([Point], 'MyTuple');
+            }, 'Invalid combinator argument `types` of value `["Func Struct"]` supplied to `tuple`, expected a list(type) of length >= 2.');
+            throwsWithMessage(function () {
+                tuple([Point, Point], 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `tuple`, expected a `maybe(Str)`.');
+        });
+    });
     describe('constructor', function () {
         var S = struct({}, 'S');
         var T = tuple([S, S], 'T');
@@ -711,7 +776,6 @@ describe('tuple', function () {
         });    
     });
     describe('#is(x)', function () {
-        var Area = tuple([Num, Num]);
         it('should return true when x is an instance of the tuple', function () {
             ok(Area.is([1, 2]));
         });
@@ -750,6 +814,16 @@ describe('tuple', function () {
 //
 
 describe('list', function () {
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                list();
+            }, 'Invalid combinator argument `type` of value `undefined` supplied to `list`, expected a type.');
+            throwsWithMessage(function () {
+                list(Point, 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `list`, expected a `maybe(Str)`.');
+        });
+    });
     describe('constructor', function () {
         var S = struct({}, 'S');
         var T = list(S, 'T');
@@ -809,6 +883,25 @@ describe('list', function () {
 //
 
 describe('subtype', function () {
+    var True = function () { return true; };
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                subtype();
+            }, 'Invalid combinator argument `type` of value `undefined` supplied to `subtype`, expected a type.');
+            throwsWithMessage(function () {
+                subtype(Point, null);
+            }, 'Invalid combinator argument `predicate` of value `null` supplied to `subtype`, expected a `Func`.');
+            throwsWithMessage(function () {
+                subtype(Point, True, 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `subtype`, expected a `maybe(Str)`.');
+        });
+        it('should be idempotent', function () {
+            var A = maybe(Point);
+            var B = maybe(A);
+            eq(A, B); 
+        });
+    });
     describe('constructor', function () {
         it('should throw if used with new and a type that is not instantiable with new', function () {
             throwsWithMessage(function () {
@@ -847,21 +940,44 @@ describe('subtype', function () {
 
 describe('func', function () {
 
-    var sum = func(tuple([Num, Num]), function (a, b) {
+    var True = function () { return true; };
+    var Arguments = tuple([Num, Num], 'Args');
+    var sum = func(Arguments, function (a, b) {
         return a + b;
     }, Num);
 
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                func();
+            }, 'Invalid combinator argument `Arguments` of value `undefined` supplied to `func()`, expected a type.');
+            throwsWithMessage(function () {
+                func(null, True, null, 'myFunc');
+            }, 'Invalid combinator argument `Arguments` of value `null` supplied to `myFunc`, expected a type.');
+            throwsWithMessage(function () { 
+                func(Arguments, True, 1); 
+            }, 'Invalid combinator argument `Return` of value `1` supplied to `func()`, expected a type.');
+            throwsWithMessage(function () { 
+                func(Arguments, null); 
+            }, 'Invalid combinator argument `f` of value `null` supplied to `func()`, expected a `Func`.');
+        });
+        it('should be idempotent', function () {
+            var A = maybe(Point);
+            var B = maybe(A);
+            eq(A, B); 
+        });
+    });
 
     describe('should be idempotent', function () {
         it('when Arguments and Return are the same', function () {
-            var Arguments = tuple([Str]);
+            var Arguments = tuple([Str, Str]);
             var f = function (s) { return s; };
             var g = func(Arguments, f, Str);
             var h = func(Arguments, g, Str);
             eq(h, g);
         });
         it('when Arguments are the same and Return is not defined', function () {
-            var Arguments = tuple([Str]);
+            var Arguments = tuple([Str, Str]);
             var f = function (s) { return s; };
             var g = func(Arguments, f, null);
             var h = func(Arguments, g);
@@ -880,7 +996,7 @@ describe('func', function () {
         it("should throw with wrong arguments", function () {
             throwsWithMessage(function () {
                 sum(1, 'a');
-            }, 'bad type value `Num`');
+            }, 'Bad type value `Num`');
         });
         it("should throw with wrong return", function () {
             var bad = func(tuple([Num, Num]), function (a, b) {
@@ -888,7 +1004,7 @@ describe('func', function () {
             }, Num);
             throwsWithMessage(function () {
                 bad(1, 2);
-            }, 'bad type value `Num`');
+            }, 'Bad type value `Num`');
         });
         it("Return should be optional", function () {
             var bad = func(tuple([Num, Num]), function (a, b) {

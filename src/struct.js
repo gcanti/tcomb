@@ -43,9 +43,9 @@
 
 function struct(props, name) {
 
-  assert(Obj.is(props), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'props');
-
-  name = name || 'struct()';
+  // check combinator args
+  name = ensureName(name, 'struct');
+  assert(Obj.is(props), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'props', props, name, 'an `Obj`');
 
   function Struct(value, mut) {
 
@@ -63,9 +63,9 @@ function struct(props, name) {
     
     for (var k in props) {
       if (props.hasOwnProperty(k)) {
-        var T = props[k];
+        var type = props[k];
         var v = value[k];
-        this[k] = T.is(v) ? v : T(v, mut);
+        this[k] = type.is(v) ? v : type(v, mut);
       }
     }
 

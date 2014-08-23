@@ -1,9 +1,9 @@
 /**
-    ### subtype(T, predicate, [name])
+    ### subtype(type, predicate, [name])
 
     Defines a subtype of an existing type.
 
-    - `T` the supertype
+    - `type` the supertype
     - `predicate` a function with signature `(x) -> boolean`
     - `name` optional string useful for debugging
 
@@ -36,36 +36,37 @@
     ```
 **/
 
-function subtype(T, predicate, name) {
+function subtype(type, predicate, name) {
 
-  assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
-  assert(Func.is(predicate), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'predicate');
-
-  name = name || format('subtype(%s)', getName(T));
+  // check combinator args
+  var combinator = 'subtype';
+  name = ensureName(name, combinator, [type]);
+  assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
+  assert(Func.is(predicate), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'predicate', predicate, combinator, 'a `Func`');
 
   function Subtype(value, mut) {
     forbidNewOperator(this, Subtype);
     // a subtype type is idempotent iif T is idempotent
-    var x = T(value, mut);
+    var x = type(value, mut);
     assert(predicate(x), errs.ERR_BAD_TYPE_VALUE, name);
     return x;
   }
 
   Subtype.meta = {
     kind: 'subtype',
-    type: T,
+    type: type,
     predicate: predicate,
     name: name
   };
 
   Subtype.is = function (x) {
-    return T.is(x) && predicate(x);
+    return type.is(x) && predicate(x);
   };
 
   /* fix #22
-  if (T.meta.kind === 'struct') {
+  if (type.meta.kind === 'struct') {
     // keep a reference to prototype to easily define new methods and attach them to supertype
-    Subtype.prototype = T.prototype;
+    Subtype.prototype = type.prototype;
   }
   */
 

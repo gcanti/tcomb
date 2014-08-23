@@ -45,9 +45,9 @@
 
 function enums(map, name) {
 
-  assert(Obj.is(map), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'map');
-
-  name = name || 'enums()';
+  // check combinator args
+  name = ensureName(name, 'enums');
+  assert(Obj.is(map), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'map', map, name, 'an `Obj`');
 
   function Enums(value) {
     forbidNewOperator(this, Enums);

@@ -1,9 +1,9 @@
 /**
-    ### list(T, [name])
+    ### list(type, [name])
 
     Defines an array where all the elements are of type `T`.
 
-    - `T` type of all the elements
+    - `type` type of all the elements
     - `name` optional string useful for debugging
 
     Example
@@ -29,11 +29,12 @@
     ```
 **/
 
-function list(T, name) {
+function list(type, name) {
 
-  assert(isType(T), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'T');
-
-  name = name || format('list(%s)', getName(T));
+  // check combinator args
+  var combinator = 'list';
+  name = ensureName(name, combinator, [type]);
+  assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
 
   function List(value, mut) {
 
@@ -48,7 +49,7 @@ function list(T, name) {
     var arr = [];
     for (var i = 0, len = value.length ; i < len ; i++ ) {
       var v = value[i];
-      arr.push(T.is(v) ? v : T(v, mut));
+      arr.push(type.is(v) ? v : type(v, mut));
     }
 
     if (!mut) { 
@@ -59,12 +60,12 @@ function list(T, name) {
 
   List.meta = {
     kind: 'list',
-    type: T,
+    type: type,
     name: name
   };
 
   List.isList = function (x) {
-    return x.every(T.is);
+    return x.every(type.is);
   };
 
   List.is = function (x) {

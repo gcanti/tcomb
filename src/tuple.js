@@ -1,9 +1,9 @@
 /**
-    ### tuple(Ts, [name])
+    ### tuple(types, [name])
 
     Defines a tuple whose coordinates have the specified types.
 
-    - `Ts` array of coordinates types
+    - `types` array of coordinates types
     - `name` optional string useful for debugging
 
     Example
@@ -26,13 +26,14 @@
     ```
 **/
 
-function tuple(Ts, name) {
+function tuple(types, name) {
 
-  assert(Arr.is(Ts) && Ts.every(isType), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Ts');
+  // check combinator args
+  var combinator = 'tuple';
+  name = ensureName(name, combinator, types);
+  assert(areTypes(types) && types.length >= 2, errs.ERR_BAD_COMBINATOR_ARGUMENT, 'types', types, combinator, 'a list(type) of length >= 2');
 
-  name = name || format('tuple(%s)', Ts.map(getName).join(', '));
-
-  var len = Ts.length;
+  var len = types.length;
 
   function Tuple(value, mut) {
 
@@ -46,7 +47,7 @@ function tuple(Ts, name) {
 
     var arr = [];
     for (var i = 0 ; i < len ; i++) {
-      var T = Ts[i];
+      var T = types[i];
       var v = value[i];
       arr.push(T.is(v) ? v : T(v, mut));
     }
@@ -59,13 +60,13 @@ function tuple(Ts, name) {
 
   Tuple.meta = {
     kind: 'tuple',
-    types: Ts,
+    types: types,
     name: name
   };
 
   Tuple.isTuple = function (x) {
-    return Ts.every(function (T, i) { 
-      return T.is(x[i]); 
+    return types.every(function (type, i) { 
+      return type.is(x[i]); 
     });
   };
 
