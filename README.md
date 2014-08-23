@@ -116,7 +116,7 @@ Browser
 
     bower install tcomb
 
-or download the `build/tcomb.min.js` file.
+or download the `build/tcomb.js` file.
 
 ### Requirements
 
@@ -253,11 +253,11 @@ Returns `true` if `x` is an instance of the struct.
 Point.is(p); // => true
 ```
 
-### union(Ts, [name])
+### union(types, [name])
   
 Defines a union of types.
   
-- `Ts` array of types
+- `types` array of types
 - `name` optional string useful for debugging
   
 Example
@@ -287,9 +287,9 @@ Returns `true` if `x` belongs to the union.
 Shape.is(Circle({center: p, radius: 10})); // => true
 ```
 
-### maybe(T, [name])
+### maybe(type, [name])
   
-Same as `union([Nil, T])`.
+Same as `union([Nil, type])`.
   
 ```javascript
 // the value of a radio input where null = no selection
@@ -343,11 +343,11 @@ var Direction = enums.of(['North', 'East', 'South', 'West']);
 Direction = enums.of('North East South West');
 ```
 
-### tuple(Ts, [name])
+### tuple(types, [name])
   
 Defines a tuple whose coordinates have the specified types.
   
-- `Ts` array of coordinates types
+- `types` array of coordinates types
 - `name` optional string useful for debugging
   
 Example
@@ -369,11 +369,11 @@ Area.is([1, 'a']);    // => false, the second element is not a Num
 Area.is([1, 2, 3]);   // => false, too many elements
 ```
 
-### subtype(T, predicate, [name])
+### subtype(type, predicate, [name])
   
 Defines a subtype of an existing type.
   
-- `T` the supertype
+- `type` the supertype
 - `predicate` a function with signature `(x) -> boolean`
 - `name` optional string useful for debugging
   
@@ -405,11 +405,11 @@ Int.is(2);      // => true
 Int.is(1.1);    // => false
 ```
 
-### list(T, [name])
+### list(type, [name])
   
 Defines an array where all the elements are of type `T`.
   
-- `T` type of all the elements
+- `type` type of all the elements
 - `name` optional string useful for debugging
   
 Example
