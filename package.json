@@ -4,12 +4,7 @@
   "description": "Pragmatic runtime type checking for JavaScript",
   "main": "build/tcomb.js",
   "scripts": {
-    "test": "grunt test",
-    "build": "grunt build",
-    "jshint": "grunt jshint",
-    "start": "grunt",
-    "coverage": "istanbul cover _mocha -- --ui bdd -R dot",
-    "doc": "grunt doc"
+    "cover": "istanbul cover _mocha -- --ui bdd -R dot"
   },
   "repository": {
     "type": "git",
