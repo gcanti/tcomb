@@ -68,7 +68,7 @@ function list(T, name) {
   };
 
   List.is = function (x) {
-    return Arr.is(x) && this.isList(x);
+    return Arr.is(x) && List.isList(x);
   };
 
 
