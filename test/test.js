@@ -720,6 +720,9 @@ describe('tuple', function () {
             ko(Area.is([1, 2, 3]));
             ko(Area.is([1, 'a']));
         });
+        it('should not depend on `this`', function () {
+            ok([[1, 2]].every(Area.is));
+        });
     });
     describe('#update()', function () {
         var Type = tuple([Str, Num]);
@@ -775,6 +778,9 @@ describe('list', function () {
         var p2 = new Point({x: 1, y: 1});
         it('should return true when x is a list', function () {
             ok(Path.is([p1, p2]));
+        });
+        it('should not depend on `this`', function () {
+            ok([[p1, p2]].every(Path.is));
         });
     });
     describe('#update()', function () {
