@@ -36,10 +36,13 @@ function list(type, name) {
   name = ensureName(name, combinator, [type]);
   assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
 
+  // cache expected value
+  var expected = format('a list of `%s`', getName(type));
+
   function List(value, mut) {
 
     forbidNewOperator(this, List);
-    assert(Arr.is(value), errs.ERR_BAD_TYPE_VALUE, name);
+    assert(Arr.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
 
     // makes List idempotent
     if (List.isList(value)) {

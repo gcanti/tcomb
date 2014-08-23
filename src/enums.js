@@ -49,9 +49,12 @@ function enums(map, name) {
   name = ensureName(name, 'enums');
   assert(Obj.is(map), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'map', map, name, 'an `Obj`');
 
+  // cache expected value
+  var expected = 'a `Str`';
+
   function Enums(value) {
     forbidNewOperator(this, Enums);
-    assert(Enums.is(value), errs.ERR_BAD_TYPE_VALUE, name);
+    assert(Enums.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
     // all enums types are idempotent
     return value;
   }

@@ -509,6 +509,11 @@ describe('struct', function () {
             var p2 = T(p1);
             eq(p2, p1);
         });
+        it('should accept only valid values', function () {
+            throwsWithMessage(function () {
+                Point(1);
+            }, 'Invalid type argument `value` of value `1` supplied to `struct`, expected an `Obj`.');
+        });
     });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the struct', function () {
@@ -563,7 +568,7 @@ describe('enums', function () {
             eq(T('a'), 'a');
             throwsWithMessage(function () {
                 T('b')
-            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
+            }, 'Invalid type argument `value` of value `"b"` supplied to `T`, expected a `Str`.');
         });
     });
     describe('#is(x)', function () {
@@ -699,12 +704,6 @@ describe('maybe', function () {
                 new T();
             }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
         });
-        it('should accept only valid values', function () {
-            throwsWithMessage(function () {
-                var T = maybe(Str, 'T');
-                T(1);
-            }, format(errs.ERR_BAD_TYPE_VALUE, 'Str'));
-        });
         it('should coerce values', function () {
             var T = maybe(Point);
             eq(T(null), null);
@@ -763,10 +762,10 @@ describe('tuple', function () {
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
                 T(1);
-            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
+            }, 'Invalid type argument `value` of value `1` supplied to `T`, expected a tuple `(S, S)`.');
             throwsWithMessage(function () {
                 T([1, 1]);
-            }, format(errs.ERR_BAD_TYPE_VALUE, 'S'));
+            }, 'Invalid type argument `value` of value `1` supplied to `S`, expected an `Obj`.');
         });
         it('should be idempotent', function () {
             var T = tuple([Str, Num]);
@@ -834,10 +833,10 @@ describe('list', function () {
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
                 T(1);
-            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
+            }, 'Invalid type argument `value` of value `1` supplied to `T`, expected a list of `S`.');
             throwsWithMessage(function () {
                 T([1]);
-            }, format(errs.ERR_BAD_TYPE_VALUE, 'S'));
+            }, 'Invalid type argument `value` of value `1` supplied to `S`, expected an `Obj`.');
         });
         it('should be idempotent', function () {
             var T = list(Point);
@@ -915,10 +914,19 @@ describe('subtype', function () {
             ok(Point.is(p));
         });
         it('should accept only valid values', function () {
-            var T = subtype(Point, function (p) { return p.x > 0; }, 'T');
+            var predicate = function (p) { return p.x > 0; };
+            var T = subtype(Point, predicate, 'T');
             throwsWithMessage(function () {
                 var p = T({x: 0, y: 0});
-            }, format(errs.ERR_BAD_TYPE_VALUE, 'T'));
+            }, 'Invalid type argument `value` of value `{"x":0,"y":0}` supplied to `T`, expected a valid value for the predicate.');
+        });
+        it('should show the predicate documentation if available', function () {
+            var predicate = function (p) { return p.x > 0; };
+            predicate.__doc__ = 'a number greater then 0';
+            var T = subtype(Point, predicate, 'T');
+            throwsWithMessage(function () {
+                var p = T({x: 0, y: 0});
+            }, 'Invalid type argument `value` of value `{"x":0,"y":0}` supplied to `T`, expected a number greater then 0.');
         });
     });
     describe('#is(x)', function () {
@@ -996,7 +1004,7 @@ describe('func', function () {
         it("should throw with wrong arguments", function () {
             throwsWithMessage(function () {
                 sum(1, 'a');
-            }, 'Bad type value `Num`');
+            }, 'Invalid type argument `value` of value `"a"` supplied to `Num`, expected a `Num`.');
         });
         it("should throw with wrong return", function () {
             var bad = func(tuple([Num, Num]), function (a, b) {
@@ -1004,7 +1012,7 @@ describe('func', function () {
             }, Num);
             throwsWithMessage(function () {
                 bad(1, 2);
-            }, 'Bad type value `Num`');
+            }, 'Invalid type argument `value` of value `"12"` supplied to `Num`, expected a `Num`.');
         });
         it("Return should be optional", function () {
             var bad = func(tuple([Num, Num]), function (a, b) {

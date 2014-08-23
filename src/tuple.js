@@ -33,12 +33,15 @@ function tuple(types, name) {
   name = ensureName(name, combinator, types);
   assert(areTypes(types) && types.length >= 2, errs.ERR_BAD_COMBINATOR_ARGUMENT, 'types', types, combinator, 'a list(type) of length >= 2');
 
+  // cache types length
   var len = types.length;
+  // cache expected value
+  var expected = format('a tuple `(%s)`', types.map(getName).join(', '));
 
   function Tuple(value, mut) {
 
     forbidNewOperator(this, Tuple);
-    assert(Arr.is(value) && value.length === len, errs.ERR_BAD_TYPE_VALUE, name);
+    assert(Arr.is(value) && value.length === len, errs.ERR_BAD_TYPE_VALUE, value, name, expected);
 
     // makes Tuple idempotent
     if (Tuple.isTuple(value)) {

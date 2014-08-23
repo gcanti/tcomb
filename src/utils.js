@@ -5,7 +5,7 @@
 var slice = Array.prototype.slice;
 
 var errs = {
-  ERR_BAD_TYPE_VALUE: 'Bad type value `%s`',
+  ERR_BAD_TYPE_VALUE: 'Invalid type argument `value` of value `%j` supplied to `%s`, expected %s.',
   ERR_BAD_COMBINATOR_ARGUMENT: 'Invalid combinator argument `%s` of value `%j` supplied to `%s`, expected %s.',
   ERR_OPTIONS_UPDATE_MISSING: 'Missing `options.update` implementation',
   ERR_NEW_OPERATOR_FORBIDDEN: 'Operator `new` is forbidden for `%s`'
@@ -81,7 +81,7 @@ function ensureName(name, defaultName, types) {
 }
 
 // since in tcomb the only real constructors are those provided
-// by `struct()`, the `new` operator is forbidden for all types
+// by `struct`, the `new` operator is forbidden for all types
 function forbidNewOperator(x, T) {
   assert(!(x instanceof T), errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T));
 }

@@ -49,7 +49,7 @@ function struct(props, name) {
 
   function Struct(value, mut) {
 
-    assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, name);
+    assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, 'an `Obj`');
 
     // makes Struct idempotent
     if (Struct.is(value)) {

@@ -44,11 +44,14 @@ function subtype(type, predicate, name) {
   assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
   assert(Func.is(predicate), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'predicate', predicate, combinator, 'a `Func`');
 
+  // cache expected value
+  var expected = predicate.__doc__ || 'a valid value for the predicate';
+
   function Subtype(value, mut) {
     forbidNewOperator(this, Subtype);
     // a subtype type is idempotent iif T is idempotent
     var x = type(value, mut);
-    assert(predicate(x), errs.ERR_BAD_TYPE_VALUE, name);
+    assert(predicate(x), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
     return x;
   }
 
