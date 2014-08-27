@@ -1,5 +1,5 @@
 /**
-    # tcomb
+    % tcomb
 
     ![tcomb logo](http://gcanti.github.io/resources/tcomb/logo.png)
 
@@ -56,7 +56,7 @@
         shippings: list(Str),       // a list of shipping methods
         category: Category,         // enum, one of [audio, video]
         price: union(Num, Price),   // a price (dollars) OR in another currency
-        dim: tuple([Num, Num])      // dimensions (width, height)
+        size: tuple([Num, Num])     // width x height
     });
 
     var Url = subtype(Str, function (s) {
@@ -75,7 +75,7 @@
         shippings: ['Same Day', 'Next Businness Day'],
         category: 'audio',
         price: {currency: 'EUR', amount: 100},
-        dim: [2.4, 4.1]
+        size: [2.4, 4.1]
     };
 
     // get an immutable instance, `new` is optional
