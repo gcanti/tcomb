@@ -50,7 +50,7 @@ function enums(map, name) {
   assert(Obj.is(map), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'map', map, name, 'an `Obj`');
 
   // cache expected value
-  var expected = 'a `Str`';
+  var expected = 'a valid enum';
 
   function Enums(value) {
     forbidNewOperator(this, Enums);
