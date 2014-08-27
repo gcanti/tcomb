@@ -2,7 +2,7 @@
   "name": "tcomb",
   "version": "0.0.12",
   "description": "Pragmatic runtime type checking for JavaScript",
-  "main": "build/tcomb.js",
+  "main": "index.js",
   "scripts": {
     "cover": "istanbul cover _mocha -- --ui bdd -R dot"
   },
@@ -17,17 +17,16 @@
   },
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
-    "mocha": "*",
-    "grunt": "*",
-    "grunt-rigger": "*",
-    "grunt-contrib-jshint": "*",
-    "grunt-mocha-test": "*",
-    "grunt-contrib-uglify": "*",
-    "grunt-contrib-watch": "*",
-    "grunt-cli": "*",
-    "jshint-stylish": "*",
-    "istanbul": "*",
-    "emu": "*"
+    "emu": "^0.0.2",
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.5.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-test": "^0.11.0",
+    "istanbul": "^0.3.0",
+    "jshint-stylish": "^0.4.0",
+    "mocha": "^1.21.4"
   },
   "tags": [
     "type",

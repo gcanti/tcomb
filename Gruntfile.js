@@ -11,26 +11,13 @@ module.exports = function (grunt) {
     
     pkg: grunt.file.readJSON('package.json'),
     
-    rig: {
-      compile: {
-        options: {
-          banner: banner + '\n\n'
-        },
-        files: {
-          'build/tcomb.js': [
-            'src/tcomb.js'
-          ]
-        }
-      }
-    },
-    
     jshint: {
       options: {
         jshintrc: '.jshintrc',
         reporter: require('jshint-stylish')
       },
       all: [
-        'build/tcomb.js'
+        'index.js'
       ]
     },
     
@@ -47,7 +34,7 @@ module.exports = function (grunt) {
           sourceMap: 'build/tcomb.min.map.js'
         },
         files: {
-          'build/tcomb.min.js': ['build/tcomb.js']
+          'build/tcomb.min.js': ['index.js']
         }
       }
     },
@@ -67,13 +54,12 @@ module.exports = function (grunt) {
     },
 
     emu: {
-      'README.md': 'build/tcomb.js'
+      'README.md': 'index.js'
     }
 
   });
 
   // plugins
-  grunt.loadNpmTasks('grunt-rigger');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -87,8 +73,8 @@ module.exports = function (grunt) {
 
     fs.writeFileSync(this.target, emu.getComments(source));
   });
-  grunt.registerTask('doc', ['rig', 'emu']);
+  grunt.registerTask('doc', ['emu']);
   grunt.registerTask('test', ['mochaTest']);
-  grunt.registerTask('default', ['rig', 'test', 'watch']);
-  grunt.registerTask('build', ['rig', 'jshint', 'test', 'uglify', 'emu']);
+  grunt.registerTask('default', ['test', 'watch']);
+  grunt.registerTask('build', ['jshint', 'test', 'uglify', 'emu']);
 };

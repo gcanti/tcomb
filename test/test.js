@@ -1,6 +1,6 @@
 "use strict";
 var assert = require('assert');
-var t = require('../build/tcomb');
+var t = require('../index');
 
 var errs = t.errs;
 var Any = t.Any;
