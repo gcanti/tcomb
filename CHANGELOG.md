@@ -1,17 +1,21 @@
 Roadmap
 =======
 
-- TODO subtype combinator: add a reference to the super type prototype, fix #22
-- TODO add `Dict(A, B)` combinator, for dictionaries, fix #21
+# v0.1.0
 
-# v.0.0.12
+- TODO add `Dict(A)` combinator, for dictionaries, fix #21
+
+# v0.0.12
 
 - more verbose error messages, fix #25
 - list#is() depends on `this`, fix #27
 - tuple#is() depends on `this`, fix #28
+
+**BREAKING**
+
 - `enums.of()` should generate values equals to keys, fix #23
 
-# v.0.0.11
+# v0.0.11
 
 - forbid the use of `new` for all types but structs, fix #8
 - make maybe combinator idempotent, fix #9
