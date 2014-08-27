@@ -4,7 +4,7 @@
 //     tcomb may be freely distributed under the MIT license.
 
 /**
-    % tcomb
+    % tcomb-validation
 
     ![tcomb logo](http://gcanti.github.io/resources/tcomb/logo.png)
 
