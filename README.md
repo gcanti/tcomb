@@ -1,4 +1,4 @@
-% tcomb-validation
+% tcomb
 
 ![tcomb logo](http://gcanti.github.io/resources/tcomb/logo.png)
 
