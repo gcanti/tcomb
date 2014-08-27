@@ -568,7 +568,7 @@ describe('enums', function () {
             eq(T('a'), 'a');
             throwsWithMessage(function () {
                 T('b')
-            }, 'Invalid type argument `value` of value `"b"` supplied to `T`, expected a `Str`.');
+            }, 'Invalid type argument `value` of value `"b"` supplied to `T`, expected a valid enum.');
         });
     });
     describe('#is(x)', function () {
