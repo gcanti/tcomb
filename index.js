@@ -1,10 +1,5 @@
-//     tcomb 0.0.12
-//     https://github.com/gcanti/tcomb
-//     (c) 2014 Giulio Canti <giulio.canti@gmail.com>
-//     tcomb may be freely distributed under the MIT license.
-
 /**
-    % tcomb-validation
+    % tcomb
 
     ![tcomb logo](http://gcanti.github.io/resources/tcomb/logo.png)
 
