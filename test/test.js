@@ -207,7 +207,7 @@ describe('Any', function () {
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
                 new T();
-            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'Any'));
+            }, 'Operator `new` is forbidden for `Any`');
         });
     });
     describe('#is(x)', function () {
@@ -252,7 +252,7 @@ describe('primitives types constructors', function () {
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
                 new T();
-            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T)));
+            }, 'Operator `new` is forbidden for `' + getName(T) + '`');
         });
     });
 });
@@ -527,7 +527,7 @@ describe('struct', function () {
         it('should throw if options.update is missing', function () {
             throwsWithMessage(function () {
                 var newInstance = Type.update(instance, {name: 'Canti'});
-            }, errs.ERR_OPTIONS_UPDATE_MISSING);
+            }, 'Missing `options.update` implementation');
         });
         it('should return a new instance if options.update is defined', function () {
             t.options.update = function (instance, updates) {
@@ -562,7 +562,7 @@ describe('enums', function () {
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
                 new T('a');
-            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
+            }, 'Operator `new` is forbidden for `T`');
         });
         it('should accept only valid values', function () {
             eq(T('a'), 'a');
@@ -656,7 +656,7 @@ describe('union', function () {
                 var T = union([Str, Num], 'T');
                 T.dispatch = function () { return Str; }
                 new T('a');
-            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
+            }, 'Operator `new` is forbidden for `T`');
         });
         it('should not throw if used with new and union types are instantiables with new', function () {
             doesNotThrow(function () {
@@ -702,7 +702,7 @@ describe('maybe', function () {
             throwsWithMessage(function () {
                 var T = maybe(Str, 'T');
                 new T();
-            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
+            }, 'Operator `new` is forbidden for `T`');
         });
         it('should coerce values', function () {
             var T = maybe(Point);
@@ -793,7 +793,7 @@ describe('tuple', function () {
         it('should throw if options.update is missing', function () {
             throwsWithMessage(function () {
                 var newInstance = Type.update(instance, ['b', 2]);
-            }, errs.ERR_OPTIONS_UPDATE_MISSING);
+            }, 'Missing `options.update` implementation');
         });
         it('should return a new instance if options.update is defined', function () {
             t.options.update = function (instance, updates) {
@@ -862,7 +862,7 @@ describe('list', function () {
         it('should throw if options.update is missing', function () {
             throwsWithMessage(function () {
                 var newInstance = Type.update(instance, ['b', 2]);
-            }, errs.ERR_OPTIONS_UPDATE_MISSING);
+            }, 'Missing `options.update` implementation');
         });
         it('should return a new instance if options.update is defined', function () {
             t.options.update = function (instance, updates) {
@@ -906,7 +906,7 @@ describe('subtype', function () {
             throwsWithMessage(function () {
                 var T = subtype(Str, function () { return true; }, 'T');
                 new T();
-            }, format(errs.ERR_NEW_OPERATOR_FORBIDDEN, 'T'));
+            }, 'Operator `new` is forbidden for `T`');
         });
         it('should coerce values', function () {
             var T = subtype(Point, function () { return true; });
