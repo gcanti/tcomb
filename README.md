@@ -41,6 +41,7 @@ You can handle:
 - tuple
 - subtype
 - list
+- dict
 - function type (experimental)
 
 ## Quick Examples
@@ -55,7 +56,8 @@ var Product = struct({
     shippings: list(Str),       // a list of shipping methods
     category: Category,         // enum, one of [audio, video]
     price: union(Num, Price),   // a price (dollars) OR in another currency
-    size: tuple([Num, Num])     // width x height
+    size: tuple([Num, Num]),    // width x height
+    warranty: dict(Num)         // a dictionary country -> covered years
 });
 
 var Url = subtype(Str, function (s) {
@@ -74,7 +76,11 @@ var json = {
     shippings: ['Same Day', 'Next Businness Day'],
     category: 'audio',
     price: {currency: 'EUR', amount: 100},
-    size: [2.4, 4.1]
+    size: [2.4, 4.1],
+    warranty: {
+      US: 2,
+      IT: 1
+    }
 };
 
 // get an immutable instance, `new` is optional
@@ -181,9 +187,7 @@ options.onFail = function (message) {
   
 #### function `options.update`
   
-TODO: better docs
-  
-Adds to structs, tuples and lists a static method `update` that returns a new instance
+Adds to structs, tuples, lists and dicts a static method `update` that returns a new instance
 without modifying the original.
   
 Example
@@ -432,6 +436,30 @@ Returns `true` if `x` belongs to the list.
 var p1 = Point({x: 0, y: 0});
 var p2 = Point({x: 1, y: 2});
 Path.is([p1, p2]); // => true
+```
+
+### dict(type, [name])
+  
+Defines a dictionary Str -> type.
+  
+- `type` the type of the values
+- `name` optional string useful for debugging
+  
+Example
+  
+```javascript
+"use strict";
+  
+// defines a dictionary of numbers
+var Tel = dict(Num);
+```
+  
+#### is(x)
+  
+Returns `true` if `x` is an instance of the dict.
+  
+```javascript
+Tel.is({'jack': 4098, 'sape': 4139}); // => true
 ```
 
 ### func(Arguments, f, [Return], [name])
