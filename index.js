@@ -7,7 +7,9 @@
     JavaScript values at runtime with a simple syntax. It is great for checking external input, 
     for testing and for **adding safety** to your internal code. 
 
-    Some features include:
+    # Overview
+
+    ## Features
 
     - **write complex domain models** in a breeze and with small code footprint
     - easy debugging
@@ -44,6 +46,15 @@
     - list
     - dict
     - function type (experimental)
+
+    ## Contents
+
+    - [Quick Examples](#quick-examples)
+    - [Setup](#setup)
+    - [Requirements](#requirements)
+    - [Tests](#tests)
+    - [The Idea](#the-idea)
+    - [Api](#api)
 
     ## Quick Examples
 
@@ -987,8 +998,6 @@
       Example
   
       ```javascript
-      "use strict";
-  
       // defines a dictionary of numbers
       var Tel = dict(Num);
       ```
