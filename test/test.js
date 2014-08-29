@@ -1,6 +1,7 @@
 "use strict";
 var assert = require('assert');
 var t = require('../index');
+var React = require('react/addons');
 
 var errs = t.errs;
 var Any = t.Any;
@@ -531,10 +532,12 @@ describe('struct', function () {
             }, 'Missing `options.update` implementation');
         });
         it('should return a new instance if options.update is defined', function () {
-            t.options.update = function (instance, updates) {
-                return updates;
+            return;
+            t.options.update = function (x, updates) {
+              x = mixin({}, x);
+              return React.addons.update(x, updates);
             };
-            var newInstance = Type.update(instance, {name: 'Canti'});
+            var newInstance = Type.update(instance, {name: {$set: 'Canti'}});
             ok(Type.is(newInstance));
             eq(instance.name, 'Giulio');
             eq(newInstance.name, 'Canti');

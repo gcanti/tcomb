@@ -26,7 +26,8 @@
     "grunt-mocha-test": "^0.11.0",
     "istanbul": "^0.3.0",
     "jshint-stylish": "^0.4.0",
-    "mocha": "^1.21.4"
+    "mocha": "^1.21.4",
+    "react": "*"
   },
   "tags": [
     "type",

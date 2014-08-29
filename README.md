@@ -194,7 +194,9 @@ Example
   
 ```javascript
 // see http://facebook.github.io/react/docs/update.html
-options.update = React.addons.update;
+options.update = function (x, updates) {
+  return React.addons.update(mixin({}, x), updates);
+};
 var p1  = Point({x: 0, y: 0});
 var p2 = Point.update(p1, {x: {$set: 1}}); // => Point({x: 1, y: 0})
 ```
