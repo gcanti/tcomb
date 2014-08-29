@@ -970,6 +970,65 @@
     return List;
   }
 
+  function dict(type, name) {
+  
+    // check combinator args
+    var combinator = 'dict';
+    name = ensureName(name, combinator, [type]);
+    assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
+
+    // cache expected value
+    var expected = format('a dict of `%s`', getName(type));
+  
+    function Dict(value, mut) {
+  
+      forbidNewOperator(this, Dict);
+      assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
+  
+      // makes Dict idempotent
+      if (Dict.isDict(value)) {
+        return value;
+      }
+  
+      var obj = {};
+      for (var k in value) {
+        if (value.hasOwnProperty(k)) {
+          var v = value[k];
+          obj[k] = type.is(v) ? v : type(v, mut);
+        }
+      }
+  
+      if (!mut) { 
+        Object.freeze(obj); 
+      }
+      return obj;
+    }
+  
+    Dict.meta = {
+      kind: 'dict',
+      type: type,
+      name: name
+    };
+  
+    Dict.isDict = function (x) {
+      for (var k in x) {
+        if (x.hasOwnProperty(k) && !type.is(x[k])) {
+          return false;
+        }
+      }
+      return true;
+    };
+  
+    Dict.is = function (x) {
+      return Obj.is(x) && Dict.isDict(x);
+    };
+  
+  
+    Dict.update = update;
+  
+    return Dict;
+  }
+
   /**
       ### func(Arguments, f, [Return], [name])
   
@@ -1069,6 +1128,7 @@
     tuple: tuple,
     subtype: subtype,
     list: list,
+    dict: dict,
     func: func
   };
 }));

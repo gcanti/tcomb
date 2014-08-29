@@ -3,7 +3,7 @@
 ![tcomb logo](http://gcanti.github.io/resources/tcomb/logo.png)
 
 tcomb is a library for Node.js and the browser (2K gzipped) which allows you to **check the types** of 
-JavaScript values at runtime with a simple syntax. It is great for **Domain Driven Design**, for checking external input, 
+JavaScript values at runtime with a simple syntax. It is great for checking external input, 
 for testing and for **adding safety** to your internal code. 
 
 Some features include:

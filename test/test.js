@@ -21,6 +21,7 @@ var tuple = t.tuple;
 var maybe = t.maybe;
 var subtype = t.subtype;
 var list = t.list;
+var dict = t.dict;
 var func = t.func;
 var getName = t.getName;
 var mixin = t.mixin;
@@ -534,9 +535,9 @@ describe('struct', function () {
                 return updates;
             };
             var newInstance = Type.update(instance, {name: 'Canti'});
-            assert(Type.is(newInstance));
-            assert(instance.name === 'Giulio');
-            assert(newInstance.name === 'Canti');
+            ok(Type.is(newInstance));
+            eq(instance.name, 'Giulio');
+            eq(newInstance.name, 'Canti');
             t.options.update = null;
         });
     });
@@ -844,6 +845,11 @@ describe('list', function () {
             var p2 = T(p1);
             eq(p2, p1);
         });    
+        it('should throw if used with new', function () {
+            throwsWithMessage(function () {
+                new T('a');
+            }, 'Operator `new` is forbidden for `T`');
+        });
     });
     describe('#is(x)', function () {
         var Path = list(Point);
@@ -938,6 +944,81 @@ describe('subtype', function () {
         });
         it('should return false when x is not a subtype', function () {
             ko(Positive.is(-1));
+        });
+    });
+});
+
+//
+// dict
+//
+
+describe('dict', function () {
+    describe('combinator', function () {
+        it('should throw if used with wrong arguments', function () {
+            throwsWithMessage(function () {
+                dict();
+            }, 'Invalid combinator argument `type` of value `undefined` supplied to `dict`, expected a type.');
+            throwsWithMessage(function () {
+                dict(Point, 1);
+            }, 'Invalid combinator argument `name` of value `1` supplied to `dict`, expected a `maybe(Str)`.');
+        });
+    });
+    describe('constructor', function () {
+        var S = struct({}, 'S');
+        var T = dict(S, 'T');
+        it('should coerce values', function () {
+            var t = T({a: {}});
+            ok(S.is(t.a));
+        });
+        it('should accept only valid values', function () {
+            throwsWithMessage(function () {
+                T(1);
+            }, 'Invalid type argument `value` of value `1` supplied to `T`, expected a dict of `S`.');
+            throwsWithMessage(function () {
+                T({a: 1});
+            }, 'Invalid type argument `value` of value `1` supplied to `S`, expected an `Obj`.');
+        });
+        it('should be idempotent', function () {
+            var T = dict(Point);
+            var p1 = new Point({x: 0, y: 0});
+            var p2 = new Point({x: 1, y: 1});
+            var t1 = T({a: p1, b: p2});
+            var t2 = T(t1);
+            eq(t2, t1);
+        });    
+        it('should throw if used with new', function () {
+            throwsWithMessage(function () {
+                new T('a');
+            }, 'Operator `new` is forbidden for `T`');
+        });
+    });
+    describe('#is(x)', function () {
+        var T = dict(Point);
+        var p1 = new Point({x: 0, y: 0});
+        var p2 = new Point({x: 1, y: 1});
+        it('should return true when x is a list', function () {
+            ok(T.is({a: p1, b: p2}));
+        });
+        it('should not depend on `this`', function () {
+            ok([{a: p1, b: p2}].every(T.is));
+        });
+    });
+    describe('#update()', function () {
+        var Type = dict(Str);
+        var instance = Type({p1: 'a', p2: 'b'});
+        it('should throw if options.update is missing', function () {
+            throwsWithMessage(function () {
+                var newInstance = Type.update(instance, {p2: 'c'});
+            }, 'Missing `options.update` implementation');
+        });
+        it('should return a new instance if options.update is defined', function () {
+            t.options.update = function (instance, updates) {
+                return mixin(mixin({}, instance), updates, true);
+            };
+            var newInstance = Type.update(instance, {p2: 'c'});
+            ok(Type.is(newInstance));
+            eq(newInstance.p2, 'c');
+            t.options.update = null;
         });
     });
 });
