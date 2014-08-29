@@ -6,7 +6,15 @@ tcomb is a library for Node.js and the browser (2K gzipped) which allows you to 
 JavaScript values at runtime with a simple syntax. It is great for checking external input, 
 for testing and for **adding safety** to your internal code. 
 
-# Overview
+# Contents
+
+- [Features](#features)
+- [Quick Examples](#quick-examples)
+- [Setup](#setup)
+- [Requirements](#requirements)
+- [Tests](#tests)
+- [The Idea](#the-idea)
+- [Api](#api)
 
 ## Features
 
@@ -45,15 +53,6 @@ You can handle:
 - list
 - dict
 - function type (experimental)
-
-## Contents
-
-- [Quick Examples](#quick-examples)
-- [Setup](#setup)
-- [Requirements](#requirements)
-- [Tests](#tests)
-- [The Idea](#the-idea)
-- [Api](#api)
 
 ## Quick Examples
 
@@ -135,7 +134,7 @@ Browser
 
 or download the `build/tcomb.min.js` file.
 
-### Requirements
+## Requirements
 
 This library uses a few ES5 methods
 
