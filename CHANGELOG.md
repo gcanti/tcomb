@@ -3,7 +3,7 @@ Roadmap
 
 # v0.1.0
 
-- TODO add `Dict(A)` combinator, for dictionaries, fix #21
+- added `Dict(A)` combinator, for dictionaries, fix #21
 
 # v0.0.12
 

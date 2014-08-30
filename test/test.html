@@ -1,4 +1,14 @@
 <!-- this file is for try new ideas and fast debug -->
-<script src="../build/tcomb.js"></script>
+<script src="../index.js"></script>
 <script>
+'use strict';
+var Point = t.struct({
+  x: t.Num,
+  y: t.Num
+});
+var p = new Point({x: 0, y: 0});
+t.options.struct.prototype.length = function () {
+  return Object.keys(this.constructor.meta.props).length;
+};
+console.log(p.length());
 </script>
