@@ -598,6 +598,7 @@
       forbidNewOperator(this, Union);
       assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
       var T = Union.dispatch(value);
+      assert(isType(T), '%s.dispatch() returns no constructor', name);
       // a union type is idempotent iif every T in types is idempotent
       return T(value, mut);
     }
