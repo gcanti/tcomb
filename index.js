@@ -405,7 +405,7 @@
   
     function Primitive(value) {
       forbidNewOperator(this, Primitive);
-      assert(Primitive.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, format('a `%s`', name));
+      assert(is(value), errs.ERR_BAD_TYPE_VALUE, value, name, format('a `%s`', name));
       // all primitives types are idempotent
       return value;
     }
@@ -511,12 +511,12 @@
   
     function Struct(value, mut) {
   
-      assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, 'an `Obj`');
-  
       // makes Struct idempotent
       if (Struct.is(value)) {
         return value;
       }
+  
+      assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, 'an `Obj`');
   
       // makes `new` optional
       if (!(this instanceof Struct)) { 
@@ -527,7 +527,7 @@
         if (props.hasOwnProperty(k)) {
           var type = props[k];
           var v = value[k];
-          this[k] = type.is(v) ? v : type(v, mut);
+          this[k] = type(v, mut);
         }
       }
   
@@ -962,7 +962,7 @@
       var arr = [];
       for (var i = 0, len = value.length ; i < len ; i++ ) {
         var v = value[i];
-        arr.push(type.is(v) ? v : type(v, mut));
+        arr.push(type(v, mut));
       }
   
       if (!mut) { 
@@ -1039,7 +1039,7 @@
       for (var k in value) {
         if (value.hasOwnProperty(k)) {
           var v = value[k];
-          obj[k] = type.is(v) ? v : type(v, mut);
+          obj[k] = type(v, mut);
         }
       }
   
