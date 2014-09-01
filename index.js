@@ -525,9 +525,7 @@
       
       for (var k in props) {
         if (props.hasOwnProperty(k)) {
-          var type = props[k];
-          var v = value[k];
-          this[k] = type(v, mut);
+          this[k] = props[k](value[k], mut);
         }
       }
   
