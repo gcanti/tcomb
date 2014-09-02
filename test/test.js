@@ -24,9 +24,11 @@ var subtype = t.subtype;
 var list = t.list;
 var dict = t.dict;
 var func = t.func;
-var getName = t.getName;
-var mixin = t.mixin;
-var format = t.format;
+var getName = t.util.getName;
+var getKind = t.util.getKind;
+var isKind = t.util.isKind;
+var mixin = t.util.mixin;
+var format = t.util.format;
 
 //
 // setup
@@ -175,6 +177,8 @@ describe('getName', function () {
     var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
     var UnnamedList = list(Str);
     var NamedList = list(Str, 'NamedList');
+    var UnnamedDict = dict(Str);
+    var NamedDict = dict(Str, 'NamedDict');
 
     it('should return the name of a named type', function () {
         eq(getName(NamedStruct), 'NamedStruct');
@@ -184,6 +188,7 @@ describe('getName', function () {
         eq(getName(NamedTuple), 'NamedTuple');
         eq(getName(NamedSubtype), 'NamedSubtype');
         eq(getName(NamedList), 'NamedList');
+        eq(getName(NamedDict), 'NamedDict');
     });
     it('should return a meaningful name of a unnamed type', function () {
         eq(getName(UnnamedStruct), 'struct');
@@ -193,6 +198,57 @@ describe('getName', function () {
         eq(getName(UnnamedTuple), 'tuple([Str, Num])');
         eq(getName(UnnamedSubtype), 'subtype(Str)');
         eq(getName(UnnamedList), 'list(Str)');
+        eq(getName(UnnamedDict), 'dict(Str)');
+    });
+});
+
+describe('getKind', function () {
+
+    var NamedStruct = struct({}, 'NamedStruct');
+    var NamedUnion = union([Str, Num], 'NamedUnion');
+    var NamedMaybe = maybe(Str, 'NamedMaybe');
+    var NamedEnums = enums({}, 'NamedEnums');
+    var NamedTuple = tuple([Str, Num], 'NamedTuple');
+    var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
+    var NamedList = list(Str, 'NamedList');
+    var NamedDict = dict(Str, 'NamedDict');
+
+    it('should return the name of a named type', function () {
+        eq(getKind(Any), 'irriducible');
+        eq(getKind(Str), 'irriducible');
+        eq(getKind(NamedStruct), 'struct');
+        eq(getKind(NamedUnion), 'union');
+        eq(getKind(NamedMaybe), 'maybe');
+        eq(getKind(NamedEnums), 'enums');
+        eq(getKind(NamedTuple), 'tuple');
+        eq(getKind(NamedSubtype), 'subtype');
+        eq(getKind(NamedList), 'list');
+        eq(getKind(NamedDict), 'dict');
+    });
+});
+
+describe('isKind', function () {
+
+    var NamedStruct = struct({}, 'NamedStruct');
+    var NamedUnion = union([Str, Num], 'NamedUnion');
+    var NamedMaybe = maybe(Str, 'NamedMaybe');
+    var NamedEnums = enums({}, 'NamedEnums');
+    var NamedTuple = tuple([Str, Num], 'NamedTuple');
+    var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
+    var NamedList = list(Str, 'NamedList');
+    var NamedDict = dict(Str, 'NamedDict');
+
+    it('should return the name of a named type', function () {
+        ok(isKind(Any, 'irriducible'));
+        ok(isKind(Str, 'irriducible'));
+        ok(isKind(NamedStruct, 'struct'));
+        ok(isKind(NamedUnion, 'union'));
+        ok(isKind(NamedMaybe, 'maybe'));
+        ok(isKind(NamedEnums, 'enums'));
+        ok(isKind(NamedTuple, 'tuple'));
+        ok(isKind(NamedSubtype, 'subtype'));
+        ok(isKind(NamedList, 'list'));
+        ok(isKind(NamedDict, 'dict'));
     });
 });
 
@@ -500,6 +556,9 @@ describe('struct', function () {
                 struct();
             }, 'Invalid combinator argument `props` of value `undefined` supplied to `struct`, expected an `Obj`.');
             throwsWithMessage(function () {
+                struct({a: null});
+            }, 'Invalid combinator argument `props` of value `{"a":null}` supplied to `struct`, expected a dict of types.');
+            throwsWithMessage(function () {
                 struct({}, 1);
             }, 'Invalid combinator argument `name` of value `1` supplied to `struct`, expected a `maybe(Str)`.');
         });
@@ -532,7 +591,6 @@ describe('struct', function () {
             }, 'Missing `options.update` implementation');
         });
         it('should return a new instance if options.update is defined', function () {
-            return;
             t.options.update = function (x, updates) {
               x = mixin({}, x);
               return React.addons.update(x, updates);
@@ -648,8 +706,19 @@ describe('union', function () {
         it('should throw when dispatch() is not implemented', function () {
             throwsWithMessage(function () {
                 var T = union([Str, Num], 'T');
+                T.dispatch = null;
                 T(1);
             }, 'unimplemented T.dispatch()');
+        });
+        it('should have a default dispatch() implementation', function () {
+            var T = union([Str, Num], 'T');
+            eq(T(1), 1);
+        });
+        it('should throw when dispatch() does not return a type', function () {
+            throwsWithMessage(function () {
+                var T = union([Str, Num], 'T');
+                T(true);
+            }, 'T.dispatch() returns no type');
         });
         it('should build instances when dispatch() is implemented', function () {
             var circle = Shape({center: {x: 0, y: 0}, radius: 10});
@@ -1042,10 +1111,10 @@ describe('func', function () {
         it('should throw if used with wrong arguments', function () {
             throwsWithMessage(function () {
                 func();
-            }, 'Invalid combinator argument `Arguments` of value `undefined` supplied to `func()`, expected a type.');
+            }, 'Invalid combinator argument `Arguments` of value `undefined` supplied to `func()`, expected a type or a list of types.');
             throwsWithMessage(function () {
                 func(null, True, null, 'myFunc');
-            }, 'Invalid combinator argument `Arguments` of value `null` supplied to `myFunc`, expected a type.');
+            }, 'Invalid combinator argument `Arguments` of value `null` supplied to `myFunc`, expected a type or a list of types.');
             throwsWithMessage(function () { 
                 func(Arguments, True, 1); 
             }, 'Invalid combinator argument `Return` of value `1` supplied to `func()`, expected a type.');
@@ -1053,27 +1122,25 @@ describe('func', function () {
                 func(Arguments, null); 
             }, 'Invalid combinator argument `f` of value `null` supplied to `func()`, expected a `Func`.');
         });
-        it('should be idempotent', function () {
-            var A = maybe(Point);
-            var B = maybe(A);
-            eq(A, B); 
+        it('should accept a list of types as first argument', function () {
+            var repeat = func([Str, Num], function (s, n) { return new Array(n+1).join(s); });
+            eq(repeat('a', 3), 'aaa');
         });
-    });
-
-    describe('should be idempotent', function () {
-        it('when Arguments and Return are the same', function () {
-            var Arguments = tuple([Str, Str]);
-            var f = function (s) { return s; };
-            var g = func(Arguments, f, Str);
-            var h = func(Arguments, g, Str);
-            eq(h, g);
-        });
-        it('when Arguments are the same and Return is not defined', function () {
-            var Arguments = tuple([Str, Str]);
-            var f = function (s) { return s; };
-            var g = func(Arguments, f, null);
-            var h = func(Arguments, g);
-            eq(h, g);
+        describe('should be idempotent', function () {
+            it('when Arguments and Return are the same', function () {
+                var Arguments = tuple([Str, Str]);
+                var f = function (s) { return s; };
+                var g = func(Arguments, f, Str);
+                var h = func(Arguments, g, Str);
+                eq(h, g);
+            });
+            it('when Arguments are the same and Return is not defined', function () {
+                var Arguments = tuple([Str, Str]);
+                var f = function (s) { return s; };
+                var g = func(Arguments, f, null);
+                var h = func(Arguments, g);
+                eq(h, g);
+            });
         });
     });
 

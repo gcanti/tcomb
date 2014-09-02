@@ -1,6 +1,6 @@
 {
   "name": "tcomb",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Pragmatic runtime type checking for JavaScript",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
-    "emu": "^0.0.2",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-jshint": "^0.10.0",

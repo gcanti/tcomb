@@ -57,7 +57,7 @@ You can handle:
 - subtype
 - list
 - dict
-- function type (experimental)
+- function type
 
 ## Quick Examples
 
@@ -70,7 +70,7 @@ var Product = struct({
     home: Url,                  // a subtype of a string
     shippings: list(Str),       // a list of shipping methods
     category: Category,         // enum, one of [audio, video]
-    price: union(Num, Price),   // a price (dollars) OR in another currency
+    price: union([Num, Price]), // a price (dollars) OR in another currency
     size: tuple([Num, Num]),    // width x height
     warranty: dict(Num)         // a dictionary country -> covered years
 });
@@ -79,7 +79,7 @@ var Url = subtype(Str, function (s) {
     return s.indexOf('http://') === 0;
 });
 
-var Category = enums({ audio: 0, video: 1 });
+var Category = enums.of('audio video');
 
 var Price = struct({ currency: Str, amount: Num });
 
@@ -479,9 +479,9 @@ Tel.is({'jack': 4098, 'sape': 4139}); // => true
 
 ### func(Arguments, f, [Return], [name])
   
-**Experimental**. Defines a function where the `arguments` and the return value are checked.
+Defines a function where the `arguments` and the return value are checked.
   
-- `Arguments` the type of `arguments`
+- `Arguments` the type of `arguments` (can be a list of types)
 - `f` the function to execute
 - `Return` optional, check the type of the return value
 - `name` optional string useful for debugging
@@ -489,7 +489,7 @@ Tel.is({'jack': 4098, 'sape': 4139}); // => true
 Example
   
 ```javascript
-var sum = func(tuple([Num, Num]), function (a, b) {
+var sum = func([Num, Num], function (a, b) {
     return a + b;
 }, Num);
   

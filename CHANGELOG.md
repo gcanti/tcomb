@@ -1,6 +1,20 @@
 Roadmap
 =======
 
+# v0.2.0
+
+- add `isKind, getKind` functions, fix #29
+- add to `struct` an assert on `props` argument, fix #30
+- add sweet.js macros for all combinators, fix #32
+- add a `defaultDispatch` function to `union` combinator, fix #33
+- add overloading to `func`, fix #35
+
+**BREAKING**
+
+- now the kind of Any and all primitives is 'irriducible' fix #34
+- uniform `Any` and primitives, export `irriducible` function, fix #34
+- group all util functions in a `util` namespace, fix #36
+
 # v0.1.0
 
 - added `Dict(A)` combinator, for dictionaries, fix #21
