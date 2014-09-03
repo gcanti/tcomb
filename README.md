@@ -32,6 +32,7 @@ its usability, please let me know.
   - [lists](#lists)
   - [dicts](#dicts)
   - [functions](#functions)
+- [sweet.js macros (experimental)](#macros)
 
 # Features
 
@@ -547,6 +548,75 @@ var sum = func([Num, Num], function (a, b) {
   
 sum(1, 2); // => 3
 sum(1, 'a'); // => fail!
+```
+
+# Macros
+
+**Experimental**. I added a `tcomb.sjs` file containing some [sweet.js](http://sweetjs.org/) macros, here some examples:
+
+```js
+// structs
+type Point struct {
+  x: Num,
+  y: Num
+}
+
+// unions
+type Shape union {
+  Circle,
+  Rectangle
+}
+
+// tuples
+type Coords tuple {
+  Num,
+  Num
+}
+
+// enums
+type Direction enums {
+  'North', 
+  'East',
+  'South', 
+  'West'
+}
+
+// enums with specified values 
+type Direction enums {
+  'North': 0, 
+  'East': 1,
+  'South': 2, 
+  'West': 3
+}
+
+// subtypes
+type Positive subtype Num n {
+  return n > 0;
+}
+
+// irriducibles types, like JavaScript primitives
+type Irriducible irriducible x {
+  return typeof x === 'function';
+}
+
+// maybe
+type Maybe maybe Str
+
+// lists
+type List list Str
+
+// dictionaries
+type Dict dict Str
+
+// functions
+fn add (x: Num, y: Num) {
+    return x + y;
+}
+
+// functions with checked return value
+fn add (x: Num, y: Num) -> Num {
+    return x + y;
+}
 ```
 
 # Contribution
