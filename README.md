@@ -20,8 +20,20 @@ its usability, please let me know.
 - [Tests](#tests)
 - [The Idea](#the-idea)
 - [Api](#api)
+  - [options](#options)
+    - [options.onFail](#options-onfail)
+    - [options.update](#options-update)
+  - [assert](#assert)
+  - [structs](#structs)
+  - [unions](#unions)
+  - [maybe](#maybe)
+  - [enums](#enums)
+  - [subtypes](#subtypes)
+  - [lists](#lists)
+  - [dicts](#dicts)
+  - [functions](#functions)
 
-## Features
+# Features
 
 - **write complex domain models** in a breeze and with small code footprint
 - easy debugging
@@ -59,7 +71,7 @@ You can handle:
 - dict
 - function type
 
-## Quick Examples
+# Quick Examples
 
 Let's build a product model
 
@@ -127,7 +139,7 @@ function Point (x, y) {
 var p = new Point(1, 'a'); // => fail! debugger kicks in
 ```
 
-## Setup
+# Setup
 
 Node
 
@@ -139,7 +151,7 @@ Browser
 
 or download the `build/tcomb.min.js` file.
 
-## Requirements
+# Requirements
 
 This library uses a few ES5 methods
 
@@ -165,11 +177,11 @@ you can use `es5-shim`, `es5-sham` and `json2` to support old browsers
 </script>
 ```
 
-## Tests
+# Tests
 
 Run `mocha` or `npm test` in the project root.
 
-## The Idea
+# The Idea
 
 What's a type? In tcomb a type is a function `T` such that
 
@@ -179,11 +191,11 @@ What's a type? In tcomb a type is a function `T` such that
 
 **Note**: 2. implies that `T` can be used as a default JSON decoder
 
-## Api
+# Api
 
-### options
+## options
   
-#### function `options.onFail`
+### options.onFail
   
 In production envs you don't want to leak failures to the user
   
@@ -200,7 +212,7 @@ options.onFail = function (message) {
 };
 ```
   
-#### function `options.update`
+### options.update
   
 Adds to structs, tuples, lists and dicts a static method `update` that returns a new instance
 without modifying the original.
@@ -216,7 +228,11 @@ var p1  = Point({x: 0, y: 0});
 var p2 = Point.update(p1, {x: {$set: 1}}); // => Point({x: 1, y: 0})
 ```
 
-### assert(guard, [message], [values...]);
+## assert
+
+```js
+assert(guard, [message], [values...]);
+```
   
 If `guard !== true` the debugger kicks in.
   
@@ -233,7 +249,11 @@ assert(1 === 2, 'error: %s !== %s', 1, 2); // throws 'error: 1 !== 2'
   
 To customize failure behaviour, see `options.onFail`.
 
-### struct(props, [name])
+## structs
+
+```js
+struct(props, [name])
+```
   
 Defines a struct like type.
   
@@ -266,7 +286,7 @@ p = Point({x: 1, y: 2}, true); // now p is mutable
 p.x = 2; // ok
 ```
   
-#### is(x)
+### is(x)
   
 Returns `true` if `x` is an instance of the struct.
   
@@ -274,7 +294,11 @@ Returns `true` if `x` is an instance of the struct.
 Point.is(p); // => true
 ```
 
-### union(types, [name])
+## unions
+
+```js
+union(types, [name])
+```
   
 Defines a union of types.
   
@@ -300,7 +324,7 @@ var Shape = union([
 ]);
 ```
   
-#### is(x)
+### is(x)
   
 Returns `true` if `x` belongs to the union.
   
@@ -308,7 +332,11 @@ Returns `true` if `x` belongs to the union.
 Shape.is(Circle({center: p, radius: 10})); // => true
 ```
 
-### maybe(type, [name])
+## maybe
+
+```js
+maybe(type, [name])
+```
   
 Same as `union([Nil, type])`.
   
@@ -321,7 +349,11 @@ Radio.is(null);    // => true
 Radio.is(1);       // => false
 ```
 
-### enums(map, [name])
+## enums
+
+```js
+enums(map, [name])
+```
   
 Defines an enum of strings.
   
@@ -339,14 +371,14 @@ var Direction = enums({
 });
 ```
   
-#### is(x)
+### is(x)
   
 Returns `true` if `x` belongs to the enum.
   
 ```javascript
 Direction.is('North'); // => true
 ```
-#### enums.of(keys, [name])
+### enums.of(keys, [name])
   
 Returns an enums of an array of keys, useful when you don't mind to define
 custom values for the enums.
@@ -364,7 +396,11 @@ var Direction = enums.of(['North', 'East', 'South', 'West']);
 Direction = enums.of('North East South West');
 ```
 
-### tuple(types, [name])
+## tuples
+
+```js
+tuple(types, [name])
+```
   
 Defines a tuple whose coordinates have the specified types.
   
@@ -380,7 +416,7 @@ var Area = tuple([Num, Num]);
 var area = Area([1, 2]);
 ```
   
-#### is(x)
+### is(x)
   
 Returns `true` if `x` belongs to the tuple.
   
@@ -390,7 +426,11 @@ Area.is([1, 'a']);    // => false, the second element is not a Num
 Area.is([1, 2, 3]);   // => false, too many elements
 ```
 
-### subtype(type, predicate, [name])
+## subtypes
+
+```js
+subtype(type, predicate, [name])
+```
   
 Defines a subtype of an existing type.
   
@@ -413,7 +453,7 @@ p = Q1Point({x: -1, y: -2}); // => fail!
 ```
 **Note**. You can't add methods to `Q1Point` `prototype`, add them to the supertype `prototype` if needed.
   
-#### is(x)
+### is(x)
   
 Returns `true` if `x` belongs to the subtype.
   
@@ -426,7 +466,11 @@ Int.is(2);      // => true
 Int.is(1.1);    // => false
 ```
 
-### list(type, [name])
+## lists
+
+```js
+list(type, [name])
+```
   
 Defines an array where all the elements are of type `T`.
   
@@ -445,7 +489,7 @@ var path = Path([
 ]);
 ```
   
-#### is(x)
+### is(x)
   
 Returns `true` if `x` belongs to the list.
   
@@ -455,7 +499,11 @@ var p2 = Point({x: 1, y: 2});
 Path.is([p1, p2]); // => true
 ```
 
-### dict(type, [name])
+## dicts
+
+```js
+dict(type, [name])
+```
   
 Defines a dictionary Str -> type.
   
@@ -469,7 +517,7 @@ Example
 var Tel = dict(Num);
 ```
   
-#### is(x)
+### is(x)
   
 Returns `true` if `x` is an instance of the dict.
   
@@ -477,7 +525,11 @@ Returns `true` if `x` is an instance of the dict.
 Tel.is({'jack': 4098, 'sape': 4139}); // => true
 ```
 
-### func(Arguments, f, [Return], [name])
+## functions
+
+```js
+func(Arguments, f, [Return], [name])
+```
   
 Defines a function where the `arguments` and the return value are checked.
   
@@ -497,17 +549,11 @@ sum(1, 2); // => 3
 sum(1, 'a'); // => fail!
 ```
 
-## IDEAS
-
-- explore generating UI based on domain models written with tcomb
-- explore auto validation of UI involving domain models written with tcomb
-- explore using tcomb with React.js
-
-## Contribution
+# Contribution
 
 If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.
 
-## License (MIT)
+# License (MIT)
 
 The MIT License (MIT)
 
