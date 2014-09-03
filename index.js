@@ -143,7 +143,7 @@
   
   // since in tcomb the only real constructors are those provided
   // by `struct`, the `new` operator is forbidden for all types
-  function forbidNewOperator(x, T) {
+  function blockNew(x, T) {
     assert(!(x instanceof T), errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T));
   }
   
@@ -162,7 +162,7 @@
   function irriducible(name, is) {
   
     function Irriducible(value) {
-      forbidNewOperator(this, Irriducible);
+      blockNew(this, Irriducible);
       assert(is(value), errs.ERR_BAD_TYPE_VALUE, value, name, format('a `%s`', name));
       // all primitives types are idempotent
       return value;
@@ -277,7 +277,7 @@
     assert(areTypes(types) && types.length >= 2, errs.ERR_BAD_COMBINATOR_ARGUMENT, 'types', types, combinator, 'a list(type) of length >= 2');
   
     function Union(value, mut) {
-      forbidNewOperator(this, Union);
+      blockNew(this, Union);
       assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
       var T = Union.dispatch(value);
       assert(isType(T), '%s.dispatch() returns no type', name);
@@ -322,7 +322,7 @@
     }
   
     function Maybe(value, mut) {
-      forbidNewOperator(this, Maybe);
+      blockNew(this, Maybe);
       // a maybe type is idempotent iif type is idempotent
       return Nil.is(value) ? null : type(value, mut);
     }
@@ -350,7 +350,7 @@
     var expected = 'a valid enum';
   
     function Enums(value) {
-      forbidNewOperator(this, Enums);
+      blockNew(this, Enums);
       assert(Enums.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
       // all enums types are idempotent
       return value;
@@ -392,7 +392,7 @@
   
     function Tuple(value, mut) {
   
-      forbidNewOperator(this, Tuple);
+      blockNew(this, Tuple);
       assert(Arr.is(value) && value.length === len, errs.ERR_BAD_TYPE_VALUE, value, name, expected);
   
       // makes Tuple idempotent
@@ -446,7 +446,7 @@
     var expected = predicate.__doc__ || 'a valid value for the predicate';
   
     function Subtype(value, mut) {
-      forbidNewOperator(this, Subtype);
+      blockNew(this, Subtype);
       // a subtype type is idempotent iif T is idempotent
       var x = type(value, mut);
       assert(predicate(x), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
@@ -486,7 +486,7 @@
   
     function List(value, mut) {
   
-      forbidNewOperator(this, List);
+      blockNew(this, List);
       assert(Arr.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
   
       // makes List idempotent
@@ -538,7 +538,7 @@
   
     function Dict(value, mut) {
   
-      forbidNewOperator(this, Dict);
+      blockNew(this, Dict);
       assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
   
       // makes Dict idempotent
