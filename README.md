@@ -590,7 +590,7 @@ type Direction enums {
 }
 
 // subtypes
-type Positive subtype Num n {
+type Positive subtype<Num> n {
   return n > 0;
 }
 
@@ -600,13 +600,13 @@ type Irriducible irriducible x {
 }
 
 // maybe
-type Maybe maybe Str
+type Maybe maybe<Str>
 
 // lists
-type List list Str
+type List list<Str>
 
 // dictionaries
-type Dict dict Str
+type Dict dict<Str>
 
 // functions
 fn add (x: Num, y: Num) {

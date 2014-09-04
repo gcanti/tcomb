@@ -35,7 +35,7 @@ macro type {
         $($lit,) ...
     ], identToLit $name);
   }
-  rule { $name:ident subtype $subtype:ident $x:ident { $body ... } } => {
+  rule { $name:ident subtype '<' $subtype:ident '>' $x:ident { $body ... } } => {
     var $name = subtype($subtype, function ($x) {
         $body ...
     }, identToLit $name);
@@ -45,13 +45,13 @@ macro type {
         $body ...
     }, identToLit $name);
   }
-  rule { $name:ident maybe $type:ident } => {
+  rule { $name:ident maybe '<' $type:ident '>' } => {
     var $name = maybe($type, identToLit $name);
   }
-  rule { $name:ident list $type:ident } => {
+  rule { $name:ident list '<' $type:ident '>' } => {
     var $name = list($type, identToLit $name);
   }
-  rule { $name:ident dict $type:ident } => {
+  rule { $name:ident dict '<' $type:ident '>' } => {
     var $name = dict($type, identToLit $name);
   }
 }
@@ -66,5 +66,5 @@ macro fn {
     var $name = func([$($type,) ...], function ($($param,) ...) {
       $body ...
     });
-  }}
-
+  }
+}
