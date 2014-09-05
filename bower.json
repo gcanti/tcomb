@@ -27,11 +27,14 @@
   "ignore": [
     "**/.*",
     "node_modules",
-    "src",
     "test",
     "coverage",
     "package.json",
     "Gruntfile.js",
-    ".jshintrc"
+    ".jshintrc",
+    "tcomb.sjs",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
   ]
 }

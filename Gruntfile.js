@@ -31,10 +31,10 @@ module.exports = function (grunt) {
       all: {
         options: {
           beautify: false,
-          sourceMap: 'build/tcomb.min.map.js'
+          sourceMap: 'tcomb.min.map.js'
         },
         files: {
-          'build/tcomb.min.js': ['index.js']
+          'tcomb.min.js': ['index.js']
         }
       }
     },
