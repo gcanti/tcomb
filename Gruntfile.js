@@ -30,6 +30,7 @@ module.exports = function (grunt) {
     uglify: {
       all: {
         options: {
+          banner: banner,
           beautify: false,
           sourceMap: 'tcomb.min.map.js'
         },
