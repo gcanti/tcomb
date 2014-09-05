@@ -150,7 +150,7 @@ Browser
 
     bower install tcomb
 
-or download the `build/tcomb.min.js` file.
+or download the `tcomb.min.js` file.
 
 # Requirements
 
