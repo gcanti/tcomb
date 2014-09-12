@@ -9,7 +9,7 @@ let identToLit = macro {
     }
 }
 
-macro type {
+let type = macro {
   rule { $name:ident struct { $($field:ident : $type:expr) (,) ... } } => {
     var $name = struct({
         $($field: $type,) ...
@@ -56,7 +56,7 @@ macro type {
   }
 }
 
-macro fn {
+let fn = macro {
   rule { $name:ident ( $($param:ident : $type:ident) (,) ... ) -> $return:ident { $body ... } } => {
     var $name = func([$($type,) ...], function ($($param,) ...) {
       $body ...
@@ -68,3 +68,6 @@ macro fn {
     });
   }
 }
+
+export type;
+export fn;
