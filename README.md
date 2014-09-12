@@ -361,10 +361,10 @@ Example
   
 ```javascript
 var Direction = enums({
-    North: 0, 
-    East: 1,
-    South: 2, 
-    West: 3
+    North: 'North', 
+    East: 'East',
+    South: 'South', 
+    West: 'West'
 });
 ```
   
