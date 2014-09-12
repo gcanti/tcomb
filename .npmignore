@@ -8,3 +8,4 @@ coverage
 .jshintrc
 bower.json
 Grunfile.js
+tcomb.sjs
