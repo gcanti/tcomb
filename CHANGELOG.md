@@ -1,5 +1,6 @@
-Roadmap
-=======
+# v0.2.1
+
+-`func` doesn't preserve `this`, fix #38
 
 # v0.2.0
 

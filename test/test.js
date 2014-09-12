@@ -1126,6 +1126,13 @@ describe('func', function () {
             var repeat = func([Str, Num], function (s, n) { return new Array(n+1).join(s); });
             eq(repeat('a', 3), 'aaa');
         });
+        it('should preserve `this`', function () {
+            var o = {name: 'giulio'};
+            o.getName = func(Any, function () {
+                return this.name;
+            });
+            eq(o.getName(), 'giulio');
+        });
         describe('should be idempotent', function () {
             it('when Arguments and Return are the same', function () {
                 var Arguments = tuple([Str, Str]);

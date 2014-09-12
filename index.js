@@ -609,7 +609,7 @@
   
       args = Arguments.is(args) ? args : Arguments(args);
   
-      var r = f.apply(null, args);
+      var r = f.apply(this, args);
   
       if (Return) {
         r = Return.is(r) ? r : Return(r);
