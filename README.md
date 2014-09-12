@@ -6,11 +6,6 @@ tcomb is a library for Node.js and the browser (2K gzipped) which allows you to 
 JavaScript values at runtime with a simple syntax. It's great for **Domain Driven Design**, for checking external input, 
 for testing and for adding safety to your internal code. 
 
-# Feedback
-
-This library aims to be a **pragmatic** tool for development, if you have any feedback that can improve
-its usability, please let me know.
-
 # Contents
 
 - [Features](#features)
@@ -33,6 +28,7 @@ its usability, please let me know.
   - [dicts](#dicts)
   - [functions](#functions)
 - [sweet.js macros (experimental)](#macros)
+- [Articles on tcomb](#articles-on-tcomb)
 
 # Features
 
@@ -618,6 +614,11 @@ fn add (x: Num, y: Num) -> Num {
     return x + y;
 }
 ```
+
+# Articles on tcomb
+
+- [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
+- [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
 
 # Contribution
 
