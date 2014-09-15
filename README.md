@@ -619,6 +619,7 @@ fn add (x: Num, y: Num) -> Num {
 
 - [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
 - [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
+- [JSON API Validation In Node.js](http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
 
 # Contribution
 
