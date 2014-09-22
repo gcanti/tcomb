@@ -1,6 +1,14 @@
 # v0.2.1
 
--`func` doesn't preserve `this`, fix #38
+- `func` doesn't preserve `this`, fix #38
+- added and exported `Type` type
+- better error messages and DEBUG HINTS
+- optimized `mixin(x, y)` when y is Nil
+- added `util.merge(objects...)`, fix #39
+
+**DEPRECATED**
+
+- `isKind` function is now deprecated
 
 # v0.2.0
 

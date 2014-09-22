@@ -16,6 +16,11 @@
   function onFail(message) {
     // start debugger only once
     if (!failed) {
+      /*
+        DEBUG HINT:
+        if you are reading this, chances are that there is a bug in your system
+        see the Call Stack to find out what's wrong..
+      */
       /*jshint debug: true*/
       debugger; 
     }
@@ -29,6 +34,11 @@
   };
 
   function fail(message) {
+    /*
+      DEBUG HINT:
+      if you are reading this, chances are that there is a bug in your system
+      see the Call Stack to find out what's wrong..
+    */
     options.onFail(message);
   }
   
@@ -36,6 +46,11 @@
     if (guard !== true) {
       var args = slice.call(arguments, 1);
       var message = args[0] ? format.apply(null, args) : 'assert failed';
+      /*
+        DEBUG HINT:
+        if you are reading this, chances are that there is a bug in your system
+        see the Call Stack to find out what's wrong..
+      */
       fail(message); 
     }
   }
@@ -46,14 +61,10 @@
   
   var slice = Array.prototype.slice;
   
-  var errs = {
-    ERR_BAD_TYPE_VALUE: 'Invalid type argument `value` of value `%j` supplied to `%s`, expected %s.',
-    ERR_BAD_COMBINATOR_ARGUMENT: 'Invalid combinator argument `%s` of value `%j` supplied to `%s`, expected %s.',
-    ERR_OPTIONS_UPDATE_MISSING: 'Missing `options.update` implementation',
-    ERR_NEW_OPERATOR_FORBIDDEN: 'Operator `new` is forbidden for `%s`'
-  };
-  
   function mixin(target, source, overwrite) {
+    if (Nil.is(source)) {
+      return target;
+    }
     for (var k in source) {
       if (source.hasOwnProperty(k)) {
         if (!overwrite) {
@@ -63,6 +74,12 @@
       }
     }
     return target;
+  }
+
+  function merge() {
+    return Array.prototype.reduce.call(arguments, function (x, y) {
+      return mixin(x, y, true);
+    }, {});
   }
   
   function format() {
@@ -102,13 +119,15 @@
     return Func.is(type) && Obj.is(type.meta);
   }
   
-  function areTypes(types) {
-    return Arr.is(types) && types.every(isType);
-  }
-  
   function getName(type) {
     assert(isType(type), 'Invalid argument `type` of value `%j` supplied to `getName()`, expected a type.', type);
     return type.meta.name;
+  }
+
+  function deprecated(message) {
+    if (console && console.warn) {
+      console.warn(message);
+    }
   }
 
   function getKind(type) {
@@ -117,38 +136,18 @@
   }
 
   function isKind(type, kind) {
+    deprecated('`isKind(type, kind)` is deprecated, use `getKind(type) === kind` instead');
     return getKind(type) === kind;
   }
-  
-  function values(obj) {
-    var ret = [];
-    for (var k in obj) {
-      if (obj.hasOwnProperty(k)) {
-        ret.push(obj[k]);
-      }
-    }
-    return ret;
-  }
 
-  function ensureName(name, defaultName, types) {
-    if (Nil.is(name)) {
-      if (areTypes(types)) {
-        return format(types.length > 1 ? '%s([%s])' : '%s(%s)', defaultName, types.map(getName).join(', '));
-      }
-      return defaultName;
-    }
-    assert(Str.is(name), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'name', name, defaultName, 'a `maybe(Str)`');
-    return name;
-  }
-  
-  // since in tcomb the only real constructors are those provided
-  // by `struct`, the `new` operator is forbidden for all types
-  function blockNew(x, T) {
-    assert(!(x instanceof T), errs.ERR_NEW_OPERATOR_FORBIDDEN, getName(T));
+  function blockNew(x, type) {
+    // DEBUG HINT: since in tcomb the only real constructors are those provided
+    // by `struct`, the `new` operator is forbidden for all types
+    assert(!(x instanceof type), 'Operator `new` is forbidden for `%s`', getName(type));
   }
   
   function update() {
-    assert(Func.is(options.update), errs.ERR_OPTIONS_UPDATE_MISSING);
+    assert(Func.is(options.update), 'Missing `options.update` implementation');
     /*jshint validthis:true*/
     var T = this;
     var value = options.update.apply(T, arguments);
@@ -161,10 +160,21 @@
   
   function irriducible(name, is) {
   
+    // DEBUG HINT: if the debugger stops here, the first argument is not a string
+    assert(typeof name === 'string', 'Invalid argument `name` supplied to `irriducible()`');
+
+    // DEBUG HINT: if the debugger stops here, the second argument is not a function
+    assert(typeof is === 'function', 'Invalid argument `is` supplied to `irriducible()`');
+
     function Irriducible(value) {
+
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Irriducible);
-      assert(is(value), errs.ERR_BAD_TYPE_VALUE, value, name, format('a `%s`', name));
-      // all primitives types are idempotent
+
+      // DEBUG HINT: if the debugger stops here, the first argument is invalid
+      // mouse over the `value` variable to see what's wrong. In `name` there is the name of the type
+      assert(is(value), 'Invalid `%s` supplied to `%s`', value, name);
+      
       return value;
     }
   
@@ -221,13 +231,21 @@
   var Dat = irriducible('Dat', function (x) {
     return x instanceof Date;
   });
+
+  var Type = irriducible('Type', isType);
   
   function struct(props, name) {
   
-    // check combinator args
-    name = ensureName(name, 'struct');
-    assert(Obj.is(props), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'props', props, name, 'an `Obj`');
-    assert(values(props).every(isType), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'props', props, name, 'a dict of types');
+    // DEBUG HINT: if the debugger stops here, the first argument is not a dict of types
+    // mouse over the `props` variable to see what's wrong
+    assert(dict(Type).is(props), 'Invalid argument `props` supplied to `struct()`');
+
+    // DEBUG HINT: if the debugger stops here, the second argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `struct()`');
+
+    // DEBUG HINT: always give a name to a type, the debug will be easier
+    name = name || 'struct';
   
     function Struct(value, mut) {
   
@@ -236,7 +254,9 @@
         return value;
       }
   
-      assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, 'an `Obj`');
+      // DEBUG HINT: if the debugger stops here, the first argument is invalid
+      // mouse over the `value` variable to see what's wrong. In `name` there is the name of the type
+      assert(Obj.is(value), 'Invalid `%s` supplied to `%s`, expected an `Obj`', value, name);
   
       // makes `new` optional
       if (!(this instanceof Struct)) { 
@@ -245,7 +265,11 @@
       
       for (var k in props) {
         if (props.hasOwnProperty(k)) {
-          this[k] = props[k](value[k], mut);
+          var expected = props[k];
+          var actual = value[k];
+          // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `expected` type is invalid
+          // mouse over the `actual` and `expected` variables to see what's wrong
+          this[k] = expected(actual, mut);
         }
       }
   
@@ -271,18 +295,36 @@
 
   function union(types, name) {
   
-    // check combinator args
-    var combinator = 'union';
-    name = ensureName(name, combinator, types);
-    assert(areTypes(types) && types.length >= 2, errs.ERR_BAD_COMBINATOR_ARGUMENT, 'types', types, combinator, 'a list(type) of length >= 2');
-  
+    // DEBUG HINT: if the debugger stops here, the first argument is not a list of types
+    assert(list(Type).is(types), 'Invalid argument `types` supplied to `union()`');
+
+    var len = types.length;
+
+    // DEBUG HINT: if the debugger stops here, there are too few types (they must be at least two)
+    assert(len >= 2, 'Invalid argument `types` supplied to `union()`');
+
+    // DEBUG HINT: if the debugger stops here, the second argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `union()`');
+
+    name = name || format('union([%s])', types.map(getName).join(', '));
+
     function Union(value, mut) {
+
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Union);
+      
+      // DEBUG HINT: if the debugger stops here, you must implement the `dispatch` static method for this type
       assert(Func.is(Union.dispatch), 'unimplemented %s.dispatch()', name);
-      var T = Union.dispatch(value);
-      assert(isType(T), '%s.dispatch() returns no type', name);
-      // a union type is idempotent iif every T in types is idempotent
-      return T(value, mut);
+
+      var type = Union.dispatch(value);
+
+      // DEBUG HINT: if the debugger stops here, the `dispatch` static method returns no type
+      assert(isType(type), '%s.dispatch() returns no type', name);
+      
+      // DEBUG HINT: if the debugger stops here, `value` can't be converted to `type`
+      // mouse over the `value` and `type` variables to see what's wrong
+      return type(value, mut);
     }
   
     Union.meta = {
@@ -292,8 +334,8 @@
     };
   
     Union.is = function (x) {
-      return types.some(function (T) {
-        return T.is(x);
+      return types.some(function (type) {
+        return type.is(x);
       });
     };
   
@@ -311,19 +353,27 @@
 
   function maybe(type, name) {
   
-    // check combinator args
-    var combinator = 'maybe';
-    name = ensureName(name, combinator, [type]);
-    assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
+    // DEBUG HINT: if the debugger stops here, the first argument is not a type
+    assert(isType(type), 'Invalid argument `type` supplied to `maybe()`');
   
     // makes the combinator idempotent
-    if (type.meta.kind === 'maybe') {
+    if (getKind(type) === 'maybe') {
       return type;
     }
+
+    // DEBUG HINT: if the debugger stops here, the second argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(Nil.is(name) || Str.is(name), 'Invalid argument `name` supplied to `maybe()`');
   
+    name = name || format('maybe(%s)', getName(type));
+
     function Maybe(value, mut) {
+
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Maybe);
-      // a maybe type is idempotent iif type is idempotent
+      
+      // DEBUG HINT: if the debugger stops here, `value` can't be converted to `type`
+      // mouse over the `value` and `type` variables to see what's wrong
       return Nil.is(value) ? null : type(value, mut);
     }
   
@@ -342,17 +392,28 @@
 
   function enums(map, name) {
   
-    // check combinator args
-    name = ensureName(name, 'enums');
-    assert(Obj.is(map), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'map', map, name, 'an `Obj`');
+    // DEBUG HINT: if the debugger stops here, the first argument is not a hash
+    // mouse over the `map` variable to see what's wrong
+    assert(Obj.is(map), 'Invalid argument `map` supplied to `enums()`');
   
-    // cache expected value
-    var expected = 'a valid enum';
+    // DEBUG HINT: if the debugger stops here, the second argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `enums()`');
+
+    name = name || 'enums';
+
+    // cache enums
+    var keys = Object.keys(map);
   
     function Enums(value) {
+
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Enums);
-      assert(Enums.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
-      // all enums types are idempotent
+
+      // DEBUG HINT: if the debugger stops here, the value is not one of the defined enums
+      // mouse over the `value`, `name` and `keys` variables to see what's wrong
+      assert(Enums.is(value), 'Invalid `%s` supplied to `%s`, expected one of %j', value, name, keys);
+      
       return value;
     }
   
@@ -379,21 +440,29 @@
   };
 
   function tuple(types, name) {
-  
-    // check combinator args
-    var combinator = 'tuple';
-    name = ensureName(name, combinator, types);
-    assert(areTypes(types) && types.length >= 2, errs.ERR_BAD_COMBINATOR_ARGUMENT, 'types', types, combinator, 'a list(type) of length >= 2');
-  
-    // cache types length
+
+    // DEBUG HINT: if the debugger stops here, the first argument is not a list of types
+    assert(list(Type).is(types), 'Invalid argument `types` supplied to `tuple()`');
+
     var len = types.length;
-    // cache expected value
-    var expected = format('a tuple `(%s)`', types.map(getName).join(', '));
+
+    // DEBUG HINT: if the debugger stops here, there are too few types (they must be at least two)
+    assert(len >= 2, 'Invalid argument `types` supplied to `tuple()`');
+
+    // DEBUG HINT: if the debugger stops here, the second argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `tuple()`');
+
+    name = name || format('tuple([%s])', types.map(getName).join(', '));
   
     function Tuple(value, mut) {
   
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Tuple);
-      assert(Arr.is(value) && value.length === len, errs.ERR_BAD_TYPE_VALUE, value, name, expected);
+
+      // DEBUG HINT: if the debugger stops here, the value is not one of the defined enums
+      // mouse over the `value`, `name` and `len` variables to see what's wrong
+      assert(Arr.is(value) && value.length === len, 'Invalid `%s` supplied to `%s`, expected an `Arr` of length `%s`', value, name, len);
   
       // makes Tuple idempotent
       if (Tuple.isTuple(value)) {
@@ -402,9 +471,11 @@
   
       var arr = [];
       for (var i = 0 ; i < len ; i++) {
-        var T = types[i];
-        var v = value[i];
-        arr.push(T.is(v) ? v : T(v, mut));
+        var expected = types[i];
+        var actual = value[i];
+        // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `expected` type is invalid
+        // mouse over the `actual` and `expected` variables to see what's wrong
+        arr.push(expected(actual, mut));
       }
   
       if (!mut) { 
@@ -436,20 +507,33 @@
 
   function subtype(type, predicate, name) {
   
-    // check combinator args
-    var combinator = 'subtype';
-    name = ensureName(name, combinator, [type]);
-    assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
-    assert(Func.is(predicate), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'predicate', predicate, combinator, 'a `Func`');
+    // DEBUG HINT: if the debugger stops here, the first argument is not a type
+    assert(isType(type), 'Invalid argument `type` supplied to `subtype()`');
+    
+    // DEBUG HINT: if the debugger stops here, the second argument is not a function
+    assert(Func.is(predicate), 'Invalid argument `predicate` supplied to `subtype()`');
   
+    // DEBUG HINT: if the debugger stops here, the third argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `subtype()`');
+
+    // DEBUG HINT: always give a name to a type, the debug will be easier
+    name = name || format('subtype(%s)', getName(type));
+
     // cache expected value
-    var expected = predicate.__doc__ || 'a valid value for the predicate';
+    var expected = predicate.__doc__ || format('insert a valid value for %s', predicate.name || 'the subtype');
   
     function Subtype(value, mut) {
+
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Subtype);
-      // a subtype type is idempotent iif T is idempotent
+      
+      // DEBUG HINT: if the debugger stops here, the value cannot be converted to the base type
       var x = type(value, mut);
-      assert(predicate(x), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
+      
+      // DEBUG HINT: if the debugger stops here, the value is converted to the base type
+      // but the predicate returns `false`
+      assert(predicate(x), 'Invalid `%s` supplied to `%s`, %s', value, name, expected);
       return x;
     }
   
@@ -464,30 +548,29 @@
       return type.is(x) && predicate(x);
     };
   
-    /* fix #22
-    if (type.meta.kind === 'struct') {
-      // keep a reference to prototype to easily define new methods and attach them to supertype
-      Subtype.prototype = type.prototype;
-    }
-    */
-  
     return Subtype;
   }
 
   function list(type, name) {
   
-    // check combinator args
-    var combinator = 'list';
-    name = ensureName(name, combinator, [type]);
-    assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
+    // DEBUG HINT: if the debugger stops here, the first argument is not a type
+    assert(isType(type), 'Invalid argument `type` supplied to `list()`');
   
-    // cache expected value
-    var expected = format('a list of `%s`', getName(type));
-  
+    // DEBUG HINT: if the debugger stops here, the third argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `list()`');
+
+    // DEBUG HINT: always give a name to a type, the debug will be easier
+    name = name || format('list(%s)', getName(type));
+
     function List(value, mut) {
   
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, List);
-      assert(Arr.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
+
+      // DEBUG HINT: if the debugger stops here, the value is not one of the defined enums
+      // mouse over the `value` and `name` variables to see what's wrong
+      assert(Arr.is(value), 'Invalid `%s` supplied to `%s`, expected an `Arr`', value, name);
   
       // makes List idempotent
       if (List.isList(value)) {
@@ -496,8 +579,10 @@
   
       var arr = [];
       for (var i = 0, len = value.length ; i < len ; i++ ) {
-        var v = value[i];
-        arr.push(type(v, mut));
+        var actual = value[i];
+        // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `type` type is invalid
+        // mouse over the `actual` and `type` variables to see what's wrong
+        arr.push(type(actual, mut));
       }
   
       if (!mut) { 
@@ -528,18 +613,24 @@
 
   function dict(type, name) {
   
-    // check combinator args
-    var combinator = 'dict';
-    name = ensureName(name, combinator, [type]);
-    assert(isType(type), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'type', type, combinator, 'a type');
-
-    // cache expected value
-    var expected = format('a dict of `%s`', getName(type));
+    // DEBUG HINT: if the debugger stops here, the first argument is not a type
+    assert(isType(type), 'Invalid argument `type` supplied to `dict()`');
   
+    // DEBUG HINT: if the debugger stops here, the third argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `dict()`');
+
+    // DEBUG HINT: always give a name to a type, the debug will be easier
+    name = name || format('dict(%s)', getName(type));
+
     function Dict(value, mut) {
   
+      // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Dict);
-      assert(Obj.is(value), errs.ERR_BAD_TYPE_VALUE, value, name, expected);
+
+      // DEBUG HINT: if the debugger stops here, the value is not one of the defined enums
+      // mouse over the `value` and `name` variables to see what's wrong
+      assert(Obj.is(value), 'Invalid `%s` supplied to `%s`, expected an `Obj`', value, name);
   
       // makes Dict idempotent
       if (Dict.isDict(value)) {
@@ -549,7 +640,10 @@
       var obj = {};
       for (var k in value) {
         if (value.hasOwnProperty(k)) {
-          obj[k] = type(value[k], mut);
+          var actual = value[k];
+          // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `type` type is invalid
+          // mouse over the `actual` and `type` variables to see what's wrong
+          obj[k] = type(actual, mut);
         }
       }
   
@@ -588,9 +682,22 @@
   
     name = name || 'func()';
     Arguments = Arr.is(Arguments) ? tuple(Arguments, 'Arguments') : Arguments;
-    assert(isType(Arguments), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Arguments', Arguments, name, 'a type or a list of types');
-    assert(Func.is(f), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'f', f, name, 'a `Func`');
-    assert(Nil.is(Return) || isType(Return), errs.ERR_BAD_COMBINATOR_ARGUMENT, 'Return', Return, name, 'a type');
+
+    // DEBUG HINT: if the debugger stops here, the first argument is not a type
+    assert(isType(Arguments), 'Invalid argument `Arguments` supplied to `func()`');
+
+    // DEBUG HINT: if the debugger stops here, the second argument is not a function
+    assert(Func.is(f), 'Invalid argument `f` supplied to `func()`');
+
+    // DEBUG HINT: if the debugger stops here, the third argument is not a type (or Nil)
+    assert(Nil.is(Return) || isType(Return), 'Invalid argument `Return` supplied to `func()`');
+
+    // DEBUG HINT: if the debugger stops here, the third argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `func()`');
+
+    // DEBUG HINT: always give a name to a type, the debug will be easier
+    name = name || f.name || 'func';
   
     // makes the combinator idempotent
     Return = Return || null;
@@ -607,12 +714,17 @@
         args.length = f.length; 
       }
   
-      args = Arguments.is(args) ? args : Arguments(args);
+      // DEBUG HINT: if the debugger stops here, the arguments of the function are invalid
+      // mouse over the `args` variable to see what's wrong
+      args = Arguments(args);
   
+      /*jshint validthis: true */
       var r = f.apply(this, args);
   
       if (Return) {
-        r = Return.is(r) ? r : Return(r);
+        // DEBUG HINT: if the debugger stops here, the return value of the function is invalid
+        // mouse over the `r` variable to see what's wrong
+        r = Return(r);
       }
   
       return r;
@@ -633,16 +745,43 @@
     return fn;
   }
 
+  function alias(type, name) {
+
+    // DEBUG HINT: if the debugger stops here, the first argument is not a type
+    assert(isType(type), 'Invalid argument `type` supplied to `alias()`');
+  
+    // DEBUG HINT: if the debugger stops here, the third argument is not a string
+    // mouse over the `name` variable to see what's wrong
+    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `alias()`');
+
+    // DEBUG HINT: always give a name to a type, the debug will be easier
+    name = name || 'alias(' + getName(type) + ')';
+
+    function Alias(value, mut) {
+      return type(value, mut);
+    }
+
+    Alias.is = function (x) {
+      return type.is(x);
+    };
+
+    Alias.meta = type.meta;
+    Alias.name = name;
+
+    return Alias;
+
+  }
+
   return {
 
     util: {
       mixin: mixin,
+      merge: merge,
       format: format,
       isType: isType,
       getName: getName,
       getKind: getKind,
       isKind: isKind,
-      values: values,
       slice: slice
     },
 
@@ -661,6 +800,7 @@
     Err: Err,
     Re: Re,
     Dat: Dat,
+    Type: Type,
 
     irriducible: irriducible,
     struct: struct,
@@ -671,6 +811,7 @@
     subtype: subtype,
     list: list,
     dict: dict,
-    func: func
+    func: func,
+    alias: alias
   };
 }));
