@@ -795,6 +795,7 @@ describe('maybe', function () {
 describe('tuple', function () {
 
     var Area = tuple([Num, Num], 'Area');
+    var Arguments = tuple([Num], 'Arguments');
 
     describe('combinator', function () {
         it('should throw if used with wrong arguments', function () {
@@ -803,9 +804,6 @@ describe('tuple', function () {
             }, 'Invalid argument `types` supplied to `tuple()`');
             throwsWithMessage(function () {
                 tuple([]);
-            }, 'Invalid argument `types` supplied to `tuple()`');
-            throwsWithMessage(function () {
-                tuple([Point], 'MyTuple');
             }, 'Invalid argument `types` supplied to `tuple()`');
             throwsWithMessage(function () {
                 tuple([Point, Point], 1);
@@ -838,14 +836,19 @@ describe('tuple', function () {
     describe('#is(x)', function () {
         it('should return true when x is an instance of the tuple', function () {
             ok(Area.is([1, 2]));
+            ok(Arguments.is([1]));
         });
         it("should return false when x is not an instance of the tuple", function () {
             ko(Area.is([1]));
             ko(Area.is([1, 2, 3]));
             ko(Area.is([1, 'a']));
+            ko(Arguments.is([1,2]));
+            ko(Arguments.is([1, 2, 3]));
+            ko(Arguments.is(['a']));
         });
         it('should not depend on `this`', function () {
             ok([[1, 2]].every(Area.is));
+            ok([[1]].every(Arguments.is));
         });
     });
     describe('#update()', function () {
@@ -1103,6 +1106,12 @@ describe('func', function () {
             throwsWithMessage(function () {
                 func(null, True, null, 'myFunc');
             }, 'Invalid argument `Arguments` supplied to `func()`');
+            throwsWithMessage(function () {
+                func([Str, Num], True);
+            }, 'Invalid argument `Arguments` supplied to `func()`');
+            throwsWithMessage(function () {
+                func(Str, True);
+            }, 'Invalid argument `Arguments` supplied to `func()`');
             throwsWithMessage(function () { 
                 func(Arguments, True, 1); 
             }, 'Invalid argument `Return` supplied to `func()`');
@@ -1113,16 +1122,12 @@ describe('func', function () {
                 func(Arguments, True, null, 1); 
             }, 'Invalid argument `name` supplied to `func()`');
         });
-        it('should accept a list of types as first argument', function () {
-            var repeat = func([Str, Num], function (s, n) { return new Array(n+1).join(s); });
-            eq(repeat('a', 3), 'aaa');
-        });
         it('should preserve `this`', function () {
             var o = {name: 'giulio'};
-            o.getName = func(Any, function () {
+            o.getName = func(tuple([Any]), function () {
                 return this.name;
             });
-            eq(o.getName(), 'giulio');
+            eq(o.getName(1), 'giulio');
         });
         describe('should be idempotent', function () {
             it('when Arguments and Return are the same', function () {
