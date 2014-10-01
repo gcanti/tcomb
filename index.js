@@ -681,10 +681,11 @@
   function func(Arguments, f, Return, name) {
   
     name = name || 'func()';
-    Arguments = Arr.is(Arguments) ? tuple(Arguments, 'Arguments') : Arguments;
 
-    // DEBUG HINT: if the debugger stops here, the first argument is not a type
-    assert(isType(Arguments), 'Invalid argument `Arguments` supplied to `func()`');
+    // DEBUG HINT: if the debugger stops here, the first argument is not a tuple
+    assert(!Nil.is(Arguments), 'Invalid argument `Arguments` supplied to `func()`');
+    assert(!Nil.is(Arguments.meta), 'Invalid argument `Arguments` supplied to `func()`');
+    assert(Arguments.meta.kind === 'tuple', 'Invalid argument `Arguments` supplied to `func()`');
 
     // DEBUG HINT: if the debugger stops here, the second argument is not a function
     assert(Func.is(f), 'Invalid argument `f` supplied to `func()`');

@@ -1106,6 +1106,12 @@ describe('func', function () {
             throwsWithMessage(function () {
                 func(null, True, null, 'myFunc');
             }, 'Invalid argument `Arguments` supplied to `func()`');
+            throwsWithMessage(function () {
+                func([Str, Num], True);
+            }, 'Invalid argument `Arguments` supplied to `func()`');
+            throwsWithMessage(function () {
+                func(Str, True);
+            }, 'Invalid argument `Arguments` supplied to `func()`');
             throwsWithMessage(function () { 
                 func(Arguments, True, 1); 
             }, 'Invalid argument `Return` supplied to `func()`');
@@ -1116,16 +1122,12 @@ describe('func', function () {
                 func(Arguments, True, null, 1); 
             }, 'Invalid argument `name` supplied to `func()`');
         });
-        it('should accept a list of types as first argument', function () {
-            var repeat = func([Str, Num], function (s, n) { return new Array(n+1).join(s); });
-            eq(repeat('a', 3), 'aaa');
-        });
         it('should preserve `this`', function () {
             var o = {name: 'giulio'};
-            o.getName = func(Any, function () {
+            o.getName = func(tuple([Any]), function () {
                 return this.name;
             });
-            eq(o.getName(), 'giulio');
+            eq(o.getName(1), 'giulio');
         });
         describe('should be idempotent', function () {
             it('when Arguments and Return are the same', function () {
