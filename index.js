@@ -716,10 +716,19 @@
   
       // DEBUG HINT: if the debugger stops here, the arguments of the function are invalid
       // mouse over the `args` variable to see what's wrong
-      args = Arguments(args);
+
+      var r;
+      if (Arguments.meta) {
+        if (Arguments.meta.kind === 'tuple') {
+          args = Arguments(args);
+          /*jshint validthis: true */
+          r = f.apply(this, args);
+        } else {
+          var arg = Arguments(args[0]);
+          r = f.apply(this, [arg]);
+        }
+      }
   
-      /*jshint validthis: true */
-      var r = f.apply(this, args);
   
       if (Return) {
         // DEBUG HINT: if the debugger stops here, the return value of the function is invalid
