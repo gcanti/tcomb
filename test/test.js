@@ -795,6 +795,7 @@ describe('maybe', function () {
 describe('tuple', function () {
 
     var Area = tuple([Num, Num], 'Area');
+    var Arguments = tuple([Num], 'Arguments');
 
     describe('combinator', function () {
         it('should throw if used with wrong arguments', function () {
@@ -803,9 +804,6 @@ describe('tuple', function () {
             }, 'Invalid argument `types` supplied to `tuple()`');
             throwsWithMessage(function () {
                 tuple([]);
-            }, 'Invalid argument `types` supplied to `tuple()`');
-            throwsWithMessage(function () {
-                tuple([Point], 'MyTuple');
             }, 'Invalid argument `types` supplied to `tuple()`');
             throwsWithMessage(function () {
                 tuple([Point, Point], 1);
@@ -838,14 +836,19 @@ describe('tuple', function () {
     describe('#is(x)', function () {
         it('should return true when x is an instance of the tuple', function () {
             ok(Area.is([1, 2]));
+            ok(Arguments.is([1]));
         });
         it("should return false when x is not an instance of the tuple", function () {
             ko(Area.is([1]));
             ko(Area.is([1, 2, 3]));
             ko(Area.is([1, 'a']));
+            ko(Arguments.is([1,2]));
+            ko(Arguments.is([1, 2, 3]));
+            ko(Arguments.is(['a']));
         });
         it('should not depend on `this`', function () {
             ok([[1, 2]].every(Area.is));
+            ok([[1]].every(Arguments.is));
         });
     });
     describe('#update()', function () {

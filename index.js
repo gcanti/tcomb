@@ -446,8 +446,8 @@
 
     var len = types.length;
 
-    // DEBUG HINT: if the debugger stops here, there are too few types (they must be at least two)
-    assert(len >= 2, 'Invalid argument `types` supplied to `tuple()`');
+    // DEBUG HINT: if the debugger stops here, there are too few types (they must be at least one)
+    assert(len >= 1, 'Invalid argument `types` supplied to `tuple()`');
 
     // DEBUG HINT: if the debugger stops here, the second argument is not a string
     // mouse over the `name` variable to see what's wrong
