@@ -1117,6 +1117,10 @@ describe('func', function () {
             var repeat = func([Str, Num], function (s, n) { return new Array(n+1).join(s); });
             eq(repeat('a', 3), 'aaa');
         });
+        it('should accept a type as first argument', function() {
+            var double = func(Str, function (s) { return s + s; }, Str);
+            eq(double('a'), 'aa');
+        });
         it('should preserve `this`', function () {
             var o = {name: 'giulio'};
             o.getName = func(Any, function () {
