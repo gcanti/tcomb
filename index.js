@@ -675,15 +675,15 @@
   }
 
   var func = function func(Argument) {
-    // DEBUG HINT: if the debugger stops here, the first argument is not a type
+    // DEBUG HINT: if the debugger stops here, the argument is not a type
     assert(isType(Argument), 'Invalid argument `Argument` supplied to `func`');
 
     var funcWithArgument =  function funcWithArgument(Return) {
-      // DEBUG HINT: if the debugger stops here, the third argument is not a type (or Nil)
+      // DEBUG HINT: if the debugger stops here, the argument is not a type
       assert(isType(Return), 'Invalid argument `Return` supplied to `func`');
 
       var funcWithArgumentAndReturn = function funcWithArgumentAndReturn(f) {
-        // DEBUG HINT: if the debugger stops here, the second argument is not a function
+        // DEBUG HINT: if the debugger stops here, the argument is not a function
         assert(Func.is(f), 'Invalid argument `f` supplied to `func`');
 
         // DEBUG HINT: always give a name to a type, the debug will be easier
