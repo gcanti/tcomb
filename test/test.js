@@ -1128,7 +1128,7 @@ describe('func', function () {
             o.getName = func(Any)(Any)(function () {
                 return this.name;
             });
-            eq(o.getName(tuple([])([])), 'giulio');
+            eq(o.getName([]), 'giulio');
         });
         describe('should be idempotent when Argument and Return are consitent', function () {
             it('when Arguments and Return are the same', function () {
@@ -1158,7 +1158,7 @@ describe('func', function () {
     describe('#is(x)', function () {
         it('should return true when x is the func', function () {
             ok(sum.is(sum));
-            ok(sum(tuple([Num, Num])([1, 2])) === 3);
+            ok(sum([1, 2]) === 3);
         });
         it("should return false when x is not the func", function () {
             ko(sum.is(noop));
@@ -1202,7 +1202,7 @@ describe('func', function () {
                 var y = args[1];
                 return x + y;
             });
-            ok(good(tuple([Num, Num])([1, 2])) === 3);
+            ok(good([1, 2]) === 3);
         });
         it("should use the function name in errors where provided", function () {
             throwsWithMessage(function () {
