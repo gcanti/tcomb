@@ -674,72 +674,91 @@
     return Dict;
   }
 
-  function func(Arguments, f, Return, name) {
-
-    name = name || 'func()';
-    Arguments = Arr.is(Arguments) ? tuple(Arguments, 'Arguments') : Arguments;
-
+  var func = function func(Argument) {
     // DEBUG HINT: if the debugger stops here, the first argument is not a type
-    assert(isType(Arguments), 'Invalid argument `Arguments` supplied to `func()`');
+    assert(isType(Argument), 'Invalid argument `Argument` supplied to `func`');
 
-    // DEBUG HINT: if the debugger stops here, the second argument is not a function
-    assert(Func.is(f), 'Invalid argument `f` supplied to `func()`');
+    var funcWithArgument =  function funcWithArgument(Return) {
+      // DEBUG HINT: if the debugger stops here, the third argument is not a type (or Nil)
+      assert(isType(Return), 'Invalid argument `Return` supplied to `func`');
 
-    // DEBUG HINT: if the debugger stops here, the third argument is not a type (or Nil)
-    assert(Nil.is(Return) || isType(Return), 'Invalid argument `Return` supplied to `func()`');
+      var funcWithArgumentAndReturn = function funcWithArgumentAndReturn(f) {
+        // DEBUG HINT: if the debugger stops here, the second argument is not a function
+        assert(Func.is(f), 'Invalid argument `f` supplied to `func`');
 
-    // DEBUG HINT: if the debugger stops here, the third argument is not a string
-    // mouse over the `name` variable to see what's wrong
-    assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `func()`');
+        // DEBUG HINT: always give a name to a type, the debug will be easier
+        var name = f.name || 'anonymousFunc';
 
-    // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || f.name || 'func';
+        // makes the combinator idempotent
+        Return = Return || null;
+        if (isType(f) && f.meta.Argument === Argument && f.meta.Return === Return) {
+          return f;
+        }
 
-    // makes the combinator idempotent
-    Return = Return || null;
-    if (isType(f) && f.meta.Arguments === Arguments && f.meta.Return === Return) {
-      return f;
-    }
+        function fn(arg) {
 
-    function fn() {
+          var args = slice.call(arguments);
 
-      var args = slice.call(arguments);
+          // DEBUG HINT: if the debugger stops here, the function was called with the
+          // wrong number of arguments.
+          assert((args.length === 1), '`' + name + '` called with more or less than one argument');
 
-      // handle optional arguments
-      if (args.length < f.length) {
-        args.length = f.length;
-      }
+          // DEBUG HINT: if the debugger stops here, the arguments of the function are invalid
+          // mouse over the `args` variable to see what's wrong
+          var safeArg = Argument(arg);
 
-      // DEBUG HINT: if the debugger stops here, the arguments of the function are invalid
-      // mouse over the `args` variable to see what's wrong
-      args = Arguments(args);
+          /*jshint validthis: true */
+          var r = f.apply(this, [arg]);
 
-      /*jshint validthis: true */
-      var r = f.apply(this, args);
+          if (Return) {
+            // DEBUG HINT: if the debugger stops here, the return value of the function is invalid
+            // mouse over the `r` variable to see what's wrong
+            r = Return(r);
+          }
 
-      if (Return) {
-        // DEBUG HINT: if the debugger stops here, the return value of the function is invalid
-        // mouse over the `r` variable to see what's wrong
-        r = Return(r);
-      }
+          return r;
+        }
 
-      return r;
-    }
+        fn.is = function (x) {
+          return x === fn;
+        };
 
-    fn.is = function (x) {
-      return x === fn;
+        fn.meta = {
+          kind: 'func',
+          Argument: Argument,
+          f: f,
+          Return: Return,
+          name: name
+        };
+
+        return fn;
+      };
+
+      funcWithArgumentAndReturn.is = function (x) {
+        return funcWithArgumentAndReturn === fn;
+      };
+
+      funcWithArgumentAndReturn.meta = {
+        kind: 'func',
+        Argument: Argument,
+        Return: Return,
+      };
+
+      return funcWithArgumentAndReturn;
     };
 
-    fn.meta = {
+
+    funcWithArgument.is = function (x) {
+      return funcWithArgument === fn;
+    };
+
+    funcWithArgument.meta = {
       kind: 'func',
-      Arguments: Arguments,
-      f: f,
-      Return: Return,
-      name: name
+      Argument: Argument,
     };
 
-    return fn;
-  }
+    return funcWithArgument;
+  };
 
   function alias(type, name) {
 

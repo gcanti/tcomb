@@ -671,7 +671,7 @@ describe('union', function () {
         assert(Obj.is(values));
         return values.hasOwnProperty('center') ?
             Circle :
-            Rectangle;   
+            Rectangle;
     };
 
     describe('combinator', function () {
@@ -1059,7 +1059,7 @@ describe('dict', function () {
             var t1 = T({a: p1, b: p2});
             var t2 = T(t1);
             eq(t2, t1);
-        });    
+        });
         it('should throw if used with new', function () {
             throwsWithMessage(function () {
                 new T('a');
@@ -1104,91 +1104,110 @@ describe('dict', function () {
 describe('func', function () {
 
     var True = function () { return true; };
-    var Arguments = tuple([Num, Num], 'Args');
-    var sum = func(Arguments, function (a, b) {
-        return a + b;
-    }, Num);
+    var SumArgs = tuple([Num, Num], 'SumArgs');
+    var sum = func(SumArgs)(Num)(function (args) {
+        var x = args[0];
+        var y = args[1];
+        return x + y;
+    });
 
     describe('combinator', function () {
         it('should throw if used with wrong arguments', function () {
             throwsWithMessage(function () {
-                func();
-            }, 'Invalid argument `Arguments` supplied to `func()`');
+                func(true)(Num)(True)
+            }, 'Invalid argument `Argument` supplied to `func`');
             throwsWithMessage(function () {
-                func(null, True, null, 'myFunc');
-            }, 'Invalid argument `Arguments` supplied to `func()`');
-            throwsWithMessage(function () { 
-                func(Arguments, True, 1); 
-            }, 'Invalid argument `Return` supplied to `func()`');
-            throwsWithMessage(function () { 
-                func(Arguments, null); 
-            }, 'Invalid argument `f` supplied to `func()`');
-            throwsWithMessage(function () { 
-                func(Arguments, True, null, 1); 
-            }, 'Invalid argument `name` supplied to `func()`');
-        });
-        it('should accept a list of types as first argument', function () {
-            var repeat = func([Str, Num], function (s, n) { return new Array(n+1).join(s); });
-            eq(repeat('a', 3), 'aaa');
+                func(Num)(true)(True)
+            }, 'Invalid argument `Return` supplied to `func`');
+            throwsWithMessage(function () {
+                func(Num)(Num)(true)
+            }, 'Invalid argument `f` supplied to `func`');
         });
         it('should preserve `this`', function () {
             var o = {name: 'giulio'};
-            o.getName = func(Any, function () {
+            o.getName = func(Any)(Any)(function () {
                 return this.name;
             });
-            eq(o.getName(), 'giulio');
+            eq(o.getName(tuple([])([])), 'giulio');
         });
-        describe('should be idempotent', function () {
+        describe('should be idempotent when Argument and Return are consitent', function () {
             it('when Arguments and Return are the same', function () {
-                var Arguments = tuple([Str, Str]);
+                var Argument = tuple([Str, Str]);
                 var f = function (s) { return s; };
-                var g = func(Arguments, f, Str);
-                var h = func(Arguments, g, Str);
+                var g = func(Argument)(Str)(f);
+                var h = func(Argument)(Str)(g);
                 eq(h, g);
             });
-            it('when Arguments are the same and Return is not defined', function () {
-                var Arguments = tuple([Str, Str]);
-                var f = function (s) { return s; };
-                var g = func(Arguments, f, null);
-                var h = func(Arguments, g);
-                eq(h, g);
+        });
+        it("should be partially applicable", function () {
+            var doubleVision = function (x) { return x.toString() + x.toString() };
+            var funcWithNumArg = func(Num);
+            var funcWithNumArgAndStrReturn = funcWithNumArg(Str);
+            var funcDoubleVision = funcWithNumArgAndStrReturn(doubleVision);
+            ok(funcDoubleVision(1) === "11");
+        });
+        it("should be able to be used as a type for safe function passing", function () {
+            var ten = func(func(Num)(Num))(Num)(function (f) {
+                return f(10);
             });
+            var plus2 = function (x) { return x + 2; };
+            ok(ten(plus2) === 12);
         });
     });
 
     describe('#is(x)', function () {
         it('should return true when x is the func', function () {
             ok(sum.is(sum));
-            ok(sum(1, 2) === 3);
+            ok(sum(tuple([Num, Num])([1, 2])) === 3);
         });
         it("should return false when x is not the func", function () {
             ko(sum.is(noop));
         });
+    });
+
+    describe('constructor', function () {
+        var ambiguous = func(Any)(Any)(function (a) {
+            return a + String(a);
+        });
+
         it("should throw with wrong arguments", function () {
             throwsWithMessage(function () {
-                sum(1, 'a');
-            }, 'Invalid `a` supplied to `Num`');
+                sum(1);
+            }, 'Invalid `1` supplied to `SumArgs`, expected an `Arr` of length `2`');
         });
         it("should throw with wrong return", function () {
-            var bad = func(tuple([Num, Num]), function (a, b) {
-                return a + String(b);
-            }, Num);
-            throwsWithMessage(function () {
-                bad(1, 2);
-            }, 'Invalid `12` supplied to `Num`');
-        });
-        it("Return should be optional", function () {
-            var bad = func(tuple([Num, Num]), function (a, b) {
-                return a + String(b);
+            var bad = func(Num)(Num)(function (a) {
+                return a + String(a);
             });
-            ok(bad(1, 2) === '12');
+            throwsWithMessage(function () {
+                bad(1);
+            }, 'Invalid `11` supplied to `Num`');
         });
-        it("should handle optional arguments", function () {
-            var sum3 = func(tuple([Num, Num, maybe(Num)]), function (a, b, c) {
-                return a + b + (c || 0);
-            }, Num);
-            ok(sum3(1, 2, 3) === 6);
-            ok(sum3(1, 2) === 3);
+        it("should throw if function called with no arguments", function () {
+            throwsWithMessage(function () {
+                ambiguous();
+            }, '`anonymousFunc` called with more or less than one argument');
+        });
+        it("should throw if function called with more than one arguments", function () {
+            var ambiguous = func(Any)(Any)(function (a) {
+                return a + String(a);
+            });
+            throwsWithMessage(function () {
+                ambiguous(1, 2);
+            }, '`anonymousFunc` called with more or less than one argument');
+        });
+        it("should behave when used according to type definition", function () {
+            var good = func(tuple([Num, Num]))(Num)(function (args) {
+                var x = args[0];
+                var y = args[1];
+                return x + y;
+            });
+            ok(good(tuple([Num, Num])([1, 2])) === 3);
+        });
+        it("should use the function name in errors where provided", function () {
+            throwsWithMessage(function () {
+                func(Any)(Any)(function double(x) { return x * 2; })();
+            }, '`double` called with more or less than one argument');
         });
     });
 });
