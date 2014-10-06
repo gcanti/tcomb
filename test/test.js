@@ -803,11 +803,22 @@ describe('tuple', function () {
                 tuple();
             }, 'Invalid argument `types` supplied to `tuple()`');
             throwsWithMessage(function () {
-                tuple([]);
-            }, 'Invalid argument `types` supplied to `tuple()`');
-            throwsWithMessage(function () {
                 tuple([Point, Point], 1);
             }, 'Invalid argument `name` supplied to `tuple()`');
+        });
+        it('should be able to create 0-tuples', function () {
+            var zeroTuple = tuple([])([]);
+            ok(zeroTuple.length === 0);
+        });
+        it('should be able to create 1-tuples', function () {
+            var oneTuple = tuple([Num])([1]);
+            ok(oneTuple.length === 1);
+        });
+        it('should be able to create n-tuples', function () {
+            var manyTypes = [Num, Num, Num, Num, Num, Num, Num, Num, Num, Num];
+            var manyValues = manyTypes.map(function () { return 1; });
+            var nTuple = tuple(manyTypes)(manyValues);
+            ok(nTuple.length === manyTypes.length);
         });
     });
     describe('constructor', function () {
@@ -831,7 +842,7 @@ describe('tuple', function () {
             var p1 = T(['a', 1]);
             var p2 = T(p1);
             eq(p2, p1);
-        });    
+        });
     });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the tuple', function () {
