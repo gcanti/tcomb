@@ -802,12 +802,6 @@ describe('tuple', function () {
                 tuple();
             }, 'Invalid argument `types` supplied to `tuple()`');
             throwsWithMessage(function () {
-                tuple([]);
-            }, 'Invalid argument `types` supplied to `tuple()`');
-            throwsWithMessage(function () {
-                tuple([Point], 'MyTuple');
-            }, 'Invalid argument `types` supplied to `tuple()`');
-            throwsWithMessage(function () {
                 tuple([Point, Point], 1);
             }, 'Invalid argument `name` supplied to `tuple()`');
         });
@@ -905,11 +899,6 @@ describe('list', function () {
             var p2 = T(p1);
             eq(p2, p1);
         });    
-        it('should throw if used with new', function () {
-            throwsWithMessage(function () {
-                new T('a');
-            }, 'Operator `new` is forbidden for `T`');
-        });
     });
     describe('#is(x)', function () {
         var Path = list(Point);
@@ -1046,11 +1035,6 @@ describe('dict', function () {
             var t2 = T(t1);
             eq(t2, t1);
         });    
-        it('should throw if used with new', function () {
-            throwsWithMessage(function () {
-                new T('a');
-            }, 'Operator `new` is forbidden for `T`');
-        });
     });
     describe('#is(x)', function () {
         var T = dict(Point);
@@ -1084,98 +1068,109 @@ describe('dict', function () {
 });
 
 //
-// func (experimental)
+// func
 //
 
 describe('func', function () {
 
-    var True = function () { return true; };
-    var Arguments = tuple([Num, Num], 'Args');
-    var sum = func(Arguments, function (a, b) {
-        return a + b;
-    }, Num);
+    it('should handle a single type', function () {
+        var T = func(Num, Num);
+        eq(T.meta.Domain.length, 1);
+        ok(T.meta.Domain[0] === Num);
+    });
 
-    describe('combinator', function () {
-        it('should throw if used with wrong arguments', function () {
+    describe('of', function () {
+
+        it('should check the arguments', function () {
+            var T = func([Num, Num], Num);
+            var sum = T.of(function (a, b) {
+                return a + b;
+            });
+            eq(sum(1, 2), 3);
             throwsWithMessage(function () {
-                func();
-            }, 'Invalid argument `Arguments` supplied to `func()`');
+                sum(1, 2, 3);
+            }, 'Invalid `1,2,3` supplied to `tuple([Num, Num])`, expected an `Arr` of length `2`');
             throwsWithMessage(function () {
-                func(null, True, null, 'myFunc');
-            }, 'Invalid argument `Arguments` supplied to `func()`');
-            throwsWithMessage(function () { 
-                func(Arguments, True, 1); 
-            }, 'Invalid argument `Return` supplied to `func()`');
-            throwsWithMessage(function () { 
-                func(Arguments, null); 
-            }, 'Invalid argument `f` supplied to `func()`');
-            throwsWithMessage(function () { 
-                func(Arguments, True, null, 1); 
-            }, 'Invalid argument `name` supplied to `func()`');
+                sum('a', 2);
+            }, 'Invalid `a` supplied to `Num`');
         });
-        it('should accept a list of types as first argument', function () {
-            var repeat = func([Str, Num], function (s, n) { return new Array(n+1).join(s); });
-            eq(repeat('a', 3), 'aaa');
+
+        it('should check the return value', function () {
+            var T = func([Num, Num], Num);
+            var sum = T.of(function (a, b) {
+                return 'a';
+            });
+            throwsWithMessage(function () {
+                sum(1, 2);
+            }, 'Invalid `a` supplied to `Num`');
         });
+
         it('should preserve `this`', function () {
             var o = {name: 'giulio'};
-            o.getName = func(Any, function () {
+            o.getName = func([], Str).of(function () {
                 return this.name;
             });
             eq(o.getName(), 'giulio');
         });
-        describe('should be idempotent', function () {
-            it('when Arguments and Return are the same', function () {
-                var Arguments = tuple([Str, Str]);
-                var f = function (s) { return s; };
-                var g = func(Arguments, f, Str);
-                var h = func(Arguments, g, Str);
-                eq(h, g);
+
+        it('should handle function types', function () {
+            var A = func([Str], Str);
+            var B = func([Str, A], Str);
+
+            var f = A.of(function (s) {
+                return s + '!';
             });
-            it('when Arguments are the same and Return is not defined', function () {
-                var Arguments = tuple([Str, Str]);
-                var f = function (s) { return s; };
-                var g = func(Arguments, f, null);
-                var h = func(Arguments, g);
-                eq(h, g);
+            var g = B.of(function (str, strAction) {
+                return strAction(str);
             });
+
+            eq(g('hello', f), 'hello!');
         });
+
+        it('should be idempotent', function () {
+            var f = function (s) { return s; };
+            var g = func([Str], Str).of(f);
+            var h = func([Str], Str).of(g);
+            ok(h === g);
+        });
+
     });
 
-    describe('#is(x)', function () {
-        it('should return true when x is the func', function () {
-            ok(sum.is(sum));
-            ok(sum(1, 2) === 3);
+    describe('currying', function () {
+
+        it('should curry functions', function () {
+            var Type = func([Num, Num, Num], Num);
+            var sum = Type.of(function (a, b, c) {
+                return a + b + c;
+            });
+            eq(sum(1, 2, 3), 6);
+            eq(sum(1, 2)(3), 6);
+            eq(sum(1)(2, 3), 6);
+            eq(sum(1)(2)(3), 6);
+
+            // important: the curried function must be of the correct type
+            var CurriedType = func([Num, Num], Num);
+            var sum1 = sum(1);
+            eq(sum1(2, 3), 6);
+            eq(sum1(2)(3), 6);
+            ok(CurriedType.is(sum1));
         });
-        it("should return false when x is not the func", function () {
-            ko(sum.is(noop));
-        });
-        it("should throw with wrong arguments", function () {
+
+        it('should throw if partial arguments are wrong', function () {
+            var T = func([Num, Num], Num);
+            var sum = T.of(function (a, b) {
+                return a + b;
+            });
             throwsWithMessage(function () {
-                sum(1, 'a');
+                sum('a');
+            }, 'Invalid `a` supplied to `Num`');
+            throwsWithMessage(function () {
+                var sum1 = sum(1);
+                sum1('a');
             }, 'Invalid `a` supplied to `Num`');
         });
-        it("should throw with wrong return", function () {
-            var bad = func(tuple([Num, Num]), function (a, b) {
-                return a + String(b);
-            }, Num);
-            throwsWithMessage(function () {
-                bad(1, 2);
-            }, 'Invalid `12` supplied to `Num`');
-        });
-        it("Return should be optional", function () {
-            var bad = func(tuple([Num, Num]), function (a, b) {
-                return a + String(b);
-            });
-            ok(bad(1, 2) === '12');
-        });
-        it("should handle optional arguments", function () {
-            var sum3 = func(tuple([Num, Num, maybe(Num)]), function (a, b, c) {
-                return a + b + (c || 0);
-            }, Num);
-            ok(sum3(1, 2, 3) === 6);
-            ok(sum3(1, 2) === 3);
-        });
+
     });
+
 });
 

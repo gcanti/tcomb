@@ -1,7 +1,7 @@
 .*
 *.log
 bower.json
-Grunfile.js
+Gruntfile.js
 tcomb.sjs
 node_modules
 test

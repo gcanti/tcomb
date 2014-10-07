@@ -1,3 +1,11 @@
+# v0.3.0
+
+**BREAKING**
+
+- removed `util.isKind`
+- removed `util.isType`, use `Type.is` instead
+- refactoring of `func`. Now is a proper type combinator
+
 # v0.2.1
 
 - `func` doesn't preserve `this`, fix #38

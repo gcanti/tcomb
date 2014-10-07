@@ -1,6 +1,4 @@
-% tcomb
-
-![tcomb logo](http://gcanti.github.io/resources/tcomb/logo.png)
+> "Si vis pacem, para bellum" (Vegetius 5th century)
 
 tcomb is a library for Node.js and the browser which allows you to **check the types** of 
 JavaScript values at runtime with a simple syntax. It's great for **Domain Driven Design**, 
@@ -530,14 +528,17 @@ func(Arguments, f, [Return], [name])
   
 Defines a function where the `arguments` and the return value are checked.
   
-- `Arguments` the type of `arguments` (can be a list of types)
-- `f` the function to execute
-- `Return` optional, check the type of the return value
-- `name` optional string useful for debugging
+- `Arguments`: a `tuple` of types (can be an array of types as a shorthand)
+- `f`: the function to execute
+- `Return`: optional, check the type of the return value
+- `name`: optional string useful for debugging
   
 Example
   
 ```javascript
+
+
+// you can use an array of types as a shorthand for tuple([Num, Num])
 var sum = func([Num, Num], function (a, b) {
     return a + b;
 }, Num);
@@ -617,6 +618,7 @@ fn add (x: Num, y: Num) -> Num {
 
 # Articles on tcomb
 
+- [JavaScript, Types and Sets](http://gcanti.github.io/2014/09/29/javascript-types-and-sets.html)
 - [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
 - [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
 - [JSON API Validation In Node.js](http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
