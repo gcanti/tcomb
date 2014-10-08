@@ -520,36 +520,131 @@ Returns `true` if `x` is an instance of the dict.
 Tel.is({'jack': 4098, 'sape': 4139}); // => true
 ```
 
-## functions
+## functions (experimental)
+
+Typed functions may be defined like this:
+
+```javascript
+var add = func([Num, Num], Num)
+    .of(function (x, y) { return x + y; });
+```
+
+And used like this:
+
+```javascript
+add("Hello", 2); // Raises error: Invalid `Hello` supplied to `Num`
+add("Hello");    // Raises error: Invalid `Hello` supplied to `Num`
+
+add(1, 2);       // Returns: 3
+add(1)(2);       // Returns: 3
+```
+
+### func(A, B, name)
 
 ```js
-func(Arguments, f, [Return], [name])
+func(Domain, Codomain, name)
 ```
-  
-Defines a function where the `arguments` and the return value are checked.
-  
-- `Arguments`: a `tuple` of types (can be an array of types as a shorthand)
-- `f`: the function to execute
-- `Return`: optional, check the type of the return value
+
+Returns a function type whose functions have their domain and codomain specified and constrained.
+
+- `Domain`: the type of the function's argument (or `list` of types of the function's arguments)
+- `Codomain`: the type of the function's return value
 - `name`: optional string useful for debugging
-  
-Example
-  
+
+`func` can be used to define function types using native types:
+
 ```javascript
-
-
-// you can use an array of types as a shorthand for tuple([Num, Num])
-var sum = func([Num, Num], function (a, b) {
-    return a + b;
-}, Num);
-  
-sum(1, 2); // => 3
-sum(1, 'a'); // => fail!
+// An `A` is a `Func` which takes a `Str` and returns an `Num`
+var A = func(Str, Num);
 ```
 
-# Macros
+The domain and codomain can also be specified using types from any combinator including `func`:
 
-**Experimental**. I added a `tcomb.sjs` file containing some [sweet.js](http://sweetjs.org/) macros, here some examples:
+```javascript
+// A `B` is a `Func` which takes a `Func` (which takes a `Str` and returns a `Num`)
+// and returns a `Str`.
+var B = func(func(Str, Num), Str);
+
+// An `ExcitedStr` is a `Str` containing an exclamation mark
+var ExcitedStr = subtype(Str, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedStr');
+
+// An `Exciter` is a `Func` which takes a `Str` and returns an `ExcitedStr`
+var Exciter = func(Str, ExcitedStr);
+```
+
+Additionally the domain can be expressed as a `list` of types:
+
+```javascript
+// A `C` is a `Func` which takes an `A`, a `B` and a `Str` and returns a `Num`
+var C = func([A, B, Str], Num);
+```
+
+### .of(f)
+
+```javascript
+func(A, B).of(f);
+```
+
+Returns a function where the domain and codomain are typechecked against the function type.
+
+If the function is passed values which are outside of the domain or returns values which are outside of the codomain it will raise an error:
+
+```javascript
+var simpleQuestionator = Exciter.of(function (s) { return s + '?'; });
+var simpleExciter      = Exciter.of(function (s) { return s + '!'; });
+
+// Raises error: 
+// Invalid `Hello?` supplied to `ExcitedStr`, insert a valid value for the subtype
+simpleQuestionator('Hello');
+
+// Raises error: Invalid `1` supplied to `Str`
+simpleExciter(1);
+
+// Returns: 'Hello!'
+simpleExciter('Hello');
+```
+
+The returned function may also be partially applied:
+
+```javascript
+// We can reasonably suggest that add has the following type signature
+// add : Num -> Num -> Num
+var add = func([Num, Num], Num)
+    .of(function (x, y) { return x + y });
+
+var addHello = add("Hello"); // As this raises: "Error: Invalid `Hello` supplied to `Num`"
+
+var add2 = add(2);
+add2(1); // And this returns: 3
+```
+
+### .is(x)
+
+```javascript
+func(A, B).is(x);
+```
+
+Returns true if x belongs to the type.
+
+```javascript
+Exciter.is(simpleExciter);      // Returns: true
+Exciter.is(simpleQuestionator); // Returns: true
+
+var id = function (x) { return x; };
+
+func([Num, Num], Num).is(func([Num, Num], Num).of(id)); // Returns: true
+func([Num, Num], Num).is(func(Num, Num).of(id));        // Returns: false 
+```
+
+### Rules
+
+1. Typed functions' domains are checked when they are called
+2. Typed functions' codomains are checked when they return
+3. The domain and codomain of a typed function's type is checked when the typed function is passed to a function type (such as when used as an argument in another typed function).
+
+# Macros (experimental)
+
+I added a `tcomb.sjs` file containing some [sweet.js](http://sweetjs.org/) macros, here some examples:
 
 ```js
 // structs
