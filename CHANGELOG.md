@@ -4,7 +4,7 @@
 
 - removed `util.isKind`
 - removed `util.isType`, use `Type.is` instead
-- refactoring of `func`. Now is a proper type combinator
+- refactoring of `func`. Now is a proper type combinator. fix #42
 
 # v0.2.1
 

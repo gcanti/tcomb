@@ -4,6 +4,11 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 JavaScript values at runtime with a simple syntax. It's great for **Domain Driven Design**, 
 for testing and for adding safety to your internal code. 
 
+# Contributors
+
+- [Giulio Canti](https://github.com/gcanti)
+- [Becky Conning](https://github.com/beckyconning) 'func' combinator ideas and documentation.
+
 # Contents
 
 - [Features](#features)
@@ -520,7 +525,7 @@ Returns `true` if `x` is an instance of the dict.
 Tel.is({'jack': 4098, 'sape': 4139}); // => true
 ```
 
-## functions (experimental)
+## functions
 
 Typed functions may be defined like this:
 
@@ -540,7 +545,7 @@ add(1, 2);       // Returns: 3
 add(1)(2);       // Returns: 3
 ```
 
-### func(A, B, name)
+### func(A, B, [name])
 
 ```js
 func(Domain, Codomain, name)
@@ -717,10 +722,6 @@ fn add (x: Num, y: Num) -> Num {
 - [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
 - [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
 - [JSON API Validation In Node.js](http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
-
-# Contribution
-
-If you do have a contribution for the package feel free to put up a Pull Request or open an Issue.
 
 # License (MIT)
 
