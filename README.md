@@ -561,21 +561,20 @@ var A = func(Str, Num);
 The domain and codomain can also be specified using types from any combinator including `func`:
 
 ```javascript
-// A `B` is a `Func` which takes a `Func` (which takes a `Str` and returns a `Num`)
-// and returns a `Str`.
+// A `B` takes a `Func` (which takes a `Str` and returns a `Num`) and returns a `Str`.
 var B = func(func(Str, Num), Str);
 
 // An `ExcitedStr` is a `Str` containing an exclamation mark
 var ExcitedStr = subtype(Str, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedStr');
 
-// An `Exciter` is a `Func` which takes a `Str` and returns an `ExcitedStr`
+// An `Exciter` takes a `Str` and returns an `ExcitedStr`
 var Exciter = func(Str, ExcitedStr);
 ```
 
 Additionally the domain can be expressed as a `list` of types:
 
 ```javascript
-// A `C` is a `Func` which takes an `A`, a `B` and a `Str` and returns a `Num`
+// A `C` takes an `A`, a `B` and a `Str` and returns a `Num`
 var C = func([A, B, Str], Num);
 ```
 
