@@ -525,6 +525,7 @@ Tel.is({'jack': 4098, 'sape': 4139}); // => true
 Typed functions may be defined like this:
 
 ```javascript
+// add takes two `Num`s and returns a `Num`
 var add = func([Num, Num], Num)
     .of(function (x, y) { return x + y; });
 ```
@@ -554,7 +555,7 @@ Returns a function type whose functions have their domain and codomain specified
 `func` can be used to define function types using native types:
 
 ```javascript
-// An `A` is a `Func` which takes a `Str` and returns an `Num`
+// An `A` takes a `Str` and returns an `Num`
 var A = func(Str, Num);
 ```
 
