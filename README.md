@@ -401,21 +401,28 @@ Direction = enums.of('North East South West');
 ```js
 tuple(types, [name])
 ```
-  
+
 Defines a tuple whose coordinates have the specified types.
-  
+
 - `types` array of coordinates types
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```javascript
 var Area = tuple([Num, Num]);
-  
+
 // constructor usage, area is immutable
 var area = Area([1, 2]);
 ```
-  
+
+0-tuples and 1-tuples are also supported
+
+```javascript
+var Nothing = tuple([]);
+var JustNum = tuple([Num]);
+```
+
 ### is(x)
   
 Returns `true` if `x` belongs to the tuple.
