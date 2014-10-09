@@ -324,6 +324,11 @@ var Shape = union([
     Circle, 
     Rectangle
 ]);
+
+// you must implement the dispatch() function in order to use `Shape` as a contructor
+Shape.dispatch = function (x) {
+  return x.center ? Circle : Rectangle;
+};
 ```
   
 ### is(x)
