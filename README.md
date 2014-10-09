@@ -82,7 +82,7 @@ var Product = struct({
     home: Url,                  // a subtype of a string
     shippings: list(Str),       // a list of shipping methods
     category: Category,         // enum, one of [audio, video]
-    price: union([Num, Price]), // a price (dollars) OR in another currency
+    price: Price,               // a price (dollars) OR in another currency
     size: tuple([Num, Num]),    // width x height
     warranty: dict(Num)         // a dictionary country -> covered years
 });
@@ -90,10 +90,12 @@ var Product = struct({
 var Url = subtype(Str, function (s) {
     return s.indexOf('http://') === 0;
 });
-
 var Category = enums.of('audio video');
-
-var Price = struct({ currency: Str, amount: Num });
+var ForeignPrice = struct({ currency: Str, amount: Num });
+var Price = union([Num, ForeignPrice]);
+Price.dispatch = function (x) {
+  return Num.is(x) ? Num : ForeignPrice;
+};
 
 // JSON of a product
 var json = {
