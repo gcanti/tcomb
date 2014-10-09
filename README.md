@@ -327,8 +327,11 @@ var Shape = union([
 
 // you must implement the dispatch() function in order to use `Shape` as a contructor
 Shape.dispatch = function (x) {
-  return x.center ? Circle : Rectangle;
+  return x.hasOwnProperty('center') ? Circle : Rectangle;
 };
+
+var circle = Shape({center: {x: 1, y: 0}, radius: 10});
+var rectangle = Shape({bl: {x: 0, y: 0}, tr: {x: 1, y: 1}});
 ```
   
 ### is(x)
@@ -336,7 +339,7 @@ Shape.dispatch = function (x) {
 Returns `true` if `x` belongs to the union.
   
 ```javascript
-Shape.is(Circle({center: p, radius: 10})); // => true
+Shape.is(new Circle({center: p, radius: 10})); // => true
 ```
 
 ## maybe
