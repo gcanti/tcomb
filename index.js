@@ -672,6 +672,11 @@
 
     function Func(value) {
 
+      // automatically instrument the function if is not already instrumented
+      if (!func.is(value)) {
+        value = Func.of(value);
+      }
+
       // DEBUG HINT: if the debugger stops here, the first argument is invalid
       // mouse over the `value` and `name` variables to see what's wrong
       assert(Func.is(value), 'Invalid `%s` supplied to `%s`', value, name);
@@ -687,15 +692,18 @@
     };
 
     Func.is = function (x) {
-      return Type.is(x) && 
-        x.meta.Domain.length === Domain.length && 
-        x.meta.Domain.every(function (type, i) {
+      return func.is(x) && 
+        x.func.Domain.length === Domain.length && 
+        x.func.Domain.every(function (type, i) {
           return type === Domain[i];
         }) && 
-        x.meta.Codomain === Codomain; 
+        x.func.Codomain === Codomain; 
     };
 
     Func.of = function (f) {
+
+      // DEBUG HINT: if the debugger stops here, f is not a function
+      assert(typeof f === 'function');
 
       // makes Func.of idempotent
       if (Func.is(f)) {
@@ -732,7 +740,7 @@
     
       }
     
-      fn.meta = {
+      fn.func = {
         Domain: Domain,
         Codomain: Codomain,
         f: f
@@ -745,6 +753,11 @@
     return Func;
 
   }
+
+  // returns true if x is an instrumented function
+  func.is = function (f) {
+    return Func.is(f) && Obj.is(f.func);
+  };
 
   return {
 

@@ -1079,6 +1079,12 @@ describe('func', function () {
         ok(T.meta.Domain[0] === Num);
     });
 
+    it('should automatically instrument a function', function () {
+        var T = func(Num, Num);
+        var f = function (a) { return 'hi'; }
+        ok(T.is(T(f)));
+    });
+
     describe('of', function () {
 
         it('should check the arguments', function () {
