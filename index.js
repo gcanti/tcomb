@@ -466,6 +466,7 @@
     Tuple.meta = {
       kind: 'tuple',
       types: types,
+      length: len,
       name: name
     };
   
