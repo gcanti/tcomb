@@ -190,8 +190,8 @@ describe('getName', function () {
     var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
     var UnnamedList = list(Str);
     var NamedList = list(Str, 'NamedList');
-    var UnnamedDict = dict(Str);
-    var NamedDict = dict(Str, 'NamedDict');
+    var UnnamedDict = dict(Str, Str);
+    var NamedDict = dict(Str, Str, 'NamedDict');
 
     it('should return the name of a named type', function () {
         eq(getName(NamedStruct), 'NamedStruct');
@@ -211,7 +211,7 @@ describe('getName', function () {
         eq(getName(UnnamedTuple), 'tuple([Str, Num])');
         eq(getName(UnnamedSubtype), 'subtype(Str)');
         eq(getName(UnnamedList), 'list(Str)');
-        eq(getName(UnnamedDict), 'dict(Str)');
+        eq(getName(UnnamedDict), 'dict(Str, Str)');
     });
 });
 
@@ -224,7 +224,7 @@ describe('getKind', function () {
     var NamedTuple = tuple([Str, Num], 'NamedTuple');
     var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
     var NamedList = list(Str, 'NamedList');
-    var NamedDict = dict(Str, 'NamedDict');
+    var NamedDict = dict(Str, Str, 'NamedDict');
 
     it('should return the name of a named type', function () {
         eq(getKind(Any), 'irriducible');
@@ -1019,15 +1019,21 @@ describe('dict', function () {
         it('should throw if used with wrong arguments', function () {
             throwsWithMessage(function () {
                 dict();
-            }, 'Invalid argument `type` supplied to `dict()`');
+            }, 'Invalid argument `domain` supplied to `dict()`');
             throwsWithMessage(function () {
-                dict(Point, 1);
+                dict(Str);
+            }, 'Invalid argument `codomain` supplied to `dict()`');
+            throwsWithMessage(function () {
+                dict(Str, Point, 1);
             }, 'Invalid argument `name` supplied to `dict()`');
         });
     });
     describe('constructor', function () {
         var S = struct({}, 'S');
-        var T = dict(S, 'T');
+        var Domain = subtype(Str, function (x) {
+            return x !== 'forbidden';
+        }, 'Domain');
+        var T = dict(Domain, S, 'T');
         it('should coerce values', function () {
             var t = T({a: {}});
             ok(S.is(t.a));
@@ -1039,9 +1045,12 @@ describe('dict', function () {
             throwsWithMessage(function () {
                 T({a: 1});
             }, 'Invalid `1` supplied to `S`, expected an `Obj`');
+            throwsWithMessage(function () {
+                T({forbidden: {}});
+            }, 'Invalid `forbidden` supplied to `Domain`, insert a valid value for the subtype');
         });
         it('should be idempotent', function () {
-            var T = dict(Point);
+            var T = dict(Str, Point);
             var p1 = new Point({x: 0, y: 0});
             var p2 = new Point({x: 1, y: 1});
             var t1 = T({a: p1, b: p2});
@@ -1050,7 +1059,7 @@ describe('dict', function () {
         });    
     });
     describe('#is(x)', function () {
-        var T = dict(Point);
+        var T = dict(Str, Point);
         var p1 = new Point({x: 0, y: 0});
         var p2 = new Point({x: 1, y: 1});
         it('should return true when x is a list', function () {
@@ -1061,7 +1070,7 @@ describe('dict', function () {
         });
     });
     describe('#update()', function () {
-        var Type = dict(Str);
+        var Type = dict(Str, Str);
         var instance = Type({p1: 'a', p2: 'b'});
         it('should throw if options.update is missing', function () {
             throwsWithMessage(function () {
@@ -1088,8 +1097,8 @@ describe('func', function () {
 
     it('should handle a single type', function () {
         var T = func(Num, Num);
-        eq(T.meta.Domain.length, 1);
-        ok(T.meta.Domain[0] === Num);
+        eq(T.meta.domain.length, 1);
+        ok(T.meta.domain[0] === Num);
     });
 
     it('should automatically instrument a function', function () {

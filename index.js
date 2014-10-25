@@ -223,7 +223,7 @@
   
     // DEBUG HINT: if the debugger stops here, the first argument is not a dict of types
     // mouse over the `props` variable to see what's wrong
-    assert(dict(Type).is(props), 'Invalid argument `props` supplied to `struct()`');
+    assert(dict(Str, Type).is(props), 'Invalid argument `props` supplied to `struct()`');
 
     // DEBUG HINT: if the debugger stops here, the second argument is not a string
     // mouse over the `name` variable to see what's wrong
@@ -594,21 +594,24 @@
     return List;
   }
 
-  function dict(type, name) {
+  function dict(domain, codomain, name) {
   
     // DEBUG HINT: if the debugger stops here, the first argument is not a type
-    assert(Type.is(type), 'Invalid argument `type` supplied to `dict()`');
+    assert(Type.is(domain), 'Invalid argument `domain` supplied to `dict()`');
+
+    // DEBUG HINT: if the debugger stops here, the second argument is not a type
+    assert(Type.is(codomain), 'Invalid argument `codomain` supplied to `dict()`');
   
     // DEBUG HINT: if the debugger stops here, the third argument is not a string
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `dict()`');
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('dict(%s)', getName(type));
+    name = name || format('dict(%s, %s)', getName(domain), getName(codomain));
 
     function Dict(value, mut) {
   
-      // DEBUG HINT: if the debugger stops here, the value is not one of the defined enums
+      // DEBUG HINT: if the debugger stops here, the value is not an object
       // mouse over the `value` and `name` variables to see what's wrong
       assert(Obj.is(value), 'Invalid `%s` supplied to `%s`, expected an `Obj`', value, name);
   
@@ -620,10 +623,13 @@
       var obj = {};
       for (var k in value) {
         if (value.hasOwnProperty(k)) {
+          // DEBUG HINT: if the debugger stops here, the `k` value supplied to the `domain` type is invalid
+          // mouse over the `k` and `domain` variables to see what's wrong
+          k = domain(k);
           var actual = value[k];
-          // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `type` type is invalid
-          // mouse over the `actual` and `type` variables to see what's wrong
-          obj[k] = type(actual, mut);
+          // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `codomain` type is invalid
+          // mouse over the `actual` and `codomain` variables to see what's wrong
+          obj[k] = codomain(actual, mut);
         }
       }
   
@@ -635,14 +641,15 @@
   
     Dict.meta = {
       kind: 'dict',
-      type: type,
+      domain: domain,
+      codomain: codomain,
       name: name
     };
   
     Dict.isDict = function (x) {
       for (var k in x) {
-        if (x.hasOwnProperty(k) && !type.is(x[k])) {
-          return false;
+        if (x.hasOwnProperty(k)) {
+          if (!domain.is(k) || !codomain.is(x[k])) { return false; }
         }
       }
       return true;
@@ -658,22 +665,22 @@
     return Dict;
   }
 
-  function func(Domain, Codomain, name) {
+  function func(domain, codomain, name) {
 
     // handle handy syntax for unary functions
-    Domain = Arr.is(Domain) ? Domain : [Domain];
+    domain = Arr.is(domain) ? domain : [domain];
 
     // DEBUG HINT: if the debugger stops here, the first argument is not a list of types
-    assert(list(Type).is(Domain), 'Invalid argument `Domain` supplied to `func()`');
+    assert(list(Type).is(domain), 'Invalid argument `domain` supplied to `func()`');
 
     // DEBUG HINT: if the debugger stops here, the second argument is not a type
-    assert(Type.is(Codomain), 'Invalid argument `Codomain` supplied to `func()`');
+    assert(Type.is(codomain), 'Invalid argument `codomain` supplied to `func()`');
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('func([%s], %s)', Domain.map(getName).join(', '), getName(Codomain));
+    name = name || format('func([%s], %s)', domain.map(getName).join(', '), getName(codomain));
 
     // cache the domain length
-    var domainLen = Domain.length;
+    var domainLen = domain.length;
 
     function Func(value) {
 
@@ -691,18 +698,18 @@
 
     Func.meta = {
       kind: 'func',
-      Domain: Domain,
-      Codomain: Codomain,
+      domain: domain,
+      codomain: codomain,
       name: name
     };
 
     Func.is = function (x) {
       return func.is(x) && 
-        x.func.Domain.length === Domain.length && 
-        x.func.Domain.every(function (type, i) {
-          return type === Domain[i];
+        x.func.domain.length === domain.length && 
+        x.func.domain.every(function (type, i) {
+          return type === domain[i];
         }) && 
-        x.func.Codomain === Codomain; 
+        x.func.codomain === codomain; 
     };
 
     Func.of = function (f) {
@@ -722,7 +729,7 @@
         
         // DEBUG HINT: if the debugger stops here, you provided wrong arguments to the function
         // mouse over the `args` variable to see what's wrong
-        args = tuple(Domain.slice(0, len))(args);
+        args = tuple(domain.slice(0, len))(args);
 
         if (len === domainLen) {
 
@@ -731,23 +738,23 @@
       
           // DEBUG HINT: if the debugger stops here, the return value of the function is invalid
           // mouse over the `r` variable to see what's wrong
-          r = Codomain(r);
+          r = codomain(r);
       
           return r;
 
         } else {
 
           var curried = Function.prototype.bind.apply(f, [this].concat(args));
-          var NewDomain = func(Domain.slice(len), Codomain);
-          return NewDomain.of(curried);
+          var newdomain = func(domain.slice(len), codomain);
+          return newdomain.of(curried);
 
         }
     
       }
     
       fn.func = {
-        Domain: Domain,
-        Codomain: Codomain,
+        domain: domain,
+        codomain: codomain,
         f: f
       };
     
