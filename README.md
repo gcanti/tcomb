@@ -75,7 +75,7 @@ You can handle:
 
 Let's build a product model
 
-```javascript
+```js
 var Product = struct({
     name: Str,                  // required string
     desc: maybe(Str),           // optional string, can be null
@@ -118,7 +118,7 @@ var ipod = Product(json);
 
 You have existing code and you want to add safety
 
-```javascript
+```js
 // your code: plain old JavaScript class
 function Point (x, y) {
     this.x = x;
@@ -130,7 +130,7 @@ var p = new Point(1, 'a'); // silent error
 
 in order to "tcombify" your code you can simply add some asserts
 
-```javascript
+```js
 function Point (x, y) {
     assert(Num.is(x));
     assert(Num.is(y));
@@ -155,29 +155,7 @@ or download the `tcomb.min.js` file.
 
 # Requirements
 
-This library uses a few ES5 methods
-
-- `Array.forEach()`
-- `Array.map()`
-- `Array.some()`
-- `Array.every()`
-- `Object.keys()`
-- `Object.freeze()`
-- `JSON.stringify()`
-
-you can use `es5-shim`, `es5-sham` and `json2` to support old browsers
-
-```html
-<!--[if lt IE 9]>
-<script src="json2.js"></script>
-<script src="es5-shim.min.js"></script>
-<script src="es5-sham.min.js"></script>
-<![endif]-->
-<script type="text/javascript" src="tcomb.js"></script>
-<script type="text/javascript">
-    console.log(t);
-</script>
-```
+This library uses a few ES5 methods, you can use `es5-shim`, `es5-sham` and `json2` to support old browsers
 
 # Tests
 
@@ -193,6 +171,14 @@ What's a type? In tcomb a type is a function `T` such that
 
 **Note**: 2. implies that `T` can be used as a default JSON decoder
 
+# Articles on tcomb
+
+- [JavaScript, Types and Sets Part 1](http://gcanti.github.io/2014/09/29/javascript-types-and-sets.html)
+- [JavaScript, Types and Sets Part 2](https://gcanti.github.io/2014/10/07/javascript-types-and-sets-part-II.html)
+- [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
+- [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
+- [JSON API Validation In Node.js](http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
+
 # Api
 
 ## options
@@ -201,7 +187,7 @@ What's a type? In tcomb a type is a function `T` such that
   
 In production envs you don't want to leak failures to the user
   
-```javascript
+```js
 // override onFail hook
 options.onFail = function (message) {
     try {
@@ -221,7 +207,7 @@ without modifying the original.
   
 Example
   
-```javascript
+```js
 // see http://facebook.github.io/react/docs/update.html
 options.update = function (x, updates) {
   return React.addons.update(mixin({}, x), updates);
@@ -243,7 +229,7 @@ If `guard !== true` the debugger kicks in.
   
 Example
   
-```javascript
+```js
 assert(1 === 2); // throws 'assert(): failed'
 assert(1 === 2, 'error!'); // throws 'error!'
 assert(1 === 2, 'error: %s !== %s', 1, 2); // throws 'error: 1 !== 2'
@@ -264,7 +250,7 @@ Defines a struct like type.
   
 Example
   
-```javascript
+```js
 "use strict";
   
 // defines a struct with two numerical props
@@ -292,8 +278,23 @@ p.x = 2; // ok
   
 Returns `true` if `x` is an instance of the struct.
   
-```javascript
+```js
 Point.is(p); // => true
+```
+
+### extend(props, [name])
+  
+Returns a new type with the additional specified `props`
+  
+```js
+var Point = struct({
+  x: Num,
+  y: Num
+}, 'Point');
+
+var Point3D = Point.extend({z: Num}, 'Point3D'); // composition, not inheritance
+
+var p = new Point3D({x: 1, y: 2, z: 3});
 ```
 
 ## unions
@@ -309,7 +310,7 @@ Defines a union of types.
   
 Example
   
-```javascript
+```js
 var Circle = struct({
     center: Point,
     radius: Num
@@ -338,7 +339,7 @@ var rectangle = Shape({bl: {x: 0, y: 0}, tr: {x: 1, y: 1}});
   
 Returns `true` if `x` belongs to the union.
   
-```javascript
+```js
 Shape.is(new Circle({center: p, radius: 10})); // => true
 ```
 
@@ -350,7 +351,7 @@ maybe(type, [name])
   
 Same as `union([Nil, type])`.
   
-```javascript
+```js
 // the value of a radio input where null = no selection
 var Radio = maybe(Str);
   
@@ -372,7 +373,7 @@ Defines an enum of strings.
   
 Example
   
-```javascript
+```js
 var Direction = enums({
     North: 'North', 
     East: 'East',
@@ -385,7 +386,7 @@ var Direction = enums({
   
 Returns `true` if `x` belongs to the enum.
   
-```javascript
+```js
 Direction.is('North'); // => true
 ```
 ### enums.of(keys, [name])
@@ -398,7 +399,7 @@ custom values for the enums.
   
 Example
   
-```javascript
+```js
 // result is the same as the main example
 var Direction = enums.of(['North', 'East', 'South', 'West']);
   
@@ -419,7 +420,7 @@ Defines a tuple whose coordinates have the specified types.
 
 Example
 
-```javascript
+```js
 var Area = tuple([Num, Num]);
 
 // constructor usage, area is immutable
@@ -428,7 +429,7 @@ var area = Area([1, 2]);
 
 0-tuples and 1-tuples are also supported
 
-```javascript
+```js
 var Nothing = tuple([]);
 var JustNum = tuple([Num]);
 ```
@@ -437,7 +438,7 @@ var JustNum = tuple([Num]);
   
 Returns `true` if `x` belongs to the tuple.
   
-```javascript
+```js
 Area.is([1, 2]);      // => true
 Area.is([1, 'a']);    // => false, the second element is not a Num
 Area.is([1, 2, 3]);   // => false, too many elements
@@ -457,7 +458,7 @@ Defines a subtype of an existing type.
   
 Example
   
-```javascript
+```js
 // points of the first quadrant
 var Q1Point = subtype(Point, function (p) {
     return p.x >= 0 && p.y >= 0;
@@ -474,7 +475,7 @@ p = Q1Point({x: -1, y: -2}); // => fail!
   
 Returns `true` if `x` belongs to the subtype.
   
-```javascript
+```js
 var Int = subtype(Num, function (n) {
     return n === parseInt(n, 10);
 });
@@ -496,7 +497,7 @@ Defines an array where all the elements are of type `T`.
   
 Example
   
-```javascript
+```js
 var Path = list(Point);
   
 // costructor usage, path is immutable
@@ -510,7 +511,7 @@ var path = Path([
   
 Returns `true` if `x` belongs to the list.
   
-```javascript
+```js
 var p1 = Point({x: 0, y: 0});
 var p2 = Point({x: 1, y: 2});
 Path.is([p1, p2]); // => true
@@ -519,26 +520,27 @@ Path.is([p1, p2]); // => true
 ## dicts
 
 ```js
-dict(type, [name])
+dict(domain, codomain, [name])
 ```
   
-Defines a dictionary Str -> type.
+Defines a dictionary domain -> codomain.
   
-- `type` the type of the values
+- `domain` the type of the keys
+- `codomain` the type of the values
 - `name` optional string useful for debugging
   
 Example
   
-```javascript
+```js
 // defines a dictionary of numbers
-var Tel = dict(Num);
+var Tel = dict(Str, Num);
 ```
   
 ### is(x)
   
 Returns `true` if `x` is an instance of the dict.
   
-```javascript
+```js
 Tel.is({'jack': 4098, 'sape': 4139}); // => true
 ```
 
@@ -546,7 +548,7 @@ Tel.is({'jack': 4098, 'sape': 4139}); // => true
 
 Typed functions may be defined like this:
 
-```javascript
+```js
 // add takes two `Num`s and returns a `Num`
 var add = func([Num, Num], Num)
     .of(function (x, y) { return x + y; });
@@ -554,7 +556,7 @@ var add = func([Num, Num], Num)
 
 And used like this:
 
-```javascript
+```js
 add("Hello", 2); // Raises error: Invalid `Hello` supplied to `Num`
 add("Hello");    // Raises error: Invalid `Hello` supplied to `Num`
 
@@ -576,14 +578,14 @@ Returns a function type whose functions have their domain and codomain specified
 
 `func` can be used to define function types using native types:
 
-```javascript
+```js
 // An `A` takes a `Str` and returns an `Num`
 var A = func(Str, Num);
 ```
 
 The domain and codomain can also be specified using types from any combinator including `func`:
 
-```javascript
+```js
 // A `B` takes a `Func` (which takes a `Str` and returns a `Num`) and returns a `Str`.
 var B = func(func(Str, Num), Str);
 
@@ -596,14 +598,14 @@ var Exciter = func(Str, ExcitedStr);
 
 Additionally the domain can be expressed as a `list` of types:
 
-```javascript
+```js
 // A `C` takes an `A`, a `B` and a `Str` and returns a `Num`
 var C = func([A, B, Str], Num);
 ```
 
 ### .of(f)
 
-```javascript
+```js
 func(A, B).of(f);
 ```
 
@@ -611,7 +613,7 @@ Returns a function where the domain and codomain are typechecked against the fun
 
 If the function is passed values which are outside of the domain or returns values which are outside of the codomain it will raise an error:
 
-```javascript
+```js
 var simpleQuestionator = Exciter.of(function (s) { return s + '?'; });
 var simpleExciter      = Exciter.of(function (s) { return s + '!'; });
 
@@ -628,7 +630,7 @@ simpleExciter('Hello');
 
 The returned function may also be partially applied:
 
-```javascript
+```js
 // We can reasonably suggest that add has the following type signature
 // add : Num -> Num -> Num
 var add = func([Num, Num], Num)
@@ -642,13 +644,13 @@ add2(1); // And this returns: 3
 
 ### .is(x)
 
-```javascript
+```js
 func(A, B).is(x);
 ```
 
 Returns true if x belongs to the type.
 
-```javascript
+```js
 Exciter.is(simpleExciter);      // Returns: true
 Exciter.is(simpleQuestionator); // Returns: true
 
@@ -733,33 +735,6 @@ fn add (x: Num, y: Num) -> Num {
 }
 ```
 
-# Articles on tcomb
-
-- [JavaScript, Types and Sets](http://gcanti.github.io/2014/09/29/javascript-types-and-sets.html)
-- [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
-- [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
-- [JSON API Validation In Node.js](http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
-
-# License (MIT)
+# License
 
 The MIT License (MIT)
-
-Copyright (c) 2014 Giulio Canti
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.

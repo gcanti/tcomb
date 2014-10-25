@@ -1,7 +1,10 @@
 # v0.3.0
 
+- add `Struct.extend(props, [name])`, fix #55
+
 **BREAKING**
 
+- change `dict(B)` combinator to `dict(A, B)` where A is the set of keys, fix #54
 - removed `util.isKind`
 - removed `util.isType`, use `Type.is` instead
 - refactoring of `func`. Now is a proper type combinator. fix #42
