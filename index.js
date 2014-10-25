@@ -176,7 +176,7 @@
   });
   
   var Nil = irriducible('Nil', function (x) {
-    return x === null || x === undefined;
+    return x === null || x === void 0;
   });
   
   var Str = irriducible('Str', function (x) {
