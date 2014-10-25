@@ -35,7 +35,7 @@ var format = t.util.format;
 
 var ok = function (x) { assert.strictEqual(true, x); };
 var ko = function (x) { assert.strictEqual(false, x); };
-var eq = assert.strictEqual;
+var eq = assert.deepEqual;
 var throwsWithMessage = function (f, message) {
     assert['throws'](f, function (err) {
         ok(err instanceof Error);
@@ -588,6 +588,19 @@ describe('struct', function () {
             eq(instance.name, 'Giulio');
             eq(newInstance.name, 'Canti');
             t.options.update = null;
+        });
+    });
+    describe('#extend(props, [name])', function () {
+        it('should throw if options.update is missing', function () {
+            var Point = struct({
+              x: Num,
+              y: Num
+            }, 'Point');
+            var Point3D = Point.extend({z: Num}, 'Point3D');
+            eq(getName(Point3D), 'Point3D');
+            eq(Point3D.meta.props.x, Num);
+            eq(Point3D.meta.props.y, Num);
+            eq(Point3D.meta.props.z, Num);
         });
     });
 });

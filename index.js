@@ -275,6 +275,10 @@
   
     Struct.update = update;
   
+    Struct.extend = function (newProps, name) {
+      return struct(mixin(mixin({}, props), newProps), name);
+    };
+
     return Struct;
   }
 
