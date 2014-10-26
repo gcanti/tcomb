@@ -27,10 +27,52 @@
     failed = true;
     throw new Error(message);
   }
-  
+
+  function defaultUpdate(value, spec) {
+    if (!spec) { return value; }
+
+    var newValue = Arr.is(value) ? value.concat() : mixin({}, value);
+
+    for (var k in spec) {
+      if (spec.hasOwnProperty(k)) {
+        var s = spec[k];
+        switch (k) {
+          case '$apply' :
+            return s(value);
+          case '$push' :
+            // TODO optimize
+            return newValue.concat(s);
+          case '$set' :
+            return spec[k];
+          case '$splice' :
+            newValue.splice.apply(newValue, s);
+            return newValue;
+          case '$swap' :
+            var el = newValue[s.to];
+            newValue[s.to] = newValue[s.from];
+            newValue[s.from] = el;
+            return newValue;
+          case '$remove' :
+            return defaultUpdate._;
+          case '$unshift' :
+            // TODO optimize
+            return [].concat(s).concat(newValue);
+        }
+
+        newValue[k] = defaultUpdate(value[k], s);
+        if (newValue[k] === defaultUpdate._) {
+          delete newValue[k];
+        }
+      }
+    }
+    return newValue;
+  }
+
+  defaultUpdate._ = {};
+
   var options = {
     onFail: onFail,
-    update: null
+    update: defaultUpdate
   };
 
   function fail(message) {
@@ -128,9 +170,9 @@
   function blockNew(x, type) {
     assert(!(x instanceof type), 'Operator `new` is forbidden for `%s`', getName(type));
   }
-  
+
   function update() {
-    assert(Func.is(options.update), 'Missing `options.update` implementation');
+    //assert(Func.is(options.update), 'Missing `options.update` implementation');
     /*jshint validthis:true*/
     var T = this;
     var value = options.update.apply(T, arguments);
@@ -779,7 +821,8 @@
       format: format,
       getName: getName,
       getKind: getKind,
-      slice: slice
+      slice: slice,
+      defaultUpdate: defaultUpdate
     },
 
     options: options,

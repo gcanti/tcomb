@@ -4,7 +4,8 @@
   "description": "Pragmatic runtime type checking for JavaScript",
   "main": "index.js",
   "scripts": {
-    "cover": "istanbul cover _mocha -- --ui bdd -R dot"
+    "cover": "istanbul cover _mocha -- --ui bdd -R dot",
+    "compile-browser-tests": "watchify ./test/test.js -o ./test/browser.test.js -v"
   },
   "repository": {
     "type": "git",

@@ -28,6 +28,7 @@ var getName = t.util.getName;
 var getKind = t.util.getKind;
 var mixin = t.util.mixin;
 var format = t.util.format;
+var defaultUpdate = t.util.defaultUpdate;
 
 //
 // setup
@@ -45,12 +46,93 @@ var throwsWithMessage = function (f, message) {
 };
 var doesNotThrow = assert.doesNotThrow;
 
-// used all over the place
 var noop = function () {};
 var Point = struct({
     x: Num,
     y: Num
 });
+
+describe('defaultUpdate(instance, [spec])', function () {
+
+    describe('structs', function () {
+        
+        var instance = new Point({x: 0, y: 1});
+
+        it('should returns the same struct if spec is not defined', function () {
+            var updated = defaultUpdate(instance);
+            ok(updated === instance);
+        });
+        it('should handle $set command', function () {
+            var updated = defaultUpdate(instance, {x: {$set: 1}});
+            eq(updated, {x: 1, y: 1});
+        });
+        it('should handle $apply command', function () {
+            var updated = defaultUpdate(instance, {x: {$apply: function (x) {
+                return x + 2;
+            }}});
+            eq(updated, {x: 2, y: 1});
+        });
+    });
+
+    describe('tuples', function () { 
+
+        var Tuple = tuple([Str, Num]);
+        var instance = Tuple(['a', 1]);
+
+        it('should handle $set command', function () {
+            var updated = defaultUpdate(instance, {0: {$set: 'b'}});
+            eq(updated, ['b', 1]);
+        });
+    });
+
+    describe('lists', function () { 
+
+        var List = list(Num);
+        var instance = List([1, 2, 3, 4]);
+
+        it('should handle $set command', function () {
+            var updated = defaultUpdate(instance, {2: {$set: 5}});
+            eq(updated, [1, 2, 5, 4]);
+        });
+        it('should handle $splice command', function () {
+            var updated = defaultUpdate(instance, {$splice: [1, 2, 5, 6]});
+            eq(updated, [1, 5, 6, 4]);
+        });
+        it('should handle $push command', function () {
+            var updated = defaultUpdate(instance, {$push: 5});
+            eq(updated, [1, 2, 3, 4, 5]);
+            updated = defaultUpdate(instance, {$push: [5, 6]});
+            eq(updated, [1, 2, 3, 4, 5, 6]);
+        });
+        it('should handle $unshift command', function () {
+            var updated = defaultUpdate(instance, {$unshift: 5});
+            eq(updated, [5, 1, 2, 3, 4]);
+            updated = defaultUpdate(instance, {$unshift: [5, 6]});
+            eq(updated, [5, 6, 1, 2, 3, 4]);
+        });
+        it('should handle $swap command', function () {
+            var updated = defaultUpdate(instance, {$swap: {from: 1, to: 2}});
+            eq(updated, [1, 3, 2, 4]);
+        });
+    });
+
+    describe('dicts', function () { 
+
+        var Dict = dict(Str, Num);
+        var instance = Dict({a: 1, b: 2});
+
+        it('should handle $set command', function () {
+            var updated = defaultUpdate(instance, {a: {$set: 2}});
+            eq(updated, {a: 2, b: 2});
+        });
+        it('should handle $remove command', function () {
+            var updated = defaultUpdate(instance, {a: {$remove: true}});
+            eq(updated, {b: 2});
+        });
+    });
+
+});
+
 
 //
 // assert
@@ -573,12 +655,7 @@ describe('struct', function () {
     describe('#update()', function () {
         var Type = struct({name: Str});
         var instance = new Type({name: 'Giulio'});
-        it('should throw if options.update is missing', function () {
-            throwsWithMessage(function () {
-                var newInstance = Type.update(instance, {name: 'Canti'});
-            }, 'Missing `options.update` implementation');
-        });
-        it('should return a new instance if options.update is defined', function () {
+        it('should return a new instance if options.update is redefined', function () {
             t.options.update = function (x, updates) {
               x = mixin({}, x);
               return React.addons.update(x, updates);
@@ -587,11 +664,11 @@ describe('struct', function () {
             ok(Type.is(newInstance));
             eq(instance.name, 'Giulio');
             eq(newInstance.name, 'Canti');
-            t.options.update = null;
+            t.options.update = defaultUpdate;
         });
     });
     describe('#extend(props, [name])', function () {
-        it('should throw if options.update is missing', function () {
+        it('should extend an existing struct', function () {
             var Point = struct({
               x: Num,
               y: Num
@@ -858,12 +935,7 @@ describe('tuple', function () {
     describe('#update()', function () {
         var Type = tuple([Str, Num]);
         var instance = Type(['a', 1]);
-        it('should throw if options.update is missing', function () {
-            throwsWithMessage(function () {
-                var newInstance = Type.update(instance, ['b', 2]);
-            }, 'Missing `options.update` implementation');
-        });
-        it('should return a new instance if options.update is defined', function () {
+        it('should return a new instance if options.update is redefined', function () {
             t.options.update = function (instance, updates) {
                 return updates;
             };
@@ -871,7 +943,7 @@ describe('tuple', function () {
             assert(Type.is(newInstance));
             assert(instance[0] === 'a');
             assert(newInstance[0] === 'b');
-            t.options.update = null;
+            t.options.update = defaultUpdate;
         });
     });
 });
@@ -927,12 +999,7 @@ describe('list', function () {
     describe('#update()', function () {
         var Type = list(Str);
         var instance = Type(['a', 'b']);
-        it('should throw if options.update is missing', function () {
-            throwsWithMessage(function () {
-                var newInstance = Type.update(instance, ['b', 2]);
-            }, 'Missing `options.update` implementation');
-        });
-        it('should return a new instance if options.update is defined', function () {
+        it('should return a new instance if options.update is redefined', function () {
             t.options.update = function (instance, updates) {
                 return updates;
             };
@@ -940,7 +1007,7 @@ describe('list', function () {
             assert(Type.is(newInstance));
             assert(instance.length === 2);
             assert(newInstance.length === 3);
-            t.options.update = null;
+            t.options.update = defaultUpdate;
         });
     });
 });
@@ -1072,19 +1139,14 @@ describe('dict', function () {
     describe('#update()', function () {
         var Type = dict(Str, Str);
         var instance = Type({p1: 'a', p2: 'b'});
-        it('should throw if options.update is missing', function () {
-            throwsWithMessage(function () {
-                var newInstance = Type.update(instance, {p2: 'c'});
-            }, 'Missing `options.update` implementation');
-        });
-        it('should return a new instance if options.update is defined', function () {
+        it('should return a new instance if options.update is redefined', function () {
             t.options.update = function (instance, updates) {
                 return mixin(mixin({}, instance), updates, true);
             };
             var newInstance = Type.update(instance, {p2: 'c'});
             ok(Type.is(newInstance));
             eq(newInstance.p2, 'c');
-            t.options.update = null;
+            t.options.update = defaultUpdate;
         });
     });
 });
