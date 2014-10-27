@@ -29,44 +29,60 @@
     throw new Error(message);
   }
 
-  function defaultUpdate(value, spec) {
-    if (!spec) { return value; }
+  function namespace(path, module) {
+    path = path.split('.');
+    var lastIndex = path.length - 1;
+    var init = {};
+    var isModule = arguments.length > 1;
+    path.reduce(function (acc, x, i) {
+      return (acc[x] = isModule && i === lastIndex ? module : {});
+    }, init);
+    return init;
+  }
 
-    var newValue = Arr.is(value) ? value.concat() : mixin({}, value);
+  function defaultUpdate(instance, spec, value) {
+    if (!spec) { return instance; }
+
+    // handle defaultUpdate(instance, path, value)
+    if (Str.is(spec)) { 
+      return defaultUpdate(instance, namespace(spec, {$set: value})); 
+    }
+
+    value = Arr.is(instance) ? instance.concat() : mixin({}, instance);
 
     for (var k in spec) {
       if (spec.hasOwnProperty(k)) {
         var s = spec[k];
         switch (k) {
           case '$apply' :
-            return s(value);
+            return s(instance);
           case '$push' :
             // TODO optimize
-            return newValue.concat(s);
+            return value.concat(s);
           case '$set' :
             return spec[k];
           case '$splice' :
-            newValue.splice.apply(newValue, s);
-            return newValue;
+            value.splice.apply(value, s);
+            return value;
           case '$swap' :
-            var el = newValue[s.to];
-            newValue[s.to] = newValue[s.from];
-            newValue[s.from] = el;
-            return newValue;
+            var el = value[s.to];
+            value[s.to] = value[s.from];
+            value[s.from] = el;
+            return value;
           case '$remove' :
             return defaultUpdate._;
           case '$unshift' :
             // TODO optimize
-            return [].concat(s).concat(newValue);
+            return [].concat(s).concat(value);
         }
 
-        newValue[k] = defaultUpdate(value[k], s);
-        if (newValue[k] === defaultUpdate._) {
-          delete newValue[k];
+        value[k] = defaultUpdate(value[k], s);
+        if (value[k] === defaultUpdate._) {
+          delete value[k];
         }
       }
     }
-    return newValue;
+    return value;
   }
 
   defaultUpdate._ = {};
@@ -301,7 +317,7 @@
         }
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(this); 
       }
     }
@@ -504,7 +520,7 @@
         arr.push(expected(actual, mut));
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(arr); 
       }
       return arr;
@@ -611,7 +627,7 @@
         arr.push(type(actual, mut));
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(arr); 
       }
       return arr;
@@ -676,7 +692,7 @@
         }
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(obj); 
       }
       return obj;
@@ -823,6 +839,7 @@
       getName: getName,
       getKind: getKind,
       slice: slice,
+      namespace: namespace,
       defaultUpdate: defaultUpdate
     },
 
@@ -21255,6 +21272,7 @@ var getName = t.util.getName;
 var getKind = t.util.getKind;
 var mixin = t.util.mixin;
 var format = t.util.format;
+var namespace = t.util.namespace;
 var defaultUpdate = t.util.defaultUpdate;
 
 //
@@ -21279,7 +21297,26 @@ var Point = struct({
     y: Num
 });
 
-describe('defaultUpdate(instance, [spec])', function () {
+describe('namespace(path, [module])', function () {
+
+    it('should returns a namespace', function () {
+        eq(namespace('a'), {a: {}});
+        eq(namespace('a.b'), {a: {b: {}}});
+        eq(namespace('a.b.0'), {a: {b: {0: {}}}});
+    });
+
+    it('should set a module', function () {
+        eq(namespace('a.b', 1), {a: {b: 1}});
+        eq(namespace('a.b.1.2', 4), {a: {b: {1: {2: 4}}}});
+    });
+
+});
+
+describe('defaultUpdate', function () {
+
+    var Tuple = tuple([Str, Num]);
+    var List = list(Num);
+    var Dict = dict(Str, Num);
 
     describe('structs', function () {
         
@@ -21303,7 +21340,6 @@ describe('defaultUpdate(instance, [spec])', function () {
 
     describe('tuples', function () { 
 
-        var Tuple = tuple([Str, Num]);
         var instance = Tuple(['a', 1]);
 
         it('should handle $set command', function () {
@@ -21314,7 +21350,6 @@ describe('defaultUpdate(instance, [spec])', function () {
 
     describe('lists', function () { 
 
-        var List = list(Num);
         var instance = List([1, 2, 3, 4]);
 
         it('should handle $set command', function () {
@@ -21345,7 +21380,6 @@ describe('defaultUpdate(instance, [spec])', function () {
 
     describe('dicts', function () { 
 
-        var Dict = dict(Str, Num);
         var instance = Dict({a: 1, b: 2});
 
         it('should handle $set command', function () {
@@ -21355,6 +21389,83 @@ describe('defaultUpdate(instance, [spec])', function () {
         it('should handle $remove command', function () {
             var updated = defaultUpdate(instance, {a: {$remove: true}});
             eq(updated, {b: 2});
+        });
+    });
+
+    describe('all together now', function () { 
+
+        it('should handle mixed commands', function () {
+            var Struct = struct({
+                a: Num,
+                b: Tuple,
+                c: List,
+                d: Dict
+            });
+            var instance = new Struct({
+                a: 1, 
+                b: ['a', 1],
+                c: [1, 2, 3, 4],
+                d: {a: 1, b: 2}
+            });
+            var updated = defaultUpdate(instance, {
+                a: {$set: 1},
+                b: {0: {$set: 'b'}},
+                c: {2: {$set: 5}},
+                d: {a: {$remove: true}}
+            });
+            eq(updated, {
+                a: 1,
+                b: ['b', 1],
+                c: [1, 2, 5, 4],
+                d: {b: 2}
+            });
+        });
+
+        it('should handle nested structures', function () {
+            var Struct = struct({
+                a: struct({
+                    b: tuple([
+                        Str,
+                        list(Num)
+                    ])
+                })
+            });
+            var instance = new Struct({
+                a: {
+                    b: ['a', [1, 2, 3]]
+                }
+            });
+            var updated = defaultUpdate(instance, {
+                a: {b: {1: {2: {$set: 4}}}}
+            });
+            eq(updated, {
+                a: {
+                    b: ['a', [1, 2, 4]]
+                }
+            });
+        });
+
+    });
+
+    it('should handle defaultUpdate(instance, path, value)', function () {
+        var Struct = struct({
+            a: struct({
+                b: tuple([
+                    Str,
+                    list(Num)
+                ])
+            })
+        });
+        var instance = new Struct({
+            a: {
+                b: ['a', [1, 2, 3]]
+            }
+        });
+        var updated = defaultUpdate(instance, 'a.b.1.2', 4);
+        eq(updated, {
+            a: {
+                b: ['a', [1, 2, 4]]
+            }
         });
     });
 
@@ -22383,6 +22494,13 @@ describe('dict', function () {
 //
 
 describe('func', function () {
+
+    it('should handle a no types', function () {
+        var T = func([], Str);
+        eq(T.meta.domain.length, 0);
+        var getGreeting = T.of(function () { return 'Hi'; });
+        eq(getGreeting(), 'Hi');
+    });
 
     it('should handle a single type', function () {
         var T = func(Num, Num);

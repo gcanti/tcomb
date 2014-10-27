@@ -28,6 +28,7 @@ var getName = t.util.getName;
 var getKind = t.util.getKind;
 var mixin = t.util.mixin;
 var format = t.util.format;
+var namespace = t.util.namespace;
 var defaultUpdate = t.util.defaultUpdate;
 
 //
@@ -52,7 +53,26 @@ var Point = struct({
     y: Num
 });
 
-describe('defaultUpdate(instance, [spec])', function () {
+describe('namespace(path, [module])', function () {
+
+    it('should returns a namespace', function () {
+        eq(namespace('a'), {a: {}});
+        eq(namespace('a.b'), {a: {b: {}}});
+        eq(namespace('a.b.0'), {a: {b: {0: {}}}});
+    });
+
+    it('should set a module', function () {
+        eq(namespace('a.b', 1), {a: {b: 1}});
+        eq(namespace('a.b.1.2', 4), {a: {b: {1: {2: 4}}}});
+    });
+
+});
+
+describe('defaultUpdate', function () {
+
+    var Tuple = tuple([Str, Num]);
+    var List = list(Num);
+    var Dict = dict(Str, Num);
 
     describe('structs', function () {
         
@@ -76,7 +96,6 @@ describe('defaultUpdate(instance, [spec])', function () {
 
     describe('tuples', function () { 
 
-        var Tuple = tuple([Str, Num]);
         var instance = Tuple(['a', 1]);
 
         it('should handle $set command', function () {
@@ -87,7 +106,6 @@ describe('defaultUpdate(instance, [spec])', function () {
 
     describe('lists', function () { 
 
-        var List = list(Num);
         var instance = List([1, 2, 3, 4]);
 
         it('should handle $set command', function () {
@@ -118,7 +136,6 @@ describe('defaultUpdate(instance, [spec])', function () {
 
     describe('dicts', function () { 
 
-        var Dict = dict(Str, Num);
         var instance = Dict({a: 1, b: 2});
 
         it('should handle $set command', function () {
@@ -128,6 +145,83 @@ describe('defaultUpdate(instance, [spec])', function () {
         it('should handle $remove command', function () {
             var updated = defaultUpdate(instance, {a: {$remove: true}});
             eq(updated, {b: 2});
+        });
+    });
+
+    describe('all together now', function () { 
+
+        it('should handle mixed commands', function () {
+            var Struct = struct({
+                a: Num,
+                b: Tuple,
+                c: List,
+                d: Dict
+            });
+            var instance = new Struct({
+                a: 1, 
+                b: ['a', 1],
+                c: [1, 2, 3, 4],
+                d: {a: 1, b: 2}
+            });
+            var updated = defaultUpdate(instance, {
+                a: {$set: 1},
+                b: {0: {$set: 'b'}},
+                c: {2: {$set: 5}},
+                d: {a: {$remove: true}}
+            });
+            eq(updated, {
+                a: 1,
+                b: ['b', 1],
+                c: [1, 2, 5, 4],
+                d: {b: 2}
+            });
+        });
+
+        it('should handle nested structures', function () {
+            var Struct = struct({
+                a: struct({
+                    b: tuple([
+                        Str,
+                        list(Num)
+                    ])
+                })
+            });
+            var instance = new Struct({
+                a: {
+                    b: ['a', [1, 2, 3]]
+                }
+            });
+            var updated = defaultUpdate(instance, {
+                a: {b: {1: {2: {$set: 4}}}}
+            });
+            eq(updated, {
+                a: {
+                    b: ['a', [1, 2, 4]]
+                }
+            });
+        });
+
+    });
+
+    it('should handle defaultUpdate(instance, path, value)', function () {
+        var Struct = struct({
+            a: struct({
+                b: tuple([
+                    Str,
+                    list(Num)
+                ])
+            })
+        });
+        var instance = new Struct({
+            a: {
+                b: ['a', [1, 2, 3]]
+            }
+        });
+        var updated = defaultUpdate(instance, 'a.b.1.2', 4);
+        eq(updated, {
+            a: {
+                b: ['a', [1, 2, 4]]
+            }
         });
     });
 
@@ -1156,6 +1250,13 @@ describe('dict', function () {
 //
 
 describe('func', function () {
+
+    it('should handle a no types', function () {
+        var T = func([], Str);
+        eq(T.meta.domain.length, 0);
+        var getGreeting = T.of(function () { return 'Hi'; });
+        eq(getGreeting(), 'Hi');
+    });
 
     it('should handle a single type', function () {
         var T = func(Num, Num);

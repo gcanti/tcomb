@@ -28,44 +28,60 @@
     throw new Error(message);
   }
 
-  function defaultUpdate(value, spec) {
-    if (!spec) { return value; }
+  function namespace(path, module) {
+    path = path.split('.');
+    var lastIndex = path.length - 1;
+    var init = {};
+    var isModule = arguments.length > 1;
+    path.reduce(function (acc, x, i) {
+      return (acc[x] = isModule && i === lastIndex ? module : {});
+    }, init);
+    return init;
+  }
 
-    var newValue = Arr.is(value) ? value.concat() : mixin({}, value);
+  function defaultUpdate(instance, spec, value) {
+    if (!spec) { return instance; }
+
+    // handle defaultUpdate(instance, path, value)
+    if (Str.is(spec)) { 
+      return defaultUpdate(instance, namespace(spec, {$set: value})); 
+    }
+
+    value = Arr.is(instance) ? instance.concat() : mixin({}, instance);
 
     for (var k in spec) {
       if (spec.hasOwnProperty(k)) {
         var s = spec[k];
         switch (k) {
           case '$apply' :
-            return s(value);
+            return s(instance);
           case '$push' :
             // TODO optimize
-            return newValue.concat(s);
+            return value.concat(s);
           case '$set' :
             return spec[k];
           case '$splice' :
-            newValue.splice.apply(newValue, s);
-            return newValue;
+            value.splice.apply(value, s);
+            return value;
           case '$swap' :
-            var el = newValue[s.to];
-            newValue[s.to] = newValue[s.from];
-            newValue[s.from] = el;
-            return newValue;
+            var el = value[s.to];
+            value[s.to] = value[s.from];
+            value[s.from] = el;
+            return value;
           case '$remove' :
             return defaultUpdate._;
           case '$unshift' :
             // TODO optimize
-            return [].concat(s).concat(newValue);
+            return [].concat(s).concat(value);
         }
 
-        newValue[k] = defaultUpdate(value[k], s);
-        if (newValue[k] === defaultUpdate._) {
-          delete newValue[k];
+        value[k] = defaultUpdate(value[k], s);
+        if (value[k] === defaultUpdate._) {
+          delete value[k];
         }
       }
     }
-    return newValue;
+    return value;
   }
 
   defaultUpdate._ = {};
@@ -822,6 +838,7 @@
       getName: getName,
       getKind: getKind,
       slice: slice,
+      namespace: namespace,
       defaultUpdate: defaultUpdate
     },
 
