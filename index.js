@@ -300,7 +300,7 @@
         }
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(this); 
       }
     }
@@ -503,7 +503,7 @@
         arr.push(expected(actual, mut));
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(arr); 
       }
       return arr;
@@ -610,7 +610,7 @@
         arr.push(type(actual, mut));
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(arr); 
       }
       return arr;
@@ -675,7 +675,7 @@
         }
       }
   
-      if (!mut) { 
+      if (mut !== true) { 
         Object.freeze(obj); 
       }
       return obj;
