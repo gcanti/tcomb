@@ -520,12 +520,11 @@ Path.is([p1, p2]); // => true
 ## dicts
 
 ```js
-dict(domain, codomain, [name])
+dict(codomain, [name])
 ```
   
-Defines a dictionary domain -> codomain.
+Defines a dictionary of Str -> Codomain.
   
-- `domain` the type of the keys
 - `codomain` the type of the values
 - `name` optional string useful for debugging
   
@@ -533,7 +532,20 @@ Example
   
 ```js
 // defines a dictionary of numbers
-var Tel = dict(Str, Num);
+var PhoneBook = dict(Num, 'PhoneBook');
+
+var extensions = PhoneBook({ 'Mary': 4461, 'Richard': 5291 }); // Returns: { Mary: 4461, Richard: 5291 }
+var speedDial  = PhoneBook({ 1: 44461, 2: 5291 });             // Returns: { '1': 44461, '2': 5291 }
+```
+
+Dictionaries are mutable
+
+```js
+extensions['Rebecca'] = 4482;
+extensions; // Returns: { Mary: 4461, Richard: 5291, Rebecca: 4482 }
+
+extensions['Mary'] = 9938;
+extensions; // Returns: { Mary: 9938, Richard: 5291, Rebecca: 4482 }
 ```
   
 ### is(x)
