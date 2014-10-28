@@ -84,7 +84,7 @@ var Product = struct({
     category: Category,         // enum, one of [audio, video]
     price: Price,               // a price (dollars) OR in another currency
     size: tuple([Num, Num]),    // width x height
-    warranty: dict(Num)         // a dictionary country -> covered years
+    warranty: dict(Str, Num)    // a dictionary country -> covered years
 });
 
 var Url = subtype(Str, function (s) {
