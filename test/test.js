@@ -148,6 +148,39 @@ describe('defaultUpdate', function () {
         });
     });
 
+    describe('memory saving', function () {
+        it('should reuse members that are not updated', function () {
+            var Struct = struct({
+                a: Num,
+                b: Str,
+                c: tuple([Num, Num]),
+            });
+            var List = list(Struct);
+            var instance = List([{
+                a: 1,
+                b: 'one',
+                c: [1000, 1000000]
+            },{
+                a: 2,
+                b: 'two',
+                c: [2000, 2000000]
+            }]);
+
+            var updated = defaultUpdate(instance, {
+                1: {
+                    a: {$set: 119}
+                }
+            });
+
+            assert.strictEqual(updated[0], instance[0]);
+            assert.notStrictEqual(updated[1], instance[1]);
+
+            assert.strictEqual(updated[1].c, instance[1].c);
+
+
+        });
+    });
+
     describe('all together now', function () { 
 
         it('should handle mixed commands', function () {
