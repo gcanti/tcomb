@@ -56,7 +56,7 @@
         switch (k) {
           case '$apply' :
             return s(instance);
-          case '$push' :
+          case '$concat' :
             // TODO optimize
             return value.concat(s);
           case '$set' :
@@ -71,7 +71,7 @@
             return value;
           case '$remove' :
             return defaultUpdate._;
-          case '$unshift' :
+          case '$prepend' :
             // TODO optimize
             return [].concat(s).concat(value);
         }
@@ -21360,16 +21360,16 @@ describe('defaultUpdate', function () {
             var updated = defaultUpdate(instance, {$splice: [1, 2, 5, 6]});
             eq(updated, [1, 5, 6, 4]);
         });
-        it('should handle $push command', function () {
-            var updated = defaultUpdate(instance, {$push: 5});
+        it('should handle $concat command', function () {
+            var updated = defaultUpdate(instance, {$concat: 5});
             eq(updated, [1, 2, 3, 4, 5]);
-            updated = defaultUpdate(instance, {$push: [5, 6]});
+            updated = defaultUpdate(instance, {$concat: [5, 6]});
             eq(updated, [1, 2, 3, 4, 5, 6]);
         });
-        it('should handle $unshift command', function () {
-            var updated = defaultUpdate(instance, {$unshift: 5});
+        it('should handle $prepend command', function () {
+            var updated = defaultUpdate(instance, {$prepend: 5});
             eq(updated, [5, 1, 2, 3, 4]);
-            updated = defaultUpdate(instance, {$unshift: [5, 6]});
+            updated = defaultUpdate(instance, {$prepend: [5, 6]});
             eq(updated, [5, 6, 1, 2, 3, 4]);
         });
         it('should handle $swap command', function () {
@@ -21389,6 +21389,39 @@ describe('defaultUpdate', function () {
         it('should handle $remove command', function () {
             var updated = defaultUpdate(instance, {a: {$remove: true}});
             eq(updated, {b: 2});
+        });
+    });
+
+    describe('memory saving', function () {
+        it('should reuse members that are not updated', function () {
+            var Struct = struct({
+                a: Num,
+                b: Str,
+                c: tuple([Num, Num]),
+            });
+            var List = list(Struct);
+            var instance = List([{
+                a: 1,
+                b: 'one',
+                c: [1000, 1000000]
+            },{
+                a: 2,
+                b: 'two',
+                c: [2000, 2000000]
+            }]);
+
+            var updated = defaultUpdate(instance, {
+                1: {
+                    a: {$set: 119}
+                }
+            });
+
+            assert.strictEqual(updated[0], instance[0]);
+            assert.notStrictEqual(updated[1], instance[1]);
+
+            assert.strictEqual(updated[1].c, instance[1].c);
+
+
         });
     });
 

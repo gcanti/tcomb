@@ -55,7 +55,7 @@
         switch (k) {
           case '$apply' :
             return s(instance);
-          case '$push' :
+          case '$concat' :
             // TODO optimize
             return value.concat(s);
           case '$set' :
@@ -70,7 +70,7 @@
             return value;
           case '$remove' :
             return defaultUpdate._;
-          case '$unshift' :
+          case '$prepend' :
             // TODO optimize
             return [].concat(s).concat(value);
         }

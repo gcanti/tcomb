@@ -116,16 +116,16 @@ describe('defaultUpdate', function () {
             var updated = defaultUpdate(instance, {$splice: [1, 2, 5, 6]});
             eq(updated, [1, 5, 6, 4]);
         });
-        it('should handle $push command', function () {
-            var updated = defaultUpdate(instance, {$push: 5});
+        it('should handle $concat command', function () {
+            var updated = defaultUpdate(instance, {$concat: 5});
             eq(updated, [1, 2, 3, 4, 5]);
-            updated = defaultUpdate(instance, {$push: [5, 6]});
+            updated = defaultUpdate(instance, {$concat: [5, 6]});
             eq(updated, [1, 2, 3, 4, 5, 6]);
         });
-        it('should handle $unshift command', function () {
-            var updated = defaultUpdate(instance, {$unshift: 5});
+        it('should handle $prepend command', function () {
+            var updated = defaultUpdate(instance, {$prepend: 5});
             eq(updated, [5, 1, 2, 3, 4]);
-            updated = defaultUpdate(instance, {$unshift: [5, 6]});
+            updated = defaultUpdate(instance, {$prepend: [5, 6]});
             eq(updated, [5, 6, 1, 2, 3, 4]);
         });
         it('should handle $swap command', function () {
