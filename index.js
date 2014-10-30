@@ -76,7 +76,7 @@
   }
 
   function merge() {
-    return Array.prototype.reduce.call(arguments, function (x, y) {
+    return Array.prototype.reduce.call(arguments, function reducer(x, y) {
       return mixin(x, y, true);
     }, {});
   }
@@ -135,7 +135,7 @@
     var lastIndex = path.length - 1;
     var init = {};
     var isModule = arguments.length > 1;
-    path.reduce(function (acc, x, i) {
+    path.reduce(function reducer(acc, x, i) {
       return (acc[x] = isModule && i === lastIndex ? module : {});
     }, init);
     return init;
@@ -226,51 +226,51 @@
     return Irriducible;
   }
 
-  var Any = irriducible('Any', function () {
+  var Any = irriducible('Any', function isAny() {
     return true;
   });
   
-  var Nil = irriducible('Nil', function (x) {
+  var Nil = irriducible('Nil', function isNil(x) {
     return x === null || x === void 0;
   });
   
-  var Str = irriducible('Str', function (x) {
+  var Str = irriducible('Str', function isStr(x) {
     return typeof x === 'string';
   });
   
-  var Num = irriducible('Num', function (x) {
+  var Num = irriducible('Num', function isNum(x) {
     return typeof x === 'number' && isFinite(x) && !isNaN(x);
   });
   
-  var Bool = irriducible('Bool', function (x) {
+  var Bool = irriducible('Bool', function isBool(x) {
     return x === true || x === false;
   });
   
-  var Arr = irriducible('Arr', function (x) {
+  var Arr = irriducible('Arr', function isArr(x) {
     return x instanceof Array;
   });
   
-  var Obj = irriducible('Obj', function (x) {
+  var Obj = irriducible('Obj', function isObj(x) {
     return !Nil.is(x) && typeof x === 'object' && !Arr.is(x);
   });
   
-  var Func = irriducible('Func', function (x) {
+  var Func = irriducible('Func', function isFunc(x) {
     return typeof x === 'function';
   });
   
-  var Err = irriducible('Err', function (x) {
+  var Err = irriducible('Err', function isErr(x) {
     return x instanceof Error;
   });
   
-  var Re = irriducible('Re', function (x) {
+  var Re = irriducible('Re', function isRe(x) {
     return x instanceof RegExp;
   });
   
-  var Dat = irriducible('Dat', function (x) {
+  var Dat = irriducible('Dat', function isDat(x) {
     return x instanceof Date;
   });
 
-  var Type = irriducible('Type', function (x) {
+  var Type = irriducible('Type', function isType(x) {
     return Func.is(x) && Obj.is(x.meta);
   });
   
@@ -324,15 +324,15 @@
       name: name
     };
   
-    Struct.is = function (x) { 
+    Struct.is = function isStruct(x) { 
       return x instanceof Struct; 
     };
   
-    Struct.update = function (instance, spec, value) {
+    Struct.update = function updateStruct(instance, spec, value) {
       return new Struct(update(instance, spec, value));
     };
   
-    Struct.extend = function (newProps, name) {
+    Struct.extend = function extendStruct(newProps, name) {
       return struct(mixin(mixin({}, props), newProps), name);
     };
 
@@ -379,14 +379,14 @@
       name: name
     };
   
-    Union.is = function (x) {
-      return types.some(function (type) {
+    Union.is = function isUnion(x) {
+      return types.some(function isType(type) {
         return type.is(x);
       });
     };
   
     // default dispatch implementation
-    Union.dispatch = function (x) {
+    Union.dispatch = function dispatch(x) {
       for (var i = 0, len = types.length ; i < len ; i++ ) {
         if (types[i].is(x)) {
           return types[i];
@@ -429,7 +429,7 @@
       name: name
     };
   
-    Maybe.is = function (x) {
+    Maybe.is = function isMaybe(x) {
       return Nil.is(x) || type.is(x);
     };
   
@@ -469,14 +469,14 @@
       name: name
     };
   
-    Enums.is = function (x) {
+    Enums.is = function isEnums(x) {
       return Str.is(x) && map.hasOwnProperty(x);
     };
   
     return Enums;
   }
   
-  enums.of = function (keys, name) {
+  enums.of = function enumsOf(keys, name) {
     keys = Str.is(keys) ? keys.split(' ') : keys;
     var value = {};
     keys.forEach(function (k) {
@@ -537,11 +537,11 @@
       });
     };
   
-    Tuple.is = function (x) {
+    Tuple.is = function isTuple(x) {
       return Arr.is(x) && x.length === len && Tuple.isTuple(x);
     };
   
-    Tuple.update = function (instance, spec, value) {
+    Tuple.update = function updateTuple(instance, spec, value) {
       return Tuple(update(instance, spec, value));
     };
   
@@ -587,11 +587,11 @@
       name: name
     };
   
-    Subtype.is = function (x) {
+    Subtype.is = function isSubtype(x) {
       return type.is(x) && predicate(x);
     };
   
-    Subtype.update = function (instance, spec, value) {
+    Subtype.update = function updateSubtype(instance, spec, value) {
       return Subtype(update(instance, spec, value));
     };
 
@@ -647,11 +647,11 @@
       return x.every(type.is);
     };
   
-    List.is = function (x) {
+    List.is = function isList(x) {
       return Arr.is(x) && List.isList(x);
     };
   
-    List.update = function (instance, spec, value) {
+    List.update = function updateList(instance, spec, value) {
       return List(update(instance, spec, value));
     };
   
@@ -719,12 +719,12 @@
       return true;
     };
   
-    Dict.is = function (x) {
+    Dict.is = function isDict(x) {
       return Obj.is(x) && Dict.isDict(x);
     };
   
   
-    Dict.update = function (instance, spec, value) {
+    Dict.update = function updateDict(instance, spec, value) {
       return Dict(update(instance, spec, value));
     };
   
@@ -769,7 +769,7 @@
       name: name
     };
 
-    Func.is = function (x) {
+    Func.is = function isFunc(x) {
       return func.is(x) && 
         x.func.domain.length === domain.length && 
         x.func.domain.every(function (type, i) {
@@ -778,7 +778,7 @@
         x.func.codomain === codomain; 
     };
 
-    Func.of = function (f) {
+    Func.of = function funcOf(f) {
 
       // DEBUG HINT: if the debugger stops here, f is not a function
       assert(typeof f === 'function');
