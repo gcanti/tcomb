@@ -28,69 +28,8 @@
     throw new Error(message);
   }
 
-  function namespace(path, module) {
-    if (!Arr.is(path)) {
-      path = path.split('.');
-    }
-    var lastIndex = path.length - 1;
-    var init = {};
-    var isModule = arguments.length > 1;
-    path.reduce(function (acc, x, i) {
-      return (acc[x] = isModule && i === lastIndex ? module : {});
-    }, init);
-    return init;
-  }
-
-  function defaultUpdate(instance, spec, value) {
-    if (!spec) { return instance; }
-
-    // handle defaultUpdate(instance, path, value)
-    if (Str.is(spec)) { 
-      return defaultUpdate(instance, namespace(spec, {$set: value})); 
-    }
-
-    value = Arr.is(instance) ? instance.concat() : mixin({}, instance);
-
-    for (var k in spec) {
-      if (spec.hasOwnProperty(k)) {
-        var s = spec[k];
-        switch (k) {
-          case '$apply' :
-            return s(instance);
-          case '$concat' :
-            // TODO optimize
-            return value.concat(s);
-          case '$set' :
-            return spec[k];
-          case '$splice' :
-            value.splice.apply(value, s);
-            return value;
-          case '$swap' :
-            var el = value[s.to];
-            value[s.to] = value[s.from];
-            value[s.from] = el;
-            return value;
-          case '$remove' :
-            return defaultUpdate._;
-          case '$prepend' :
-            // TODO optimize
-            return [].concat(s).concat(value);
-        }
-
-        value[k] = defaultUpdate(value[k], s);
-        if (value[k] === defaultUpdate._) {
-          delete value[k];
-        }
-      }
-    }
-    return value;
-  }
-
-  defaultUpdate._ = {};
-
   var options = {
-    onFail: onFail,
-    update: defaultUpdate
+    onFail: onFail
   };
 
   function fail(message) {
@@ -189,13 +128,69 @@
     assert(!(x instanceof type), 'Operator `new` is forbidden for `%s`', getName(type));
   }
 
-  function update() {
-    //assert(Func.is(options.update), 'Missing `options.update` implementation');
-    /*jshint validthis:true*/
-    var T = this;
-    var value = options.update.apply(T, arguments);
-    return T(value);
+  function namespace(path, module) {
+    if (!Arr.is(path)) {
+      path = path.split('.');
+    }
+    var lastIndex = path.length - 1;
+    var init = {};
+    var isModule = arguments.length > 1;
+    path.reduce(function (acc, x, i) {
+      return (acc[x] = isModule && i === lastIndex ? module : {});
+    }, init);
+    return init;
   }
+
+  function shallowCopy(x) {
+    return Arr.is(x) ? x.concat() : mixin({}, x);
+  }
+
+  function update(instance, spec, value) {
+    if (!spec) { return instance; }
+
+    // handle update(instance, path, value)
+    if (Str.is(spec)) { 
+      return update(instance, namespace(spec, {$set: value})); 
+    }
+
+    value = shallowCopy(instance);
+
+    for (var k in spec) {
+      if (spec.hasOwnProperty(k)) {
+        var s = spec[k];
+        switch (k) {
+          case '$apply' :
+            return s(instance);
+          case '$concat' :
+            // TODO optimize
+            return value.concat(s);
+          case '$set' :
+            return spec[k];
+          case '$splice' :
+            value.splice.apply(value, s);
+            return value;
+          case '$swap' :
+            var el = value[s.to];
+            value[s.to] = value[s.from];
+            value[s.from] = el;
+            return value;
+          case '$remove' :
+            return update._;
+          case '$prepend' :
+            // TODO optimize
+            return [].concat(s).concat(value);
+        }
+
+        value[k] = update(value[k], s);
+        if (value[k] === update._) {
+          delete value[k];
+        }
+      }
+    }
+    return value;
+  }
+
+  update._ = {};
 
   //
   // irriducibles
@@ -333,7 +328,9 @@
       return x instanceof Struct; 
     };
   
-    Struct.update = update;
+    Struct.update = function (instance, spec, value) {
+      return new Struct(update(instance, spec, value));
+    };
   
     Struct.extend = function (newProps, name) {
       return struct(mixin(mixin({}, props), newProps), name);
@@ -544,7 +541,9 @@
       return Arr.is(x) && x.length === len && Tuple.isTuple(x);
     };
   
-    Tuple.update = update;
+    Tuple.update = function (instance, spec, value) {
+      return Tuple(update(instance, spec, value));
+    };
   
     return Tuple;
   }
@@ -592,6 +591,10 @@
       return type.is(x) && predicate(x);
     };
   
+    Subtype.update = function (instance, spec, value) {
+      return Subtype(update(instance, spec, value));
+    };
+
     return Subtype;
   }
 
@@ -648,8 +651,9 @@
       return Arr.is(x) && List.isList(x);
     };
   
-  
-    List.update = update;
+    List.update = function (instance, spec, value) {
+      return List(update(instance, spec, value));
+    };
   
     return List;
   }
@@ -720,7 +724,9 @@
     };
   
   
-    Dict.update = update;
+    Dict.update = function (instance, spec, value) {
+      return Dict(update(instance, spec, value));
+    };
   
     return Dict;
   }
@@ -841,7 +847,7 @@
       getKind: getKind,
       slice: slice,
       namespace: namespace,
-      defaultUpdate: defaultUpdate
+      update: update
     },
 
     options: options,

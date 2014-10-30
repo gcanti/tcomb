@@ -29,7 +29,7 @@ var getKind = t.util.getKind;
 var mixin = t.util.mixin;
 var format = t.util.format;
 var namespace = t.util.namespace;
-var defaultUpdate = t.util.defaultUpdate;
+var update = t.util.update;
 
 //
 // setup
@@ -68,7 +68,7 @@ describe('namespace(path, [module])', function () {
 
 });
 
-describe('defaultUpdate', function () {
+describe('update', function () {
 
     var Tuple = tuple([Str, Num]);
     var List = list(Num);
@@ -79,15 +79,15 @@ describe('defaultUpdate', function () {
         var instance = new Point({x: 0, y: 1});
 
         it('should returns the same struct if spec is not defined', function () {
-            var updated = defaultUpdate(instance);
+            var updated = update(instance);
             ok(updated === instance);
         });
         it('should handle $set command', function () {
-            var updated = defaultUpdate(instance, {x: {$set: 1}});
+            var updated = update(instance, {x: {$set: 1}});
             eq(updated, {x: 1, y: 1});
         });
         it('should handle $apply command', function () {
-            var updated = defaultUpdate(instance, {x: {$apply: function (x) {
+            var updated = update(instance, {x: {$apply: function (x) {
                 return x + 2;
             }}});
             eq(updated, {x: 2, y: 1});
@@ -99,7 +99,7 @@ describe('defaultUpdate', function () {
         var instance = Tuple(['a', 1]);
 
         it('should handle $set command', function () {
-            var updated = defaultUpdate(instance, {0: {$set: 'b'}});
+            var updated = update(instance, {0: {$set: 'b'}});
             eq(updated, ['b', 1]);
         });
     });
@@ -109,27 +109,27 @@ describe('defaultUpdate', function () {
         var instance = List([1, 2, 3, 4]);
 
         it('should handle $set command', function () {
-            var updated = defaultUpdate(instance, {2: {$set: 5}});
+            var updated = update(instance, {2: {$set: 5}});
             eq(updated, [1, 2, 5, 4]);
         });
         it('should handle $splice command', function () {
-            var updated = defaultUpdate(instance, {$splice: [1, 2, 5, 6]});
+            var updated = update(instance, {$splice: [1, 2, 5, 6]});
             eq(updated, [1, 5, 6, 4]);
         });
         it('should handle $concat command', function () {
-            var updated = defaultUpdate(instance, {$concat: 5});
+            var updated = update(instance, {$concat: 5});
             eq(updated, [1, 2, 3, 4, 5]);
-            updated = defaultUpdate(instance, {$concat: [5, 6]});
+            updated = update(instance, {$concat: [5, 6]});
             eq(updated, [1, 2, 3, 4, 5, 6]);
         });
         it('should handle $prepend command', function () {
-            var updated = defaultUpdate(instance, {$prepend: 5});
+            var updated = update(instance, {$prepend: 5});
             eq(updated, [5, 1, 2, 3, 4]);
-            updated = defaultUpdate(instance, {$prepend: [5, 6]});
+            updated = update(instance, {$prepend: [5, 6]});
             eq(updated, [5, 6, 1, 2, 3, 4]);
         });
         it('should handle $swap command', function () {
-            var updated = defaultUpdate(instance, {$swap: {from: 1, to: 2}});
+            var updated = update(instance, {$swap: {from: 1, to: 2}});
             eq(updated, [1, 3, 2, 4]);
         });
     });
@@ -139,11 +139,11 @@ describe('defaultUpdate', function () {
         var instance = Dict({a: 1, b: 2});
 
         it('should handle $set command', function () {
-            var updated = defaultUpdate(instance, {a: {$set: 2}});
+            var updated = update(instance, {a: {$set: 2}});
             eq(updated, {a: 2, b: 2});
         });
         it('should handle $remove command', function () {
-            var updated = defaultUpdate(instance, {a: {$remove: true}});
+            var updated = update(instance, {a: {$remove: true}});
             eq(updated, {b: 2});
         });
     });
@@ -166,7 +166,7 @@ describe('defaultUpdate', function () {
                 c: [2000, 2000000]
             }]);
 
-            var updated = defaultUpdate(instance, {
+            var updated = update(instance, {
                 1: {
                     a: {$set: 119}
                 }
@@ -196,7 +196,7 @@ describe('defaultUpdate', function () {
                 c: [1, 2, 3, 4],
                 d: {a: 1, b: 2}
             });
-            var updated = defaultUpdate(instance, {
+            var updated = update(instance, {
                 a: {$set: 1},
                 b: {0: {$set: 'b'}},
                 c: {2: {$set: 5}},
@@ -224,7 +224,7 @@ describe('defaultUpdate', function () {
                     b: ['a', [1, 2, 3]]
                 }
             });
-            var updated = defaultUpdate(instance, {
+            var updated = update(instance, {
                 a: {b: {1: {2: {$set: 4}}}}
             });
             eq(updated, {
@@ -236,7 +236,7 @@ describe('defaultUpdate', function () {
 
     });
 
-    it('should handle defaultUpdate(instance, path, value)', function () {
+    it('should handle update(instance, path, value)', function () {
         var Struct = struct({
             a: struct({
                 b: tuple([
@@ -250,7 +250,7 @@ describe('defaultUpdate', function () {
                 b: ['a', [1, 2, 3]]
             }
         });
-        var updated = defaultUpdate(instance, 'a.b.1.2', 4);
+        var updated = update(instance, 'a.b.1.2', 4);
         eq(updated, {
             a: {
                 b: ['a', [1, 2, 4]]
@@ -782,16 +782,11 @@ describe('struct', function () {
     describe('#update()', function () {
         var Type = struct({name: Str});
         var instance = new Type({name: 'Giulio'});
-        it('should return a new instance if options.update is redefined', function () {
-            t.options.update = function (x, updates) {
-              x = mixin({}, x);
-              return React.addons.update(x, updates);
-            };
+        it('should return a new instance', function () {
             var newInstance = Type.update(instance, {name: {$set: 'Canti'}});
             ok(Type.is(newInstance));
             eq(instance.name, 'Giulio');
             eq(newInstance.name, 'Canti');
-            t.options.update = defaultUpdate;
         });
     });
     describe('#extend(props, [name])', function () {
@@ -1062,15 +1057,11 @@ describe('tuple', function () {
     describe('#update()', function () {
         var Type = tuple([Str, Num]);
         var instance = Type(['a', 1]);
-        it('should return a new instance if options.update is redefined', function () {
-            t.options.update = function (instance, updates) {
-                return updates;
-            };
-            var newInstance = Type.update(instance, ['b', 2]);
+        it('should return a new instance', function () {
+            var newInstance = Type.update(instance, {0: {$set: 'b'}});
             assert(Type.is(newInstance));
             assert(instance[0] === 'a');
             assert(newInstance[0] === 'b');
-            t.options.update = defaultUpdate;
         });
     });
 });
@@ -1126,15 +1117,11 @@ describe('list', function () {
     describe('#update()', function () {
         var Type = list(Str);
         var instance = Type(['a', 'b']);
-        it('should return a new instance if options.update is redefined', function () {
-            t.options.update = function (instance, updates) {
-                return updates;
-            };
-            var newInstance = Type.update(instance, ['a', 'b', 'c']);
+        it('should return a new instance', function () {
+            var newInstance = Type.update(instance, {'$concat': 'c'});
             assert(Type.is(newInstance));
             assert(instance.length === 2);
             assert(newInstance.length === 3);
-            t.options.update = defaultUpdate;
         });
     });
 });
@@ -1202,6 +1189,15 @@ describe('subtype', function () {
             ko(Positive.is(-1));
         });
     });
+    describe('#update()', function () {
+        var Type = subtype(Str, function (s) { return s.length > 2; });
+        var instance = Type('abc');
+        it('should return a new instance', function () {
+            var newInstance = Type.update(instance, {'$set': 'bca'});
+            assert(Type.is(newInstance));
+            eq(newInstance, 'bca');
+        });
+    });
 });
 
 //
@@ -1266,14 +1262,11 @@ describe('dict', function () {
     describe('#update()', function () {
         var Type = dict(Str, Str);
         var instance = Type({p1: 'a', p2: 'b'});
-        it('should return a new instance if options.update is redefined', function () {
-            t.options.update = function (instance, updates) {
-                return mixin(mixin({}, instance), updates, true);
-            };
-            var newInstance = Type.update(instance, {p2: 'c'});
+        it('should return a new instance', function () {
+            var newInstance = Type.update(instance, {p2: {$set: 'c'}});
             ok(Type.is(newInstance));
+            eq(instance.p2, 'b');
             eq(newInstance.p2, 'c');
-            t.options.update = defaultUpdate;
         });
     });
 });

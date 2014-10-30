@@ -1,6 +1,7 @@
 # v0.3.0
 
-- add `Struct.extend(props, [name])`, fix #55
+- added `Struct.extend(props, [name])`, fix #55
+- added built-in immutable updates, fix #31
 
 **BREAKING**
 
@@ -8,6 +9,7 @@
 - removed `util.isKind`
 - removed `util.isType`, use `Type.is` instead
 - refactoring of `func`. Now is a proper type combinator. fix #42
+- removed `options.update`
 
 # v0.2.1
 

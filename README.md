@@ -1,8 +1,8 @@
 > "Si vis pacem, para bellum" (Vegetius 5th century)
 
-tcomb is a library for Node.js and the browser which allows you to **check the types** of 
-JavaScript values at runtime with a simple syntax. It's great for **Domain Driven Design**, 
-for testing and for adding safety to your internal code. 
+tcomb is a library for Node.js and the browser which allows you to **check the types** of
+JavaScript values at runtime with a simple syntax. It's great for **Domain Driven Design**,
+for testing and for adding safety to your internal code.
 
 # Contributors
 
@@ -20,7 +20,6 @@ for testing and for adding safety to your internal code.
 - [Api](#api)
   - [options](#options)
     - [options.onFail](#optionsonfail)
-    - [options.update](#optionsupdate)
   - [assert](#assert)
   - [structs](#structs)
   - [unions](#unions)
@@ -29,6 +28,7 @@ for testing and for adding safety to your internal code.
   - [subtypes](#subtypes)
   - [lists](#lists)
   - [dicts](#dicts)
+  - [built-in (immutable) updates](#updates)
   - [functions](#functions)
 - [sweet.js macros (experimental)](#macros)
 - [Articles on tcomb](#articles-on-tcomb)
@@ -40,7 +40,7 @@ for testing and for adding safety to your internal code.
 - instances are immutables by default
 - encode/decode of domain models to/from JSON for free
 
-The library provides a built-in `assert` function, if an assert fails the **debugger kicks in** 
+The library provides a built-in `assert` function, if an assert fails the **debugger kicks in**
 so you can inspect the stack and quickly find out what's wrong.
 
 You can handle:
@@ -182,11 +182,11 @@ What's a type? In tcomb a type is a function `T` such that
 # Api
 
 ## options
-  
+
 ### options.onFail
-  
+
 In production envs you don't want to leak failures to the user
-  
+
 ```js
 // override onFail hook
 options.onFail = function (message) {
@@ -199,42 +199,26 @@ options.onFail = function (message) {
     }
 };
 ```
-  
-### options.update
-  
-Adds to structs, tuples, lists and dicts a static method `update` that returns a new instance
-without modifying the original.
-  
-Example
-  
-```js
-// see http://facebook.github.io/react/docs/update.html
-options.update = function (x, updates) {
-  return React.addons.update(mixin({}, x), updates);
-};
-var p1  = Point({x: 0, y: 0});
-var p2 = Point.update(p1, {x: {$set: 1}}); // => Point({x: 1, y: 0})
-```
 
 ## assert
 
 ```js
 assert(guard, [message], [values...]);
 ```
-  
+
 If `guard !== true` the debugger kicks in.
-  
+
 - `guard` boolean condition
 - `message` optional string useful for debugging, formatted with values like [util.format in Node](http://nodejs.org/api/util.html#util_util_format_format)
-  
+
 Example
-  
+
 ```js
 assert(1 === 2); // throws 'assert(): failed'
 assert(1 === 2, 'error!'); // throws 'error!'
 assert(1 === 2, 'error: %s !== %s', 1, 2); // throws 'error: 1 !== 2'
 ```
-  
+
 To customize failure behaviour, see `options.onFail`.
 
 ## structs
@@ -242,50 +226,50 @@ To customize failure behaviour, see `options.onFail`.
 ```js
 struct(props, [name])
 ```
-  
+
 Defines a struct like type.
-  
+
 - `props` hash name -> type
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```js
 "use strict";
-  
+
 // defines a struct with two numerical props
 var Point = struct({
     x: Num,
     y: Num
 });
-  
+
 // methods are defined as usual
 Point.prototype.toString = function () {
     return '(' + this.x + ', ' + this.y + ')';
 };
-  
+
 // costructor usage, p is immutable
 var p = Point({x: 1, y: 2});
-  
+
 p.x = 2; // => TypeError
-  
+
 p = Point({x: 1, y: 2}, true); // now p is mutable
-  
+
 p.x = 2; // ok
 ```
-  
+
 ### is(x)
-  
+
 Returns `true` if `x` is an instance of the struct.
-  
+
 ```js
 Point.is(p); // => true
 ```
 
 ### extend(props, [name])
-  
+
 Returns a new type with the additional specified `props`
-  
+
 ```js
 var Point = struct({
   x: Num,
@@ -302,27 +286,27 @@ var p = new Point3D({x: 1, y: 2, z: 3});
 ```js
 union(types, [name])
 ```
-  
+
 Defines a union of types.
-  
+
 - `types` array of types
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```js
 var Circle = struct({
     center: Point,
     radius: Num
 });
-  
+
 var Rectangle = struct({
     bl: Point, // bottom left vertex
     tr: Point  // top right vertex
 });
-  
+
 var Shape = union([
-    Circle, 
+    Circle,
     Rectangle
 ]);
 
@@ -334,11 +318,11 @@ Shape.dispatch = function (x) {
 var circle = Shape({center: {x: 1, y: 0}, radius: 10});
 var rectangle = Shape({bl: {x: 0, y: 0}, tr: {x: 1, y: 1}});
 ```
-  
+
 ### is(x)
-  
+
 Returns `true` if `x` belongs to the union.
-  
+
 ```js
 Shape.is(new Circle({center: p, radius: 10})); // => true
 ```
@@ -348,13 +332,13 @@ Shape.is(new Circle({center: p, radius: 10})); // => true
 ```js
 maybe(type, [name])
 ```
-  
+
 Same as `union([Nil, type])`.
-  
+
 ```js
 // the value of a radio input where null = no selection
 var Radio = maybe(Str);
-  
+
 Radio.is('a');     // => true
 Radio.is(null);    // => true
 Radio.is(1);       // => false
@@ -365,44 +349,44 @@ Radio.is(1);       // => false
 ```js
 enums(map, [name])
 ```
-  
+
 Defines an enum of strings.
-  
+
 - `map` hash enum -> value
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```js
 var Direction = enums({
-    North: 'North', 
+    North: 'North',
     East: 'East',
-    South: 'South', 
+    South: 'South',
     West: 'West'
 });
 ```
-  
+
 ### is(x)
-  
+
 Returns `true` if `x` belongs to the enum.
-  
+
 ```js
 Direction.is('North'); // => true
 ```
 ### enums.of(keys, [name])
-  
+
 Returns an enums of an array of keys, useful when you don't mind to define
 custom values for the enums.
-  
+
 - `keys` array (or string) of keys
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```js
 // result is the same as the main example
 var Direction = enums.of(['North', 'East', 'South', 'West']);
-  
+
 // or..
 Direction = enums.of('North East South West');
 ```
@@ -435,9 +419,9 @@ var JustNum = tuple([Num]);
 ```
 
 ### is(x)
-  
+
 Returns `true` if `x` belongs to the tuple.
-  
+
 ```js
 Area.is([1, 2]);      // => true
 Area.is([1, 'a']);    // => false, the second element is not a Num
@@ -449,37 +433,37 @@ Area.is([1, 2, 3]);   // => false, too many elements
 ```js
 subtype(type, predicate, [name])
 ```
-  
+
 Defines a subtype of an existing type.
-  
+
 - `type` the supertype
 - `predicate` a function with signature `(x) -> boolean`
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```js
 // points of the first quadrant
 var Q1Point = subtype(Point, function (p) {
     return p.x >= 0 && p.y >= 0;
 });
-  
+
 // costructor usage, p is immutable
 var p = Q1Point({x: 1, y: 2});
-  
+
 p = Q1Point({x: -1, y: -2}); // => fail!
 ```
 **Note**. You can't add methods to `Q1Point` `prototype`, add them to the supertype `prototype` if needed.
-  
+
 ### is(x)
-  
+
 Returns `true` if `x` belongs to the subtype.
-  
+
 ```js
 var Int = subtype(Num, function (n) {
     return n === parseInt(n, 10);
 });
-  
+
 Int.is(2);      // => true
 Int.is(1.1);    // => false
 ```
@@ -489,28 +473,28 @@ Int.is(1.1);    // => false
 ```js
 list(type, [name])
 ```
-  
+
 Defines an array where all the elements are of type `T`.
-  
+
 - `type` type of all the elements
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```js
 var Path = list(Point);
-  
+
 // costructor usage, path is immutable
 var path = Path([
-    {x: 0, y: 0}, 
+    {x: 0, y: 0},
     {x: 1, y: 1}
 ]);
 ```
-  
+
 ### is(x)
-  
+
 Returns `true` if `x` belongs to the list.
-  
+
 ```js
 var p1 = Point({x: 0, y: 0});
 var p2 = Point({x: 1, y: 2});
@@ -522,26 +506,72 @@ Path.is([p1, p2]); // => true
 ```js
 dict(domain, codomain, [name])
 ```
-  
+
 Defines a dictionary domain -> codomain.
-  
+
 - `domain` the type of the keys
 - `codomain` the type of the values
 - `name` optional string useful for debugging
-  
+
 Example
-  
+
 ```js
 // defines a dictionary of numbers
 var Tel = dict(Str, Num);
 ```
-  
+
 ### is(x)
-  
+
 Returns `true` if `x` is an instance of the dict.
-  
+
 ```js
 Tel.is({'jack': 4098, 'sape': 4139}); // => true
+```
+
+## Updates
+
+```js
+Type.update(instance, spec)
+```
+
+### Settings a value
+
+- `{$set: value}`: to update structs, tuples, subtypes, lists and dicts
+- `{$apply: function}`: passes in the current value to the function and updates it with the new returned value.
+- `update(instance, path: array | string, value)`: to optimize the most common operation
+
+```js
+var Point = struct({
+    x: Num,
+    y: Num
+});
+var a = new Point({x: 0, y: 1});
+var b = Point.update(a, {x: {$set: 1}}); // => {x: 1, y: 1}
+```
+
+### Removing a value form a dict
+
+`{$remove: true}`: to remove keys from dicts
+
+```js
+var MyDict = dict(Str, Num);
+var a = MyDict({a: 1, b: 2});
+var b = MyDict.update(a, {a: {$remove: true}}); // => {b: 2}
+```
+
+### Updating a list
+
+- `{$splice: args}`: to add and remove elements at the same time
+- `{$concat: element | array}`: `concat` `element` or `array` to the list
+- `{$prepend: element | array}`: `concat` the list to  `element` or `array`
+- `{$swap: {from: 1, to: 2}}`: swap the element at index `from` with the element at index `to`
+
+**Note**. `$splice` and `$concat` act as the `Array.prototype` counterparts.
+
+```js
+var Type = list(Num);
+var a = [1, 2, 3];
+var b = Type.update(a, {'$concat': [4, 5]}); // => [1, 2, 3, 4, 5]
 ```
 
 ## functions
@@ -617,7 +647,7 @@ If the function is passed values which are outside of the domain or returns valu
 var simpleQuestionator = Exciter.of(function (s) { return s + '?'; });
 var simpleExciter      = Exciter.of(function (s) { return s + '!'; });
 
-// Raises error: 
+// Raises error:
 // Invalid `Hello?` supplied to `ExcitedStr`, insert a valid value for the subtype
 simpleQuestionator('Hello');
 
@@ -657,7 +687,7 @@ Exciter.is(simpleQuestionator); // Returns: true
 var id = function (x) { return x; };
 
 func([Num, Num], Num).is(func([Num, Num], Num).of(id)); // Returns: true
-func([Num, Num], Num).is(func(Num, Num).of(id));        // Returns: false 
+func([Num, Num], Num).is(func(Num, Num).of(id));        // Returns: false
 ```
 
 ### Rules
@@ -691,17 +721,17 @@ type Coords tuple {
 
 // enums
 type Direction enums {
-  'North', 
+  'North',
   'East',
-  'South', 
+  'South',
   'West'
 }
 
-// enums with specified values 
+// enums with specified values
 type Direction enums {
-  'North': 0, 
+  'North': 0,
   'East': 1,
-  'South': 2, 
+  'South': 2,
   'West': 3
 }
 
