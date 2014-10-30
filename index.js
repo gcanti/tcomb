@@ -29,7 +29,9 @@
   }
 
   function namespace(path, module) {
-    path = path.split('.');
+    if (!Arr.is(path)) {
+      path = path.split('.');
+    }
     var lastIndex = path.length - 1;
     var init = {};
     var isModule = arguments.length > 1;
