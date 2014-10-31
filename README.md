@@ -4,6 +4,25 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 JavaScript values at runtime with a simple syntax. It's great for **Domain Driven Design**,
 for testing and for adding safety to your internal code.
 
+# The Idea
+
+tcomb is based on set theory.
+What's a type? In tcomb a type is a function `T` such that
+
+1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
+2. `T` is idempotent: `T(T(value, mut), mut) === T(value, mut)`
+3. `T` owns a static function `T.is(x)` returning `true` if `x` is an instance of `T`
+
+**Note**: 2. implies that `T` can be used as a default JSON decoder
+
+# Articles on tcomb
+
+- [JavaScript, Types and Sets Part 1](http://gcanti.github.io/2014/09/29/javascript-types-and-sets.html)
+- [JavaScript, Types and Sets Part 2](https://gcanti.github.io/2014/10/07/javascript-types-and-sets-part-II.html)
+- [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
+- [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
+- [JSON API Validation In Node.js](http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
+
 # Contributors
 
 - [Giulio Canti](https://github.com/gcanti)
@@ -16,7 +35,6 @@ for testing and for adding safety to your internal code.
 - [Setup](#setup)
 - [Requirements](#requirements)
 - [Tests](#tests)
-- [The Idea](#the-idea)
 - [Api](#api)
   - [options](#options)
     - [options.onFail](#optionsonfail)
@@ -31,7 +49,6 @@ for testing and for adding safety to your internal code.
   - [built-in (immutable) updates](#updates)
   - [functions](#functions)
 - [sweet.js macros (experimental)](#macros)
-- [Articles on tcomb](#articles-on-tcomb)
 
 # Features
 
@@ -160,24 +177,6 @@ This library uses a few ES5 methods, you can use `es5-shim`, `es5-sham` and `jso
 # Tests
 
 Run `mocha` or `npm test` in the project root.
-
-# The Idea
-
-What's a type? In tcomb a type is a function `T` such that
-
-1. `T` has signature `T(value, [mut])` where `value` depends on the nature of `T` and the optional boolean `mut` makes the instance mutable (default `false`)
-2. `T` is idempotent: `T(T(value, mut), mut) === T(value, mut)`
-3. `T` owns a static function `T.is(x)` returning `true` if `x` is an instance of `T`
-
-**Note**: 2. implies that `T` can be used as a default JSON decoder
-
-# Articles on tcomb
-
-- [JavaScript, Types and Sets Part 1](http://gcanti.github.io/2014/09/29/javascript-types-and-sets.html)
-- [JavaScript, Types and Sets Part 2](https://gcanti.github.io/2014/10/07/javascript-types-and-sets-part-II.html)
-- [What if your domain model could validate the UI for free?](http://gcanti.github.io/2014/08/12/what-if-your-domain-model-could-validate-the-ui-for-free.html)
-- [JSON Deserialization Into An Object Model](http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
-- [JSON API Validation In Node.js](http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
 
 # Api
 
