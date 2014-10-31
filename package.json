@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "cover": "istanbul cover _mocha -- --ui bdd -R dot",
-    "compile-browser-tests": "watchify ./test/test.js -o ./test/browser.js -v"
+    "compile-browser-tests": "watchify ./test/test.js -o ./test/browser -v"
   },
   "repository": {
     "type": "git",

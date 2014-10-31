@@ -128,6 +128,7 @@
     assert(!(x instanceof type), 'Operator `new` is forbidden for `%s`', getName(type));
   }
 
+  /*
   function namespace(path, module) {
     if (!Arr.is(path)) {
       path = path.split('.');
@@ -139,10 +140,6 @@
       return (acc[x] = isModule && i === lastIndex ? module : {});
     }, init);
     return init;
-  }
-
-  function shallowCopy(x) {
-    return Arr.is(x) ? x.concat() : mixin({}, x);
   }
 
   function update(instance, spec, value) {
@@ -191,6 +188,74 @@
   }
 
   update._ = {};
+  */
+
+  function shallowCopy(x) {
+    return Arr.is(x) ? x.concat() : Obj.is(x) ? mixin({}, x) : x;
+  }
+
+  function update(instance, spec) {
+    assert(!Nil.is(instance));
+    assert(Obj.is(spec));
+    var value = shallowCopy(instance);
+    for (var k in spec) {
+      if (spec.hasOwnProperty(k)) {
+        if (update.commands.hasOwnProperty(k)) {
+          assert(Object.keys(spec).length === 1);
+          return update.commands[k](spec[k], value);
+        } else {
+          value[k] = update(value[k], spec[k]);
+        }
+      }
+    }
+    return value;
+  }
+
+  update.commands = {
+    '$apply': function (f, value) {
+      assert(Func.is(f));
+      return f(value);
+    },
+    '$push': function (elements, arr) {
+      assert(Arr.is(elements));
+      assert(Arr.is(arr));
+      return arr.concat(elements);
+    },
+    '$remove': function (keys, obj) {
+      assert(Arr.is(keys));
+      assert(Obj.is(obj));
+      for (var i = 0, len = keys.length ; i < len ; i++ ) {
+        delete obj[keys[i]];
+      }
+      return obj;
+    },
+    '$set': function (value) {
+      return value;
+    },
+    '$splice': function (splices, arr) {
+      assert(list(Arr).is(splices));
+      assert(Arr.is(arr));
+      return splices.reduce(function (acc, splice) {
+        acc.splice.apply(acc, splice);
+        return acc;
+      }, arr);
+    },
+    '$swap': function (config, arr) {
+      assert(Obj.is(config));
+      assert(Num.is(config.from));
+      assert(Num.is(config.to));
+      assert(Arr.is(arr));
+      var element = arr[config.to];
+      arr[config.to] = arr[config.from];
+      arr[config.from] = element;
+      return arr;
+    },
+    '$unshift': function (elements, arr) {
+      assert(Arr.is(elements));
+      assert(Arr.is(arr));
+      return elements.concat(arr);
+    }
+  };
 
   //
   // irriducibles
@@ -846,7 +911,7 @@
       getName: getName,
       getKind: getKind,
       slice: slice,
-      namespace: namespace,
+      shallowCopy: shallowCopy,
       update: update
     },
 

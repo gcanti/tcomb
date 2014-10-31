@@ -28,8 +28,6 @@ var getName = t.util.getName;
 var getKind = t.util.getKind;
 var mixin = t.util.mixin;
 var format = t.util.format;
-var namespace = t.util.namespace;
-var update = t.util.update;
 
 //
 // setup
@@ -53,43 +51,85 @@ var Point = struct({
     y: Num
 });
 
-describe('namespace(path, [module])', function () {
-
-    it('should returns a namespace', function () {
-        eq(namespace('a'), {a: {}});
-        eq(namespace('a.b'), {a: {b: {}}});
-        eq(namespace('a.b.0'), {a: {b: {0: {}}}});
-    });
-
-    it('should set a module', function () {
-        eq(namespace('a.b', 1), {a: {b: 1}});
-        eq(namespace('a.b.1.2', 4), {a: {b: {1: {2: 4}}}});
-    });
-
-});
-
 describe('update', function () {
 
+    var update = t.util.update;
     var Tuple = tuple([Str, Num]);
     var List = list(Num);
     var Dict = dict(Str, Num);
 
-    describe('structs', function () {
-        
-        var instance = new Point({x: 0, y: 1});
+    it('should handle $set command', function () {
+        var instance = 1;
+        var actual = update(instance, {$set: 2});
+        eq(actual, 2);
+        instance = [1, 2, 3];
+        actual = update(instance, {1: {'$set': 4}});
+        eq(instance, [1, 2, 3]);
+        eq(actual, [1, 4, 3]);
+    });
 
-        it('should returns the same struct if spec is not defined', function () {
-            var updated = update(instance);
-            ok(updated === instance);
-        });
+    it('should handle $apply command', function () {
+        var $apply = function (n) { return n + 1; };
+        var instance = 1;
+        var actual = update(instance, {$apply: $apply});
+        eq(actual, 2);
+        instance = [1, 2, 3];
+        actual = update(instance, {1: {'$apply': $apply}});
+        eq(instance, [1, 2, 3]);
+        eq(actual, [1, 3, 3]);
+    });
+
+    it('should handle $unshift command', function () {
+        var actual = update([1, 2, 3], {'$unshift': [4]});
+        eq(actual, [4, 1, 2, 3]);
+        actual = update([1, 2, 3], {'$unshift': [4, 5]});
+        eq(actual, [4, 5, 1, 2, 3]);
+        actual = update([1, 2, 3], {'$unshift': [[4, 5]]});
+        eq(actual, [[4, 5], 1, 2, 3]);
+    });
+
+    it('should handle $push command', function () {
+        var actual = update([1, 2, 3], {'$push': [4]});
+        eq(actual, [1, 2, 3, 4]);
+        actual = update([1, 2, 3], {'$push': [4, 5]});
+        eq(actual, [1, 2, 3, 4, 5]);
+        actual = update([1, 2, 3], {'$push': [[4, 5]]});
+        eq(actual, [1, 2, 3, [4, 5]]);
+    });
+
+    it('should handle $splice command', function () {
+        var instance = [1, 2, {a: [12, 17, 15]}];
+        var actual = update(instance, {2: {a: {$splice: [[1, 1, 13, 14]]}}});
+        eq(instance, [1, 2, {a: [12, 17, 15]}]);
+        eq(actual, [1, 2, {a: [12, 13, 14, 15]}]);
+    });
+
+    it('should handle $remove command', function () {
+        var instance = {a: 1, b: 2};
+        var actual = update(instance, {'$remove': ['a']});
+        eq(instance, {a: 1, b: 2});
+        eq(actual, {b: 2});
+    });
+
+    it('should handle $swap command', function () {
+        var instance = [1, 2, 3, 4];
+        var actual = update(instance, {'$swap': {from: 1, to: 2}});
+        eq(instance, [1, 2, 3, 4]);
+        eq(actual, [1, 3, 2, 4]);
+    });
+
+    describe('structs', function () {
+        var instance = new Point({x: 0, y: 1});
         it('should handle $set command', function () {
             var updated = update(instance, {x: {$set: 1}});
+            eq(instance, {x: 0, y: 1});
             eq(updated, {x: 1, y: 1});
         });
         it('should handle $apply command', function () {
             var updated = update(instance, {x: {$apply: function (x) {
                 return x + 2;
             }}});
+            eq(instance, {x: 0, y: 1});
             eq(updated, {x: 2, y: 1});
         });
     });
@@ -113,19 +153,19 @@ describe('update', function () {
             eq(updated, [1, 2, 5, 4]);
         });
         it('should handle $splice command', function () {
-            var updated = update(instance, {$splice: [1, 2, 5, 6]});
+            var updated = update(instance, {$splice: [[1, 2, 5, 6]]});
             eq(updated, [1, 5, 6, 4]);
         });
         it('should handle $concat command', function () {
-            var updated = update(instance, {$concat: 5});
+            var updated = update(instance, {$push: [5]});
             eq(updated, [1, 2, 3, 4, 5]);
-            updated = update(instance, {$concat: [5, 6]});
+            updated = update(instance, {$push: [5, 6]});
             eq(updated, [1, 2, 3, 4, 5, 6]);
         });
         it('should handle $prepend command', function () {
-            var updated = update(instance, {$prepend: 5});
+            var updated = update(instance, {$unshift: [5]});
             eq(updated, [5, 1, 2, 3, 4]);
-            updated = update(instance, {$prepend: [5, 6]});
+            updated = update(instance, {$unshift: [5, 6]});
             eq(updated, [5, 6, 1, 2, 3, 4]);
         });
         it('should handle $swap command', function () {
@@ -143,7 +183,7 @@ describe('update', function () {
             eq(updated, {a: 2, b: 2});
         });
         it('should handle $remove command', function () {
-            var updated = update(instance, {a: {$remove: true}});
+            var updated = update(instance, {$remove: ['a']});
             eq(updated, {b: 2});
         });
     });
@@ -200,7 +240,7 @@ describe('update', function () {
                 a: {$set: 1},
                 b: {0: {$set: 'b'}},
                 c: {2: {$set: 5}},
-                d: {a: {$remove: true}}
+                d: {$remove: ['a']}
             });
             eq(updated, {
                 a: 1,
@@ -236,30 +276,7 @@ describe('update', function () {
 
     });
 
-    it('should handle update(instance, path, value)', function () {
-        var Struct = struct({
-            a: struct({
-                b: tuple([
-                    Str,
-                    list(Num)
-                ])
-            })
-        });
-        var instance = new Struct({
-            a: {
-                b: ['a', [1, 2, 3]]
-            }
-        });
-        var updated = update(instance, 'a.b.1.2', 4);
-        eq(updated, {
-            a: {
-                b: ['a', [1, 2, 4]]
-            }
-        });
-    });
-
 });
-
 
 //
 // assert
@@ -1118,7 +1135,7 @@ describe('list', function () {
         var Type = list(Str);
         var instance = Type(['a', 'b']);
         it('should return a new instance', function () {
-            var newInstance = Type.update(instance, {'$concat': 'c'});
+            var newInstance = Type.update(instance, {'$push': ['c']});
             assert(Type.is(newInstance));
             assert(instance.length === 2);
             assert(newInstance.length === 3);

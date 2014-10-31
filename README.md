@@ -534,45 +534,37 @@ Tel.is({'jack': 4098, 'sape': 4139}); // => true
 Type.update(instance, spec)
 ```
 
-### Settings a value
+The following commands are compatible with the [Facebook Immutability Helpers](http://facebook.github.io/react/docs/update.html).
 
-- `{$set: value}`: to update structs, tuples, subtypes, lists and dicts
-- `{$apply: function}`: passes in the current value to the function and updates it with the new returned value.
-- `update(instance, path: array | string, value)`: to optimize the most common operation
-
-```js
-var Point = struct({
-    x: Num,
-    y: Num
-});
-var a = new Point({x: 0, y: 1});
-var b = Point.update(a, {x: {$set: 1}}); // => {x: 1, y: 1}
-```
+- $push
+- $unshift
+- $splice
+- $set
+- $apply
 
 ### Removing a value form a dict
 
-`{$remove: true}`: to remove keys from dicts
+`{$remove: keys}`
 
 ```js
-var MyDict = dict(Str, Num);
-var a = MyDict({a: 1, b: 2});
-var b = MyDict.update(a, {a: {$remove: true}}); // => {b: 2}
+var Type = dict(Str, Num);
+var instance = Type({a: 1, b: 2});
+var updated = Type.update(instance, {$remove: ['a']}); // => {b: 2}
 ```
 
-### Updating a list
+### Swapping two list elements
 
-- `{$splice: args}`: to add and remove elements at the same time
-- `{$concat: element | array}`: `concat` `element` or `array` to the list
-- `{$prepend: element | array}`: `concat` the list to  `element` or `array`
-- `{$swap: {from: 1, to: 2}}`: swap the element at index `from` with the element at index `to`
-
-**Note**. `$splice` and `$concat` act as the `Array.prototype` counterparts.
+`{$swap: {from: number, to: number}}`
 
 ```js
 var Type = list(Num);
-var a = [1, 2, 3];
-var b = Type.update(a, {'$concat': [4, 5]}); // => [1, 2, 3, 4, 5]
+var instance = Type([1, 2, 3, 4]);
+var updated = Type.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3, 2, 4]
 ```
+
+### Adding other commands
+
+You can add your custom commands updating the `util.update.commands` hash.
 
 ## functions
 
