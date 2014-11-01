@@ -128,68 +128,6 @@
     assert(!(x instanceof type), 'Operator `new` is forbidden for `%s`', getName(type));
   }
 
-  /*
-  function namespace(path, module) {
-    if (!Arr.is(path)) {
-      path = path.split('.');
-    }
-    var lastIndex = path.length - 1;
-    var init = {};
-    var isModule = arguments.length > 1;
-    path.reduce(function reducer(acc, x, i) {
-      return (acc[x] = isModule && i === lastIndex ? module : {});
-    }, init);
-    return init;
-  }
-
-  function update(instance, spec, value) {
-    if (!spec) { return instance; }
-
-    // handle update(instance, path, value)
-    if (Str.is(spec)) { 
-      return update(instance, namespace(spec, {$set: value})); 
-    }
-
-    value = shallowCopy(instance);
-
-    for (var k in spec) {
-      if (spec.hasOwnProperty(k)) {
-        var s = spec[k];
-        switch (k) {
-          case '$apply' :
-            return s(instance);
-          case '$concat' :
-            // TODO optimize
-            return value.concat(s);
-          case '$set' :
-            return spec[k];
-          case '$splice' :
-            value.splice.apply(value, s);
-            return value;
-          case '$swap' :
-            var el = value[s.to];
-            value[s.to] = value[s.from];
-            value[s.from] = el;
-            return value;
-          case '$remove' :
-            return update._;
-          case '$prepend' :
-            // TODO optimize
-            return [].concat(s).concat(value);
-        }
-
-        value[k] = update(value[k], s);
-        if (value[k] === update._) {
-          delete value[k];
-        }
-      }
-    }
-    return value;
-  }
-
-  update._ = {};
-  */
-
   function shallowCopy(x) {
     return Arr.is(x) ? x.concat() : Obj.is(x) ? mixin({}, x) : x;
   }
