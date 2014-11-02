@@ -818,6 +818,15 @@ describe('struct', function () {
             eq(Point3D.meta.props.y, Num);
             eq(Point3D.meta.props.z, Num);
         });
+        it('should handle an array as argument', function () {
+            var Type = struct({a: Str}, 'Type');
+            var Mixin = [{b: Num, c: Bool}];
+            var NewType = Type.extend(Mixin, 'NewType');
+            eq(getName(NewType), 'NewType');
+            eq(NewType.meta.props.a, Str);
+            eq(NewType.meta.props.b, Num);
+            eq(NewType.meta.props.c, Bool);
+        });
     });
 });
 
