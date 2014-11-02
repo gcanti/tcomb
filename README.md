@@ -278,6 +278,9 @@ var Point = struct({
 var Point3D = Point.extend({z: Num}, 'Point3D'); // composition, not inheritance
 
 var p = new Point3D({x: 1, y: 2, z: 3});
+
+// `props` can be an array of new props
+var Point4D = Point.extend([{z: Num}, {time: Num}], 'Point4D');
 ```
 
 ## unions

@@ -1,3 +1,7 @@
+# v0.3.1
+
+- Make `Struct.extend` accept array of extensions
+
 # v0.3.0
 
 - added `Struct.extend(props, [name])`, fix #55
