@@ -398,7 +398,7 @@
     };
   
     Struct.extend = function extendStruct(newProps, name) {
-      return struct(mixin(mixin({}, props), newProps), name);
+      return struct([props].concat(newProps).reduce(mixin, {}), name);
     };
 
     return Struct;
