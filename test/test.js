@@ -387,19 +387,6 @@ describe('mixin', function () {
     });
 });
 
-describe('merge', function () {
-    it('should mix two objects', function () {
-        var o1 = {a: 1, c: 3};
-        var o2 = {b: 2, c: 4}
-        var o3 = t.util.merge(o1, o2);
-        ok(o3 !== o1);
-        ok(o3 !== o2);
-        eq(o3.a, 1);
-        eq(o3.b, 2);
-        eq(o3.c, 4);
-    });
-});
-
 describe('getName', function () {
 
     var UnnamedStruct = struct({});

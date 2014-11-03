@@ -75,12 +75,6 @@
     return target;
   }
 
-  function merge() {
-    return Array.prototype.reduce.call(arguments, function reducer(x, y) {
-      return mixin(x, y, true);
-    }, {});
-  }
-  
   function format() {
     var args = slice.call(arguments);
     var len = args.length;
@@ -844,7 +838,6 @@
 
     util: {
       mixin: mixin,
-      merge: merge,
       format: format,
       getName: getName,
       getKind: getKind,
