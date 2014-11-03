@@ -66,7 +66,7 @@
     }
     for (var k in source) {
       if (source.hasOwnProperty(k)) {
-        if (!overwrite) {
+        if (overwrite !== true) {
           assert(!target.hasOwnProperty(k), 'cannot overwrite property %s', k);
         }
         target[k] = source[k];
