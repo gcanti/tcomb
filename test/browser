@@ -67,7 +67,7 @@
     }
     for (var k in source) {
       if (source.hasOwnProperty(k)) {
-        if (!overwrite) {
+        if (overwrite !== true) {
           assert(!target.hasOwnProperty(k), 'cannot overwrite property %s', k);
         }
         target[k] = source[k];
@@ -76,12 +76,6 @@
     return target;
   }
 
-  function merge() {
-    return Array.prototype.reduce.call(arguments, function reducer(x, y) {
-      return mixin(x, y, true);
-    }, {});
-  }
-  
   function format() {
     var args = slice.call(arguments);
     var len = args.length;
@@ -134,7 +128,6 @@
   }
 
   function update(instance, spec) {
-    assert(!Nil.is(instance));
     assert(Obj.is(spec));
     var value = shallowCopy(instance);
     for (var k in spec) {
@@ -845,7 +838,6 @@
 
     util: {
       mixin: mixin,
-      merge: merge,
       format: format,
       getName: getName,
       getKind: getKind,
@@ -21323,6 +21315,14 @@ describe('update', function () {
         eq(actual, [1, 4, 3]);
     });
 
+    it.only('$set and null value, issue #65', function () {
+        var NullStruct = struct({a: Num, b: maybe(Num)});
+        var instance = new NullStruct({a: 1});
+        var updated = update(instance, {b: {$set: 2}});
+        eq(instance, {a: 1, b: null});
+        eq(updated, {a: 1, b: 2});
+    });
+
     it('should handle $apply command', function () {
         var $apply = function (n) { return n + 1; };
         var instance = 1;
@@ -21639,19 +21639,6 @@ describe('mixin', function () {
         var target = {};
         mixin(target, source);
         eq(target.method, undefined);
-    });
-});
-
-describe('merge', function () {
-    it('should mix two objects', function () {
-        var o1 = {a: 1, c: 3};
-        var o2 = {b: 2, c: 4}
-        var o3 = t.util.merge(o1, o2);
-        ok(o3 !== o1);
-        ok(o3 !== o2);
-        eq(o3.a, 1);
-        eq(o3.b, 2);
-        eq(o3.c, 4);
     });
 });
 

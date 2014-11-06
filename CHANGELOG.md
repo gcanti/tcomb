@@ -1,3 +1,8 @@
+# v0.3.2
+
+- removed `util.merge`
+- $set and null value, fix #65
+
 # v0.3.1
 
 - Make `Struct.extend` accept array of extensions

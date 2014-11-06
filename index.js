@@ -127,7 +127,6 @@
   }
 
   function update(instance, spec) {
-    assert(!Nil.is(instance));
     assert(Obj.is(spec));
     var value = shallowCopy(instance);
     for (var k in spec) {

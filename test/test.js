@@ -68,6 +68,14 @@ describe('update', function () {
         eq(actual, [1, 4, 3]);
     });
 
+    it.only('$set and null value, issue #65', function () {
+        var NullStruct = struct({a: Num, b: maybe(Num)});
+        var instance = new NullStruct({a: 1});
+        var updated = update(instance, {b: {$set: 2}});
+        eq(instance, {a: 1, b: null});
+        eq(updated, {a: 1, b: 2});
+    });
+
     it('should handle $apply command', function () {
         var $apply = function (n) { return n + 1; };
         var instance = 1;
