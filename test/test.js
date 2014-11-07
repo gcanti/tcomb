@@ -68,7 +68,7 @@ describe('update', function () {
         eq(actual, [1, 4, 3]);
     });
 
-    it.only('$set and null value, issue #65', function () {
+    it('$set and null value, issue #65', function () {
         var NullStruct = struct({a: Num, b: maybe(Num)});
         var instance = new NullStruct({a: 1});
         var updated = update(instance, {b: {$set: 2}});
