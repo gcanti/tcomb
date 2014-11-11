@@ -142,7 +142,7 @@ describe('update', function () {
         });
     });
 
-    describe('tuples', function () { 
+    describe('tuples', function () {
 
         var instance = Tuple(['a', 1]);
 
@@ -152,7 +152,7 @@ describe('update', function () {
         });
     });
 
-    describe('lists', function () { 
+    describe('lists', function () {
 
         var instance = List([1, 2, 3, 4]);
 
@@ -182,7 +182,7 @@ describe('update', function () {
         });
     });
 
-    describe('dicts', function () { 
+    describe('dicts', function () {
 
         var instance = Dict({a: 1, b: 2});
 
@@ -229,7 +229,7 @@ describe('update', function () {
         });
     });
 
-    describe('all together now', function () { 
+    describe('all together now', function () {
 
         it('should handle mixed commands', function () {
             var Struct = struct({
@@ -239,7 +239,7 @@ describe('update', function () {
                 d: Dict
             });
             var instance = new Struct({
-                a: 1, 
+                a: 1,
                 b: ['a', 1],
                 c: [1, 2, 3, 4],
                 d: {a: 1, b: 2}
@@ -293,7 +293,7 @@ describe('update', function () {
 describe('assert', function () {
 
     var assert = t.assert;
-    
+
     it('should nor throw when guard is true', function () {
         assert(true);
     });
@@ -784,6 +784,32 @@ describe('struct', function () {
                 Point(1);
             }, 'Invalid `1` supplied to `struct`, expected an `Obj`');
         });
+
+        it("should throw when a property type does not match", function () {
+            throwsWithMessage(function () {
+                Point({
+                    x: "asdf",
+                    y: "1"
+                });
+            }, 'Invalid `asdf` supplied to `x: Num` in `struct`');
+
+        });
+
+        it("should throw when a child struct has an invalid property", function () {
+            var ParentStruct = struct({
+                a: struct({
+                    b: Num,
+                }, "ChildStruct")
+            }, "ParentStruct")
+
+            throwsWithMessage(function () {
+                ParentStruct({
+                    a: {
+                        b: "asdf"
+                    }
+                });
+            }, "Invalid `asdf` supplied to `b: Num` in `ChildStruct`")
+        });
     });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the struct', function () {
@@ -856,9 +882,9 @@ describe('enums', function () {
     });
     describe('#is(x)', function () {
         var Direction = enums({
-            North: 0, 
+            North: 0,
             East: 1,
-            South: 2, 
+            South: 2,
             West: 3
         });
         it('should return true when x is an instance of the enum', function () {
@@ -904,7 +930,7 @@ describe('union', function () {
         assert(Obj.is(values));
         return values.hasOwnProperty('center') ?
             Circle :
-            Rectangle;   
+            Rectangle;
     };
 
     describe('combinator', function () {
@@ -988,7 +1014,7 @@ describe('maybe', function () {
         it('should be idempotent', function () {
             var A = maybe(Point);
             var B = maybe(A);
-            eq(A, B); 
+            eq(A, B);
         });
     });
     describe('constructor', function () {
@@ -1060,7 +1086,7 @@ describe('tuple', function () {
             var p1 = T(['a', 1]);
             var p2 = T(p1);
             eq(p2, p1);
-        });    
+        });
     });
     describe('#is(x)', function () {
         it('should return true when x is an instance of the tuple', function () {
@@ -1122,7 +1148,7 @@ describe('list', function () {
             var p1 = T([{x: 0, y: 0}]);
             var p2 = T(p1);
             eq(p2, p1);
-        });    
+        });
     });
     describe('#is(x)', function () {
         var Path = list(Point);
@@ -1168,7 +1194,7 @@ describe('subtype', function () {
         it('should be idempotent', function () {
             var A = maybe(Point);
             var B = maybe(A);
-            eq(A, B); 
+            eq(A, B);
         });
     });
     describe('constructor', function () {
@@ -1267,7 +1293,7 @@ describe('dict', function () {
             var t1 = T({a: p1, b: p2});
             var t2 = T(t1);
             eq(t2, t1);
-        });    
+        });
     });
     describe('#is(x)', function () {
         var T = dict(Str, Point);
