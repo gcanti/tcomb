@@ -200,20 +200,15 @@
     // DEBUG HINT: if the debugger stops here, the second argument is not a function
     assert(typeof is === 'function', 'Invalid argument `is` supplied to `irriducible()`');
 
-    function Irriducible(value, _, parentType, key) {
+    function Irriducible(value) {
 
       // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Irriducible);
 
 
-      if (parentType && key) {
-        assert(is(value), 'Invalid `%s` supplied to `%s: %s` in `%s`', value, key, name, parentType);
-
-      } else {
-        // DEBUG HINT: if the debugger stops here, the first argument is invalid
-        // mouse over the `value` variable to see what's wrong. In `name` there is the name of the type
-        assert(is(value), 'Invalid `%s` supplied to `%s`', value, name);
-      }
+      // DEBUG HINT: if the debugger stops here, the first argument is invalid
+      // mouse over the `value` variable to see what's wrong. In `name` there is the name of the type
+      assert(is(value), 'Invalid `%s` supplied to `%s`', value, name);
 
       return value;
     }
@@ -289,7 +284,20 @@
     // DEBUG HINT: always give a name to a type, the debug will be easier
     name = name || 'struct';
 
-    function Struct(value, mut, parentType, key) {
+    function addKey(Subtype, key) {
+      return function Keyed(value, mut) {
+        assert(Subtype.is(value), 'Invalid `%s` supplied to `%s: %s` in `%s`',
+          value, key, Subtype.meta.name, name);
+        return Subtype(value, mut);
+      };
+    }
+
+    props = Object.keys(props).reduce(function (newProps, key) {
+      newProps[key] = addKey(props[key], key);
+      return newProps;
+    }, {});
+
+    function Struct(value, mut) {
 
       // makes Struct idempotent
       if (Struct.is(value)) {
@@ -302,7 +310,7 @@
 
       // makes `new` optional
       if (!(this instanceof Struct)) {
-        return new Struct(value, mut, parentType, key);
+        return new Struct(value, mut);
       }
 
       for (var k in props) {
@@ -311,7 +319,7 @@
           var actual = value[k];
           // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `expected` type is invalid
           // mouse over the `actual` and `expected` variables to see what's wrong
-          this[k] = expected(actual, mut, name, k);
+          this[k] = expected(actual, mut);
         }
       }
 

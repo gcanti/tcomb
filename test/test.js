@@ -127,7 +127,10 @@ describe('update', function () {
     });
 
     describe('structs', function () {
-        var instance = new Point({x: 0, y: 1});
+        var instance;
+        before(function () {
+            instance = new Point({x: 0, y: 1});
+        });
         it('should handle $set command', function () {
             var updated = update(instance, {x: {$set: 1}});
             eq(instance, {x: 0, y: 1});
@@ -818,8 +821,11 @@ describe('struct', function () {
         });
     });
     describe('#update()', function () {
-        var Type = struct({name: Str});
-        var instance = new Type({name: 'Giulio'});
+        var Type, instance;
+        before(function () {
+            Type = struct({name: Str});
+            instance = new Type({name: 'Giulio'});
+        });
         it('should return a new instance', function () {
             var newInstance = Type.update(instance, {name: {$set: 'Canti'}});
             ok(Type.is(newInstance));
@@ -1151,9 +1157,12 @@ describe('list', function () {
         });
     });
     describe('#is(x)', function () {
-        var Path = list(Point);
-        var p1 = new Point({x: 0, y: 0});
-        var p2 = new Point({x: 1, y: 1});
+        var Path, p1, p2;
+        before(function () {
+            Path = list(Point);
+            p1 = new Point({x: 0, y: 0});
+            p2 = new Point({x: 1, y: 1});
+        });
         it('should return true when x is a list', function () {
             ok(Path.is([p1, p2]));
         });
@@ -1296,9 +1305,12 @@ describe('dict', function () {
         });
     });
     describe('#is(x)', function () {
-        var T = dict(Str, Point);
-        var p1 = new Point({x: 0, y: 0});
-        var p2 = new Point({x: 1, y: 1});
+        var T, p1, p2;
+        before(function () {
+            T = dict(Str, Point);
+            p1 = new Point({x: 0, y: 0});
+            p2 = new Point({x: 1, y: 1});
+        });
         it('should return true when x is a list', function () {
             ok(T.is({a: p1, b: p2}));
         });
