@@ -1,3 +1,7 @@
+# v0.3.3
+
+- add `displayName` to combinators, fix #69
+
 # v0.3.2
 
 - removed `util.merge`
