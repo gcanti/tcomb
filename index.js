@@ -104,8 +104,8 @@
   }
 
   format.formatters = {
-    s: function (x) { return String(x); },
-    j: function (x) { return JSON.stringify(x, replacer); }
+    s: function formatString(x) { return String(x); },
+    j: function formatJSON(x) { return JSON.stringify(x, replacer); }
   };
 
   function getName(type) {
@@ -143,16 +143,16 @@
   }
 
   update.commands = {
-    '$apply': function (f, value) {
+    '$apply': function $apply(f, value) {
       assert(Func.is(f));
       return f(value);
     },
-    '$push': function (elements, arr) {
+    '$push': function $push(elements, arr) {
       assert(Arr.is(elements));
       assert(Arr.is(arr));
       return arr.concat(elements);
     },
-    '$remove': function (keys, obj) {
+    '$remove': function $remove(keys, obj) {
       assert(Arr.is(keys));
       assert(Obj.is(obj));
       for (var i = 0, len = keys.length ; i < len ; i++ ) {
@@ -160,18 +160,18 @@
       }
       return obj;
     },
-    '$set': function (value) {
+    '$set': function $set(value) {
       return value;
     },
-    '$splice': function (splices, arr) {
+    '$splice': function $splice(splices, arr) {
       assert(list(Arr).is(splices));
       assert(Arr.is(arr));
-      return splices.reduce(function (acc, splice) {
+      return splices.reduce(function reducer(acc, splice) {
         acc.splice.apply(acc, splice);
         return acc;
       }, arr);
     },
-    '$swap': function (config, arr) {
+    '$swap': function $swap(config, arr) {
       assert(Obj.is(config));
       assert(Num.is(config.from));
       assert(Num.is(config.to));
@@ -181,7 +181,7 @@
       arr[config.from] = element;
       return arr;
     },
-    '$unshift': function (elements, arr) {
+    '$unshift': function $unshift(elements, arr) {
       assert(Arr.is(elements));
       assert(Arr.is(arr));
       return elements.concat(arr);
@@ -485,7 +485,7 @@
   enums.of = function enumsOf(keys, name) {
     keys = Str.is(keys) ? keys.split(' ') : keys;
     var value = {};
-    keys.forEach(function (k) {
+    keys.forEach(function setEnum(k) {
       value[k] = k;
     });
     return enums(value, name);
@@ -539,8 +539,8 @@
 
     Tuple.displayName = name;
 
-    Tuple.isTuple = function (x) {
-      return types.every(function (type, i) {
+    Tuple.isTuple = function isTuple(x) {
+      return types.every(function isType(type, i) {
         return type.is(x[i]);
       });
     };
@@ -655,7 +655,7 @@
 
     List.displayName = name;
 
-    List.isList = function (x) {
+    List.isList = function isList(x) {
       return x.every(type.is);
     };
 
@@ -724,7 +724,7 @@
 
     Dict.displayName = name;
 
-    Dict.isDict = function (x) {
+    Dict.isDict = function isDict(x) {
       for (var k in x) {
         if (x.hasOwnProperty(k)) {
           if (!domain.is(k) || !codomain.is(x[k])) { return false; }
@@ -788,7 +788,7 @@
     Func.is = function isFunc(x) {
       return func.is(x) &&
         x.func.domain.length === domain.length &&
-        x.func.domain.every(function (type, i) {
+        x.func.domain.every(function isEqual(type, i) {
           return type === domain[i];
         }) &&
         x.func.codomain === codomain;
@@ -849,7 +849,7 @@
   }
 
   // returns true if x is an instrumented function
-  func.is = function (f) {
+  func.is = function isFunc(f) {
     return Func.is(f) && Obj.is(f.func);
   };
 
