@@ -285,17 +285,30 @@
     name = name || 'struct';
 
     function addKey(Subtype, key) {
-      return function Keyed(value, mut) {
-        assert(Subtype.is(value), 'Invalid `%s` supplied to `%s: %s` in `%s`',
-          value, key, Subtype.meta.name, name);
+      if (Subtype.meta.keyed) { return Subtype; }
+
+      var Keyed = function Keyed(value, mut) {
+        if (Subtype.meta.kind !== 'struct') {
+          assert(Subtype.is(value), 'Invalid `%s` supplied to `%s: %s` in `%s`',
+            value, key, Subtype.meta.name, name);
+        }
         return Subtype(value, mut);
       };
+
+      Keyed.meta = shallowCopy(Subtype.meta);
+      Keyed.meta.keyed = true;
+
+      return Keyed;
     }
 
-    props = Object.keys(props).reduce(function (newProps, key) {
-      newProps[key] = addKey(props[key], key);
-      return newProps;
-    }, {});
+    function keyProps(otherProps) {
+      return Object.keys(otherProps).reduce(function (newProps, key) {
+        newProps[key] = addKey(otherProps[key], key);
+        return newProps;
+      }, {});
+    }
+
+    props = keyProps(props);
 
     function Struct(value, mut) {
 
@@ -342,8 +355,9 @@
       return new Struct(update(instance, spec, value));
     };
 
-    Struct.extend = function extendStruct(newProps, name) {
-      return struct([props].concat(newProps).reduce(mixin, {}), name);
+    Struct.extend = function extendStruct(extraProps, name) {
+      extraProps = [].concat(extraProps).map(keyProps);
+      return struct([props].concat(extraProps).reduce(mixin, {}), name);
     };
 
     return Struct;

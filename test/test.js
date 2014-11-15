@@ -841,18 +841,18 @@ describe('struct', function () {
             }, 'Point');
             var Point3D = Point.extend({z: Num}, 'Point3D');
             eq(getName(Point3D), 'Point3D');
-            eq(Point3D.meta.props.x, Num);
-            eq(Point3D.meta.props.y, Num);
-            eq(Point3D.meta.props.z, Num);
+            eq(Point3D.meta.props.x.kind, Num.kind);
+            eq(Point3D.meta.props.y.kind, Num.kind);
+            eq(Point3D.meta.props.z.kind, Num.kind);
         });
         it('should handle an array as argument', function () {
             var Type = struct({a: Str}, 'Type');
             var Mixin = [{b: Num, c: Bool}];
             var NewType = Type.extend(Mixin, 'NewType');
             eq(getName(NewType), 'NewType');
-            eq(NewType.meta.props.a, Str);
-            eq(NewType.meta.props.b, Num);
-            eq(NewType.meta.props.c, Bool);
+            eq(NewType.meta.props.a.kind, Str.kind);
+            eq(NewType.meta.props.b.kind, Num.kind);
+            eq(NewType.meta.props.c.kind, Bool.kind);
         });
     });
 });
