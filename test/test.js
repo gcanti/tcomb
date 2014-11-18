@@ -822,6 +822,31 @@ describe('struct', function () {
             eq(NewType.meta.props.b, Num);
             eq(NewType.meta.props.c, Bool);
         });
+        it('should support prototypal inheritance', function () {
+            var Rectangle = struct({
+              w: Num,
+              h: Num
+            }, 'Rectangle');
+            Rectangle.prototype.area = function () {
+              return this.w * this.h;
+            };
+            var Cube = Rectangle.extend({
+              l: Num
+            });
+            Cube.prototype.volume = function () {
+              return this.area() * this.l;
+            };
+
+            assert('function' === typeof Rectangle.prototype.area);
+            assert('function' === typeof Cube.prototype.area);
+            assert(undefined === Rectangle.prototype.volume);
+            assert('function' === typeof Cube.prototype.volume);
+            assert(Cube.prototype.constructor !== Rectangle.prototype.constructor);
+
+            
+            var c = new Cube({w:2, h:2, l:2});
+            eq(c.volume(), 8);
+        });
     });
 });
 

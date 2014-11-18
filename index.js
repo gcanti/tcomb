@@ -333,7 +333,9 @@
     };
 
     Struct.extend = function extendStruct(newProps, name) {
-      return struct([props].concat(newProps).reduce(mixin, {}), name);
+      var newStruct = struct([props].concat(newProps).reduce(mixin, {}), name);
+      mixin(newStruct.prototype, Struct.prototype);
+      return newStruct;
     };
 
     return Struct;
