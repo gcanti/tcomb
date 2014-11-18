@@ -837,10 +837,12 @@ describe('struct', function () {
               return this.area() * this.l;
             };
 
-            (func.is(Rectangle.prototype.area));
-            (Nil.is(Rectangle.prototype.volume));
-            (func.is(Cube.prototype.area));
-            (func.is(Cube.prototype.volume));
+            assert('function' === typeof Rectangle.prototype.area);
+            assert('function' === typeof Cube.prototype.area);
+            assert(undefined === Rectangle.prototype.volume);
+            assert('function' === typeof Cube.prototype.volume);
+            assert(Cube.prototype.constructor !== Rectangle.prototype.constructor);
+
             
             var c = new Cube({w:2, h:2, l:2});
             eq(c.volume(), 8);
