@@ -1,3 +1,7 @@
+# v0.3.4
+
+- Struct.extend(): prototypal inheritance added
+
 # v0.3.3
 
 - add `displayName` to combinators, fix #69

@@ -334,7 +334,7 @@
 
     Struct.extend = function extendStruct(newProps, name) {
       var newStruct = struct([props].concat(newProps).reduce(mixin, {}), name);
-      mixin(newStruct.prototype, Struct.prototype);
+      mixin(newStruct.prototype, Struct.prototype); // prototypal inheritance
       return newStruct;
     };
 
