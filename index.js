@@ -105,7 +105,13 @@
 
   format.formatters = {
     s: function formatString(x) { return String(x); },
-    j: function formatJSON(x) { return JSON.stringify(x, replacer); }
+    j: function formatJSON(x) {
+      try {
+        return JSON.stringify(x, replacer);
+      } catch (e) {
+        return String(x);
+      }
+    }
   };
 
   function getName(type) {
