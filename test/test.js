@@ -1355,7 +1355,7 @@ describe('func', function () {
             }, 'Invalid `1,2,3` supplied to `tuple([Num, Num])`, expected an `Arr` of length `2`');
             throwsWithMessage(function () {
                 sum('a', 2);
-            }, 'Invalid `a` supplied to `Num`');
+            }, 'Invalid value supplied to `Num` for property `undefined`');
         });
 
         it('should check the return value', function () {
@@ -1365,7 +1365,7 @@ describe('func', function () {
             });
             throwsWithMessage(function () {
                 sum(1, 2);
-            }, 'Invalid `a` supplied to `Num`');
+            }, 'Invalid value supplied to `Num` for property `undefined`');
         });
 
         it('should preserve `this`', function () {
@@ -1426,11 +1426,11 @@ describe('func', function () {
             });
             throwsWithMessage(function () {
                 sum('a');
-            }, 'Invalid `a` supplied to `Num`');
+            }, 'Invalid value supplied to `Num` for property `undefined`');
             throwsWithMessage(function () {
                 var sum1 = sum(1);
                 sum1('a');
-            }, 'Invalid `a` supplied to `Num`');
+            }, 'Invalid value supplied to `Num` for property `undefined`');
         });
 
     });

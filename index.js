@@ -206,14 +206,14 @@
     // DEBUG HINT: if the debugger stops here, the second argument is not a function
     assert(typeof is === 'function', 'Invalid argument `is` supplied to `irriducible()`');
 
-    function Irriducible(value) {
+    function Irriducible(value, mut, key) {
 
       // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
       blockNew(this, Irriducible);
 
       // DEBUG HINT: if the debugger stops here, the first argument is invalid
       // mouse over the `value` variable to see what's wrong. In `name` there is the name of the type
-      assert(is(value), 'Invalid `%s` supplied to `%s`', value, name);
+      assert(is(value), 'Invalid value supplied to `%s` for property `%s`', name, key);
 
       return value;
     }
@@ -313,7 +313,7 @@
           var actual = value[k];
           // DEBUG HINT: if the debugger stops here, the `actual` value supplied to the `expected` type is invalid
           // mouse over the `actual` and `expected` variables to see what's wrong
-          this[k] = expected(actual, mut);
+          this[k] = expected(actual, mut, k);
         }
       }
 
