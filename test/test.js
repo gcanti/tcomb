@@ -140,6 +140,23 @@ describe('update', function () {
             eq(instance, {x: 0, y: 1});
             eq(updated, {x: 2, y: 1});
         });
+        it('should handle $merge command', function () {
+            var updated = update(instance, {'$merge': {x: 2, y: 2}});
+            eq(instance, {x: 0, y: 1});
+            eq(updated, {x: 2, y: 2});
+            var Nested = struct({
+                a: Num,
+                b: struct({
+                    c: Num,
+                    d: Num,
+                    e: Num
+                })
+            });
+            instance = new Nested({a: 1, b: {c: 2, d: 3, e: 4}});
+            updated = update(instance, {b: {'$merge': {c: 5, e: 6}}});
+            eq(instance, {a: 1, b: {c: 2, d: 3, e: 4}});
+            eq(updated, {a: 1, b: {c: 5, d: 3, e: 6}});
+        });
     });
 
     describe('tuples', function () {

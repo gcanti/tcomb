@@ -191,6 +191,9 @@
       assert(Arr.is(elements));
       assert(Arr.is(arr));
       return elements.concat(arr);
+    },
+    '$merge': function (obj, value) {
+      return mixin(mixin({}, value), obj, true);
     }
   };
 
