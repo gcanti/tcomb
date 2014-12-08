@@ -1,3 +1,7 @@
+# v0.3.5
+
+- Add $merge command, fix #74
+
 # v0.3.4
 
 - Struct.extend(): prototypal inheritance added

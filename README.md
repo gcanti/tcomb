@@ -543,6 +543,7 @@ The following commands are compatible with the [Facebook Immutability Helpers](h
 - $splice
 - $set
 - $apply
+- $merge
 
 ### Removing a value form a dict
 
