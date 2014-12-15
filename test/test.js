@@ -794,7 +794,9 @@ describe('struct', function () {
             var T = Point;
             var p1 = T({x: 0, y: 0});
             var p2 = T(p1);
-            eq(p2, p1);
+            eq(Object.isFrozen(p1), true);
+            eq(Object.isFrozen(p2), true);
+            eq(p2 === p1, true);
         });
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
@@ -1002,7 +1004,9 @@ describe('union', function () {
         it('should be idempotent', function () {
             var p1 = Shape({center: {x: 0, y: 0}, radius: 10});
             var p2 = Shape(p1);
-            eq(p2, p1);
+            eq(Object.isFrozen(p1), true);
+            eq(Object.isFrozen(p2), true);
+            eq(p2 === p1, true);
         });
     });
     describe('#is(x)', function () {
@@ -1050,7 +1054,9 @@ describe('maybe', function () {
             var T = maybe(Point);
             var p1 = T({x: 0, y: 0});
             var p2 = T(p1);
-            eq(p2, p1);
+            eq(Object.isFrozen(p1), true);
+            eq(Object.isFrozen(p2), true);
+            eq(p2 === p1, true);
         });
     });
     describe('#is(x)', function () {
@@ -1101,7 +1107,9 @@ describe('tuple', function () {
             var T = tuple([Str, Num]);
             var p1 = T(['a', 1]);
             var p2 = T(p1);
-            eq(p2, p1);
+            eq(Object.isFrozen(p1), true);
+            eq(Object.isFrozen(p2), true);
+            eq(p2 === p1, true);
         });
     });
     describe('#is(x)', function () {
@@ -1160,10 +1168,12 @@ describe('list', function () {
             }, 'Invalid `1` supplied to `S`, expected an `Obj`');
         });
         it('should be idempotent', function () {
-            var T = list(Point);
-            var p1 = T([{x: 0, y: 0}]);
+            var T = list(Num);
+            var p1 = T([1, 2]);
             var p2 = T(p1);
-            eq(p2, p1);
+            eq(Object.isFrozen(p1), true);
+            eq(Object.isFrozen(p2), true);
+            eq(p2 === p1, true);
         });
     });
     describe('#is(x)', function () {
@@ -1303,12 +1313,12 @@ describe('dict', function () {
             }, 'Invalid `forbidden` supplied to `Domain`, insert a valid value for the subtype');
         });
         it('should be idempotent', function () {
-            var T = dict(Str, Point);
-            var p1 = new Point({x: 0, y: 0});
-            var p2 = new Point({x: 1, y: 1});
-            var t1 = T({a: p1, b: p2});
-            var t2 = T(t1);
-            eq(t2, t1);
+            var T = dict(Str, Str);
+            var p1 = T({a: 'a', b: 'b'});
+            var p2 = T(p1);
+            eq(Object.isFrozen(p1), true);
+            eq(Object.isFrozen(p2), true);
+            eq(p2 === p1, true);
         });
     });
     describe('#is(x)', function () {

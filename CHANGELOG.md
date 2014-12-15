@@ -1,3 +1,7 @@
+# v0.3.6
+
+- tuple, list and dicts don't freeze values if they are irriducibles, fix #76
+
 # v0.3.5
 
 - Add $merge command, fix #74

@@ -521,8 +521,10 @@
       // mouse over the `value`, `name` and `len` variables to see what's wrong
       assert(Arr.is(value) && value.length === len, 'Invalid `%s` supplied to `%s`, expected an `Arr` of length `%s`', value, name, len);
 
+      var frozen = (mut !== true);
+
       // makes Tuple idempotent
-      if (Tuple.isTuple(value)) {
+      if (Tuple.isTuple(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
 
@@ -535,7 +537,7 @@
         arr.push(expected(actual, mut));
       }
 
-      if (mut !== true) {
+      if (frozen) {
         Object.freeze(arr);
       }
       return arr;
@@ -639,8 +641,10 @@
       // mouse over the `value` and `name` variables to see what's wrong
       assert(Arr.is(value), 'Invalid `%s` supplied to `%s`, expected an `Arr`', value, name);
 
+      var frozen = (mut !== true);
+
       // makes List idempotent
-      if (List.isList(value)) {
+      if (List.isList(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
 
@@ -652,7 +656,7 @@
         arr.push(type(actual, mut));
       }
 
-      if (mut !== true) {
+      if (frozen) {
         Object.freeze(arr);
       }
       return arr;
@@ -702,8 +706,10 @@
       // mouse over the `value` and `name` variables to see what's wrong
       assert(Obj.is(value), 'Invalid `%s` supplied to `%s`, expected an `Obj`', value, name);
 
+      var frozen = (mut !== true);
+
       // makes Dict idempotent
-      if (Dict.isDict(value)) {
+      if (Dict.isDict(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
 
@@ -720,7 +726,7 @@
         }
       }
 
-      if (mut !== true) {
+      if (frozen) {
         Object.freeze(obj);
       }
       return obj;
