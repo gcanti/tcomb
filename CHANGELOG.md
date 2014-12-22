@@ -1,3 +1,9 @@
+# v0.4
+
+- spelling error: `irreducible` instead of `irriducible`, fix #77
+- Prevent illegal type definitions and make easy type analysis, fix #78
+- change default name for unnamed types, fix #79
+
 # v0.3.6
 
 - tuple, list and dicts don't freeze values if they are irriducibles, fix #76
