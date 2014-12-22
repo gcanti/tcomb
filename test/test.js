@@ -420,11 +420,11 @@ describe('getName', function () {
     var NamedUnion = union([Str, Num], 'NamedUnion');
     var UnnamedMaybe = maybe(Str);
     var NamedMaybe = maybe(Str, 'NamedMaybe');
-    var UnnamedEnums = enums({});
+    var UnnamedEnums = enums({a: 'A', b: 'B'});
     var NamedEnums = enums({}, 'NamedEnums');
     var UnnamedTuple = tuple([Str, Num]);
     var NamedTuple = tuple([Str, Num], 'NamedTuple');
-    var UnnamedSubtype = subtype(Str, function (x) { return x !== ''; });
+    var UnnamedSubtype = subtype(Str, function notEmpty(x) { return x !== ''; });
     var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
     var UnnamedList = list(Str);
     var NamedList = list(Str, 'NamedList');
@@ -442,14 +442,14 @@ describe('getName', function () {
         eq(getName(NamedDict), 'NamedDict');
     });
     it('should return a meaningful name of a unnamed type', function () {
-        eq(getName(UnnamedStruct), 'struct');
-        eq(getName(UnnamedUnion), 'union([Str, Num])');
-        eq(getName(UnnamedMaybe), 'maybe(Str)');
-        eq(getName(UnnamedEnums), 'enums');
-        eq(getName(UnnamedTuple), 'tuple([Str, Num])');
-        eq(getName(UnnamedSubtype), 'subtype(Str)');
-        eq(getName(UnnamedList), 'list(Str)');
-        eq(getName(UnnamedDict), 'dict(Str, Str)');
+        eq(getName(UnnamedStruct), '{}');
+        eq(getName(UnnamedUnion), 'Str | Num');
+        eq(getName(UnnamedMaybe), '?Str');
+        eq(getName(UnnamedEnums), '"a" | "b"');
+        eq(getName(UnnamedTuple), '(Str, Num)');
+        eq(getName(UnnamedSubtype), '{Str | notEmpty}');
+        eq(getName(UnnamedList), '[Str]');
+        eq(getName(UnnamedDict), '{Str: Str}');
     });
 });
 
@@ -801,7 +801,7 @@ describe('struct', function () {
         it('should accept only valid values', function () {
             throwsWithMessage(function () {
                 Point(1);
-            }, 'Invalid `1` supplied to `struct`, expected an `Obj`');
+            }, 'Invalid `1` supplied to `{x: Num, y: Num}`, expected an `Obj`');
         });
     });
     describe('#is(x)', function () {
@@ -1240,15 +1240,7 @@ describe('subtype', function () {
             var T = subtype(Point, predicate, 'T');
             throwsWithMessage(function () {
                 var p = T({x: 0, y: 0});
-            }, 'Invalid `[object Object]` supplied to `T`, insert a valid value for the subtype');
-        });
-        it('should show the predicate documentation if available', function () {
-            var predicate = function (p) { return p.x > 0; };
-            predicate.__doc__ = 'Insert a number greater then 0';
-            var T = subtype(Point, predicate, 'T');
-            throwsWithMessage(function () {
-                var p = T({x: 0, y: 0});
-            }, 'Invalid `[object Object]` supplied to `T`, Insert a number greater then 0');
+            }, 'Invalid `[object Object]` supplied to `T`');
         });
     });
     describe('#is(x)', function () {
@@ -1310,7 +1302,7 @@ describe('dict', function () {
             }, 'Invalid `1` supplied to `S`, expected an `Obj`');
             throwsWithMessage(function () {
                 T({forbidden: {}});
-            }, 'Invalid `forbidden` supplied to `Domain`, insert a valid value for the subtype');
+            }, 'Invalid `forbidden` supplied to `Domain`');
         });
         it('should be idempotent', function () {
             var T = dict(Str, Str);
@@ -1379,7 +1371,7 @@ describe('func', function () {
             eq(sum(1, 2), 3);
             throwsWithMessage(function () {
                 sum(1, 2, 3);
-            }, 'Invalid `1,2,3` supplied to `tuple([Num, Num])`, expected an `Arr` of length `2`');
+            }, 'Invalid `1,2,3` supplied to `(Num, Num)`, expected an `Arr` of length `2`');
             throwsWithMessage(function () {
                 sum('a', 2);
             }, 'Invalid `a` supplied to `Num`');

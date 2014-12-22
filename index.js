@@ -292,7 +292,9 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `struct()`');
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || 'struct';
+    name = name || format('{%s}', Object.keys(props).map(function (prop) {
+      return format('%s: %s', prop, getName(props[prop]));
+    }).join(', '));
 
     function Struct(value, mut) {
 
@@ -364,7 +366,7 @@
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `union()`');
 
-    name = name || format('union([%s])', types.map(getName).join(', '));
+    name = name || types.map(getName).join(' | ');
 
     function Union(value, mut) {
 
@@ -424,7 +426,7 @@
     // mouse over the `name` variable to see what's wrong
     assert(Nil.is(name) || Str.is(name), 'Invalid argument `name` supplied to `maybe()`');
 
-    name = name || format('maybe(%s)', getName(type));
+    name = name || ('?' + getName(type));
 
     function Maybe(value, mut) {
 
@@ -461,7 +463,7 @@
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `enums()`');
 
-    name = name || 'enums';
+    name = name || Object.keys(map).map(function (k) { return JSON.stringify(k); }).join(' | ');
 
     // cache enums
     var keys = Object.keys(map);
@@ -513,7 +515,7 @@
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `tuple()`');
 
-    name = name || format('tuple([%s])', types.map(getName).join(', '));
+    name = name || format('(%s)', types.map(getName).join(', '));
 
     function Tuple(value, mut) {
 
@@ -581,11 +583,10 @@
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `subtype()`');
 
-    // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('subtype(%s)', getName(type));
+    var predicateName = predicate.name || predicate.displayName || '<predicate>';
 
-    // cache expected value
-    var expected = predicate.__doc__ || format('insert a valid value for %s', predicate.name || 'the subtype');
+    // DEBUG HINT: always give a name to a type, the debug will be easier
+    name = name || format('{%s | %s}', getName(type), predicateName);
 
     function Subtype(value, mut) {
 
@@ -597,7 +598,7 @@
 
       // DEBUG HINT: if the debugger stops here, the value is converted to the base type
       // but the predicate returns `false`
-      assert(predicate(x), 'Invalid `%s` supplied to `%s`, %s', value, name, expected);
+      assert(predicate(x), 'Invalid `%s` supplied to `%s`', value, name);
       return x;
     }
 
@@ -631,7 +632,7 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `list()`');
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('list(%s)', getName(type));
+    name = name || format('[%s]', getName(type));
 
     function List(value, mut) {
 
@@ -698,7 +699,7 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` supplied to `dict()`');
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('dict(%s, %s)', getName(domain), getName(codomain));
+    name = name || format('{%s: %s}', getName(domain), getName(codomain));
 
     function Dict(value, mut) {
 
@@ -774,7 +775,7 @@
     assert(Type.is(codomain), 'Invalid argument `codomain` supplied to `func()`');
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('func([%s], %s)', domain.map(getName).join(', '), getName(codomain));
+    name = name || format('(%s) -> %s', domain.map(getName).join(', '), getName(codomain));
 
     // cache the domain length
     var domainLen = domain.length;
