@@ -2,10 +2,5 @@
 *.log
 bower.json
 Gruntfile.js
-tcomb.sjs
 node_modules
 test
-coverage
-dev
-playground
-examples

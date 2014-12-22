@@ -48,7 +48,6 @@ What's a type? In tcomb a type is a function `T` such that
   - [dicts](#dicts)
   - [built-in (immutable) updates](#updates)
   - [functions](#functions)
-- [sweet.js macros (experimental)](#macros)
 
 # Features
 
@@ -690,75 +689,6 @@ func([Num, Num], Num).is(func(Num, Num).of(id));        // Returns: false
 1. Typed functions' domains are checked when they are called
 2. Typed functions' codomains are checked when they return
 3. The domain and codomain of a typed function's type is checked when the typed function is passed to a function type (such as when used as an argument in another typed function).
-
-# Macros (experimental)
-
-I added a `tcomb.sjs` file containing some [sweet.js](http://sweetjs.org/) macros, here some examples:
-
-```js
-// structs
-type Point struct {
-  x: Num,
-  y: Num
-}
-
-// unions
-type Shape union {
-  Circle,
-  Rectangle
-}
-
-// tuples
-type Coords tuple {
-  Num,
-  Num
-}
-
-// enums
-type Direction enums {
-  'North',
-  'East',
-  'South',
-  'West'
-}
-
-// enums with specified values
-type Direction enums {
-  'North': 0,
-  'East': 1,
-  'South': 2,
-  'West': 3
-}
-
-// subtypes
-type Positive subtype<Num> n {
-  return n > 0;
-}
-
-// irriducibles types, like JavaScript primitives
-type Irriducible irriducible x {
-  return typeof x === 'function';
-}
-
-// maybe
-type Maybe maybe<Str>
-
-// lists
-type List list<Str>
-
-// dictionaries
-type Dict dict<Str>
-
-// functions
-fn add (x: Num, y: Num) {
-    return x + y;
-}
-
-// functions with checked return value
-fn add (x: Num, y: Num) -> Num {
-    return x + y;
-}
-```
 
 # License
 
