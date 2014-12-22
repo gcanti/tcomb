@@ -1,11 +1,10 @@
 {
   "name": "tcomb",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "Pragmatic runtime type checking for JavaScript",
   "main": "index.js",
   "scripts": {
-    "cover": "istanbul cover _mocha -- --ui bdd -R dot",
-    "compile-browser-tests": "watchify ./test/test.js -o ./test/browser -v"
+    "cover": "istanbul cover _mocha -- --ui bdd -R dot"
   },
   "repository": {
     "type": "git",

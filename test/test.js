@@ -465,8 +465,8 @@ describe('getKind', function () {
     var NamedDict = dict(Str, Str, 'NamedDict');
 
     it('should return the name of a named type', function () {
-        eq(getKind(Any), 'irriducible');
-        eq(getKind(Str), 'irriducible');
+        eq(getKind(Any), 'irreducible');
+        eq(getKind(Str), 'irreducible');
         eq(getKind(NamedStruct), 'struct');
         eq(getKind(NamedUnion), 'union');
         eq(getKind(NamedMaybe), 'maybe');

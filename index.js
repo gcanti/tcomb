@@ -198,21 +198,21 @@
   };
 
   //
-  // irriducibles
+  // irreducibles
   //
 
-  function irriducible(name, is) {
+  function irreducible(name, is) {
 
     // DEBUG HINT: if the debugger stops here, the first argument is not a string
-    assert(typeof name === 'string', 'Invalid argument `name` supplied to `irriducible()`');
+    assert(typeof name === 'string', 'Invalid argument `name` supplied to `irreducible()`');
 
     // DEBUG HINT: if the debugger stops here, the second argument is not a function
-    assert(typeof is === 'function', 'Invalid argument `is` supplied to `irriducible()`');
+    assert(typeof is === 'function', 'Invalid argument `is` supplied to `irreducible()`');
 
-    function Irriducible(value) {
+    function Irreducible(value) {
 
       // DEBUG HINT: if the debugger stops here, you have used the `new` operator but it's forbidden
-      blockNew(this, Irriducible);
+      blockNew(this, Irreducible);
 
       // DEBUG HINT: if the debugger stops here, the first argument is invalid
       // mouse over the `value` variable to see what's wrong. In `name` there is the name of the type
@@ -221,63 +221,63 @@
       return value;
     }
 
-    Irriducible.meta = {
-      kind: 'irriducible',
+    Irreducible.meta = {
+      kind: 'irreducible',
       name: name
     };
 
-    Irriducible.displayName = name;
+    Irreducible.displayName = name;
 
-    Irriducible.is = is;
+    Irreducible.is = is;
 
-    return Irriducible;
+    return Irreducible;
   }
 
-  var Any = irriducible('Any', function isAny() {
+  var Any = irreducible('Any', function isAny() {
     return true;
   });
 
-  var Nil = irriducible('Nil', function isNil(x) {
+  var Nil = irreducible('Nil', function isNil(x) {
     return x === null || x === void 0;
   });
 
-  var Str = irriducible('Str', function isStr(x) {
+  var Str = irreducible('Str', function isStr(x) {
     return typeof x === 'string';
   });
 
-  var Num = irriducible('Num', function isNum(x) {
+  var Num = irreducible('Num', function isNum(x) {
     return typeof x === 'number' && isFinite(x) && !isNaN(x);
   });
 
-  var Bool = irriducible('Bool', function isBool(x) {
+  var Bool = irreducible('Bool', function isBool(x) {
     return x === true || x === false;
   });
 
-  var Arr = irriducible('Arr', function isArr(x) {
+  var Arr = irreducible('Arr', function isArr(x) {
     return x instanceof Array;
   });
 
-  var Obj = irriducible('Obj', function isObj(x) {
+  var Obj = irreducible('Obj', function isObj(x) {
     return !Nil.is(x) && typeof x === 'object' && !Arr.is(x);
   });
 
-  var Func = irriducible('Func', function isFunc(x) {
+  var Func = irreducible('Func', function isFunc(x) {
     return typeof x === 'function';
   });
 
-  var Err = irriducible('Err', function isErr(x) {
+  var Err = irreducible('Err', function isErr(x) {
     return x instanceof Error;
   });
 
-  var Re = irriducible('Re', function isRe(x) {
+  var Re = irreducible('Re', function isRe(x) {
     return x instanceof RegExp;
   });
 
-  var Dat = irriducible('Dat', function isDat(x) {
+  var Dat = irreducible('Dat', function isDat(x) {
     return x instanceof Date;
   });
 
-  var Type = irriducible('Type', function isType(x) {
+  var Type = irreducible('Type', function isType(x) {
     return Func.is(x) && Obj.is(x.meta);
   });
 
@@ -899,7 +899,7 @@
     Dat: Dat,
     Type: Type,
 
-    irriducible: irriducible,
+    irreducible: irreducible,
     struct: struct,
     enums: enums,
     union: union,
