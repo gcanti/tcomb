@@ -990,6 +990,20 @@ describe('struct', function () {
       eq(NewType.meta.props.c, Bool);
     });
 
+    it('should handle a struct (or list of structs) as argument', function () {
+      var A = struct({a: Str}, 'A');
+      var B = struct({b: Str}, 'B');
+      var C = struct({c: Str}, 'C');
+      var MixinD = {d: Str};
+      var E = A.extend([B, C, MixinD]);
+      eq(E.meta.props, {
+        a: Str,
+        b: Str,
+        c: Str,
+        d: Str
+      });
+    });
+
     it('should support prototypal inheritance', function () {
       var Rectangle = struct({
         w: Num,

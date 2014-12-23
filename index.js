@@ -348,10 +348,14 @@
       return new Struct(update(instance, spec, value));
     };
 
-    Struct.extend = function extendStruct(newProps, name) {
-      var newStruct = struct([props].concat(newProps).reduce(mixin, {}), name);
-      mixin(newStruct.prototype, Struct.prototype); // prototypal inheritance
-      return newStruct;
+    Struct.extend = function extendStruct(arr, name) {
+      arr = [].concat(arr).map(function (x) {
+        return Obj.is(x) ? x : x.meta.props;
+      });
+      arr.unshift(props);
+      var ret = struct(arr.reduce(mixin, {}), name);
+      mixin(ret.prototype, Struct.prototype); // prototypal inheritance
+      return ret;
     };
 
     return Struct;
