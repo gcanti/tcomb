@@ -119,6 +119,11 @@
     return type.meta.name;
   }
 
+  function getFunctionName(f) {
+    assert(typeof f === 'function', 'Invalid argument `f` = `%s` supplied to `getFunctionName()`', f);
+    return f.displayName || f.name || format('<function%s>', f.length);
+  }
+
   function getKind(type) {
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `geKind()`', type);
     return type.meta.kind;
@@ -204,10 +209,10 @@
   function irreducible(name, is) {
 
     // DEBUG HINT: if the debugger stops here, the first argument is not a string
-    assert(typeof name === 'string', 'Invalid argument `name` supplied to `irreducible()`');
+    assert(typeof name === 'string', 'Invalid argument `name` = `%s` supplied to `irreducible()`', name);
 
     // DEBUG HINT: if the debugger stops here, the second argument is not a function
-    assert(typeof is === 'function', 'Invalid argument `is` supplied to `irreducible()`');
+    assert(typeof is === 'function', 'Invalid argument `is` = `%s` supplied to `irreducible()`', is);
 
     function Irreducible(value) {
 
@@ -363,15 +368,6 @@
     // DEBUG HINT: if the debugger stops here, there are too few types (they must be at least two)
     assert(len >= 2, 'Invalid argument `types` = `%s` supplied to `union` combinator, provide at least two types', defaultName);
 
-    // DEBUG HINT: if the debugger stops here, types contains Any
-    assert(types.every(function (type) { return type !== Any; }), 'Invalid `Any` supplied to argument `types` of `union` combinator, use only `Any` instead');
-
-    // DEBUG HINT: if the debugger stops here, types contains Nil
-    assert(types.every(function (type) { return type !== Nil; }), 'Invalid `Nil` supplied to `types` argument of `union` combinator, use maybe(union([...])) instead');
-
-    // DEBUG HINT: if the debugger stops here, types contains a maybe
-    assert(types.every(function (type) { return getKind(type) !== 'maybe'; }), 'Invalid `maybe(...)` supplied to `types` argument of `union` combinator, use maybe(union([...])) instead');
-
     // DEBUG HINT: if the debugger stops here, the second argument is not a string
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `union` combinator', name);
@@ -427,11 +423,8 @@
     // DEBUG HINT: if the debugger stops here, the first argument is not a type
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `maybe` combinator', type);
 
-    // DEBUG HINT: if the debugger stops here, the first argument is Any
-    assert(type !== Any, 'Invalid `Any` supplied to argument `type` of `maybe` combinator');
-
-    // makes the combinator idempotent
-    if (getKind(type) === 'maybe') {
+    // makes the combinator idempotent and handle Any, Nil
+    if (getKind(type) === 'maybe' || type === Any || type === Nil) {
       return type;
     }
 
@@ -528,7 +521,7 @@
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `tuple` combinator', name);
 
-    name = name || format('(%s)', types.map(getName).join(', '));
+    name = name || format('[%s]', types.map(getName).join(', '));
 
     function Tuple(value, mut) {
 
@@ -589,15 +582,6 @@
     // DEBUG HINT: if the debugger stops here, the first argument is not a type
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `subtype` combinator', type);
 
-    // DEBUG HINT: if the debugger stops here, type is Nil
-    assert(type !== Nil, 'Invalid `Nil` supplied to `type` argument of `subtype` combinator');
-
-    // DEBUG HINT: if the debugger stops here, type is a maybe
-    assert(getKind(type) !== 'maybe', 'Invalid `maybe(...)` supplied to `type` argument of `subtype` combinator, use maybe(subtype(...), predicate) instead');
-
-    // DEBUG HINT: if the debugger stops here, type is a union
-    assert(getKind(type) !== 'union', 'Invalid `union(...)` supplied to `type` argument of `subtype` combinator, use union([subtype(...), ...]) instead');
-
     // DEBUG HINT: if the debugger stops here, the second argument is not a function
     assert(Func.is(predicate), 'Invalid argument `predicate` = `%s` supplied to `subtype` combinator', predicate);
 
@@ -605,10 +589,8 @@
     // mouse over the `name` variable to see what's wrong
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `subtype` combinator', name);
 
-    var predicateName = predicate.name || predicate.displayName || '<predicate>';
-
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('{%s | %s}', getName(type), predicateName);
+    name = name || format('{%s | %s}', getName(type), getFunctionName(predicate));
 
     function Subtype(value, mut) {
 
@@ -654,7 +636,7 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `list` combinator', name);
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('[%s]', getName(type));
+    name = name || format('Array<%s>', getName(type));
 
     function List(value, mut) {
 
@@ -721,7 +703,7 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `dict` combinator', name);
 
     // DEBUG HINT: always give a name to a type, the debug will be easier
-    name = name || format('{%s: %s}', getName(domain), getName(codomain));
+    name = name || format('{[key:%s]: %s}', getName(domain), getName(codomain));
 
     function Dict(value, mut) {
 
@@ -903,6 +885,7 @@
       mixin: mixin,
       format: format,
       getName: getName,
+      getFunctionName: getFunctionName,
       getKind: getKind,
       slice: slice,
       shallowCopy: shallowCopy,

@@ -8,19 +8,20 @@ module.exports = function (grunt) {
   ].join('\n');
 
   grunt.initConfig({
-    
+
     pkg: grunt.file.readJSON('package.json'),
-    
+
     jshint: {
       options: {
         jshintrc: '.jshintrc',
         reporter: require('jshint-stylish')
       },
       all: [
-        'index.js'
+        'index.js',
+        'test/test.js'
       ]
     },
-    
+
     mochaTest: {
       all: {
         src: ['test/**/*.js']
@@ -39,7 +40,7 @@ module.exports = function (grunt) {
         }
       }
     },
-    
+
     watch: {
       options: {
         interrupt: true,
