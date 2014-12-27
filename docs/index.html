@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>tcomb.js v0.4</title>
+    <meta name="description" content="Domain driven design and type checking for JavaScript">
+    <meta name="keywords" content="JavaScript Domain Driven design type checking">
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.5/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.5/es5-sham.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="css/bootstrap.css"/>
+    <link type="text/css" rel="stylesheet" href="css/style.css"/>
+    <style>
+    .landing-header {
+      background-image: -webkit-linear-gradient(135deg, #F65C5F, #c3292c);
+      background-image: -o-linear-gradient(135deg, #F65C5F, #c3292c);
+      background-image: linear-gradient(135deg, #F65C5F, #c3292c);
+      background-color: #F65C5F;
+      color: #FFC2C5;
+      padding: 4em 0;
+      position: relative;
+      text-align: center;
+    }
+    .landing-header h1 {
+      font-weight: 300;
+      color: #fff;
+      padding: 1em 0;
+    }
+    .subheader {
+      background-color: #AA1013;
+      padding: 20px 0;
+      text-align: center;
+      -webkit-box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.2);
+      -moz-box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.2);
+      box-shadow: 0px 1px 4px 0px rgba(0,0,0,0.2);
+    }
+    .subheader a {
+      color: #FFC2C5;
+    }
+    h2 {
+      margin: 2em 0 1em 0;
+    }
+    img {
+      padding-top: 2em;
+      display: block;
+      width: 340px;
+      margin: auto;
+    }
+    </style>
+  </head>
+  <body>
+    <div class="landing-header">
+      <div class="container">
+        <p class="lead">tcomb.js v0.4</p>
+        <h1>Domain driven design and <br/>type checking for JavaScript.</h1>
+        <p class="lead">"Si vis pacem, para bellum"<br/>(Vegetius 5th century)</p>
+      </div>
+    </div>
+    <div class="subheader lead">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-3">
+            <a href="https://twitter.com/GiulioCanti">Twitter</a>
+          </div>
+          <div class="col-xs-3">
+            <a href="https://gcanti.github.io">Blog</a>
+          </div>
+          <div class="col-xs-3">
+            <a href="https://github.com/gcanti/tcomb">Github</a>
+          </div>
+          <div class="col-xs-3">
+            <a href="guide/index.html">Docs</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <h2 class="text-center">The idea</h2>
+          <p>What's a type? In tcomb <b>a type is represented by a function</b> T such that:</p>
+          <ol>
+            <li><p>has signature T(value, ?mut) where value depends on the nature of T and the optional boolean mut makes the instance mutable (default false)</p></li>
+            <li><p>is idempotent, that is T(T(value)) = T(value)</p></li>
+            <li><p>owns a static function T.is(x) returning true if x is an instance of T</p></li>
+          </ol>
+        </div>
+        <div class="col-md-4">
+          <h2 class="text-center">Articles</h2>
+          <p>tcomb.js is based on <b>set theory</b> and <b>type combinators</b>:</p>
+          <ul>
+            <li><a href="http://gcanti.github.io/2014/09/29/javascript-types-and-sets.html">JavaScript, Types and Sets Part 1</a></li>
+            <li><a href="https://gcanti.github.io/2014/10/07/javascript-types-and-sets-part-II.html">JavaScript, Types and Sets Part 2</a></li>
+            <li><a href="http://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html">JSON Deserialization Into An Object Model</a></li>
+            <li><a href="http://gcanti.github.io/2014/09/15/json-api-validation-in-node.html">JSON API Validation In Node.js</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h2 class="text-center">Features</h2>
+          <ul class="task-list">
+            <li>write <b>complex domain models</b> in a breeze and with a small code footprint</li>
+            <li>easy debugging</li>
+            <li>instances are <b>immutables</b> by default</li>
+            <li>encodes/decodes domain models to/from JSON for free</li>
+            <li><b>type reflection at runtime</b></li>
+          </ul>
+          <p>The library provides a built-in <code>assert</code> function, if an assert fails the <b>debugger kicks in</b> so you can inspect the stack and quickly find out what's wrong.</p>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <footer>
+        <div class="row">
+          <div class="col-xs-6">
+            <a href="https://twitter.com/GiulioCanti">Twitter</a> -
+            <a href="https://gcanti.github.io">Blog</a> -
+            <a href="https://github.com/gcanti/tcomb">Github</a> -
+            <a href="guide/index.html">Docs</a>
+          </div>
+          <div class="col-xs-6 text-right">
+            Open source (MIT). Made by Giulio Canti
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

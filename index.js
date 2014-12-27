@@ -886,11 +886,11 @@
   return {
 
     util: {
-      mixin: mixin,
       format: format,
-      getName: getName,
-      getFunctionName: getFunctionName,
       getKind: getKind,
+      getFunctionName: getFunctionName,
+      getName: getName,
+      mixin: mixin,
       slice: slice,
       shallowCopy: shallowCopy,
       update: update
