@@ -1,6 +1,8 @@
-# v0.4
+# v0.4.0
 
-- spelling error: `irreducible` instead of `irriducible`, fix #77
+**BREAKING**
+
+- `t.irreducible` instead of `t.irriducible`, fix #77
 - Prevent illegal type definitions and make easy type analysis, fix #78
 - change default name for unnamed types, fix #79
 

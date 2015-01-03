@@ -96,11 +96,13 @@
     return str;
   }
 
+  function getFunctionName(f) {
+    assert(typeof f === 'function', 'Invalid argument `f` = `%s` supplied to `getFunctionName()`', f);
+    return f.displayName || f.name || format('<function%s>', f.length);
+  }
+
   function replacer(key, value) {
-    if (typeof value === 'function') {
-      return format('Func', value.name);
-    }
-    return value;
+    return Func.is(value) ? getFunctionName(value) : value;
   }
 
   format.formatters = {
@@ -117,11 +119,6 @@
   function getName(type) {
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `getName()`', type);
     return type.meta.name;
-  }
-
-  function getFunctionName(f) {
-    assert(typeof f === 'function', 'Invalid argument `f` = `%s` supplied to `getFunctionName()`', f);
-    return f.displayName || f.name || format('<function%s>', f.length);
   }
 
   function getKind(type) {
