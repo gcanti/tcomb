@@ -23,9 +23,9 @@ var subtype = t.subtype;
 var list = t.list;
 var dict = t.dict;
 var func = t.func;
-var getName = t.util.getName;
-var mixin = t.util.mixin;
-var format = t.util.format;
+var getName = t.getName;
+var mixin = t.mixin;
+var format = t.format;
 
 //
 // setup
@@ -51,7 +51,7 @@ var Point = struct({
 
 describe('update', function () {
 
-  var update = t.util.update;
+  var update = t.update;
   var Tuple = tuple([Str, Num]);
   var List = list(Num);
   var Dict = dict(Str, Num);
@@ -442,7 +442,7 @@ describe('mixin(x, y, [overwrite])', function () {
 
 describe('getFunctionName(f, [defaultName])', function () {
 
-  var getFunctionName = t.util.getFunctionName;
+  var getFunctionName = t.getFunctionName;
 
   it('should return the name of a named function', function () {
     eq(getFunctionName(function myfunc(){}), 'myfunc');

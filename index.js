@@ -21,10 +21,6 @@
     throw new TypeError(message);
   }
 
-  var exports = {
-    fail: fail
-  };
-
   function assert(guard, message) {
     if (guard !== true) {
       message = message ? format.apply(null, slice.call(arguments, 1)) : 'assert failed';
@@ -39,9 +35,7 @@
   var slice = Array.prototype.slice;
 
   function mixin(target, source, overwrite) {
-    if (Nil.is(source)) {
-      return target;
-    }
+    if (Nil.is(source)) { return target; }
     for (var k in source) {
       if (source.hasOwnProperty(k)) {
         if (overwrite !== true) {
@@ -248,6 +242,7 @@
   });
 
   function struct(props, name) {
+
     assert(dict(Str, Type).is(props), 'Invalid argument `props` = `%s` supplied to `struct` combinator', props);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `struct` combinator', name);
     name = name || format('{%s}', Object.keys(props).map(function (prop) {
@@ -255,19 +250,15 @@
     }).join(', '));
 
     function Struct(value, mut) {
-
       // makes Struct idempotent
       if (Struct.is(value)) {
         return value;
       }
-
       assert(Obj.is(value), 'Invalid argument `value` = `%s` supplied to struct type `%s`', value, name);
-
       // makes `new` optional
       if (!(this instanceof Struct)) {
         return new Struct(value, mut);
       }
-
       for (var k in props) {
         if (props.hasOwnProperty(k)) {
           var expected = props[k];
@@ -275,7 +266,6 @@
           this[k] = expected(actual, mut);
         }
       }
-
       if (mut !== true) {
         Object.freeze(this);
       }
@@ -294,7 +284,7 @@
     };
 
     Struct.update = function updateStruct(instance, spec, value) {
-      return new Struct(update(instance, spec, value));
+      return new Struct(exports.update(instance, spec, value));
     };
 
     Struct.extend = function extendStruct(arr, name) {
@@ -311,6 +301,7 @@
   }
 
   function union(types, name) {
+
     assert(list(Type).is(types), 'Invalid argument `types` = `%s` supplied to `union` combinator', types);
     var len = types.length;
     var defaultName = types.map(getName).join(' | ');
@@ -353,13 +344,12 @@
   }
 
   function maybe(type, name) {
-    assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `maybe` combinator', type);
 
+    assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `maybe` combinator', type);
     // makes the combinator idempotent and handle Any, Nil
     if (type.meta.kind === 'maybe' || type === Any || type === Nil) {
       return type;
     }
-
     assert(Nil.is(name) || Str.is(name), 'Invalid argument `name` = `%s` supplied to `maybe` combinator', name);
     name = name || ('?' + getName(type));
 
@@ -384,10 +374,10 @@
   }
 
   function enums(map, name) {
+
     assert(Obj.is(map), 'Invalid argument `map` = `%s` supplied to `enums` combinator', map);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `enums` combinator', name);
-    // cache enums
-    var keys = Object.keys(map);
+    var keys = Object.keys(map); // cache enums
     name = name || keys.map(function (k) { return JSON.stringify(k); }).join(' | ');
 
     function Enums(value) {
@@ -421,27 +411,25 @@
   };
 
   function tuple(types, name) {
+
     assert(list(Type).is(types), 'Invalid argument `types` = `%s` supplied to `tuple` combinator', types);
-    var len = types.length;
+    var len = types.length; // cache types length
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `tuple` combinator', name);
     name = name || format('[%s]', types.map(getName).join(', '));
 
     function Tuple(value, mut) {
       assert(Arr.is(value) && value.length === len, 'Invalid argument `value` = `%s` supplied to tuple type `%s`, expected an `Arr` of length `%s`', value, name, len);
       var frozen = (mut !== true);
-
       // makes Tuple idempotent
       if (Tuple.isTuple(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
-
       var arr = [];
       for (var i = 0 ; i < len ; i++) {
         var expected = types[i];
         var actual = value[i];
         arr.push(expected(actual, mut));
       }
-
       if (frozen) {
         Object.freeze(arr);
       }
@@ -468,13 +456,14 @@
     };
 
     Tuple.update = function updateTuple(instance, spec, value) {
-      return Tuple(update(instance, spec, value));
+      return Tuple(exports.update(instance, spec, value));
     };
 
     return Tuple;
   }
 
   function subtype(type, predicate, name) {
+
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `subtype` combinator', type);
     assert(Func.is(predicate), 'Invalid argument `predicate` = `%s` supplied to `subtype` combinator', predicate);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `subtype` combinator', name);
@@ -501,33 +490,30 @@
     };
 
     Subtype.update = function updateSubtype(instance, spec, value) {
-      return Subtype(update(instance, spec, value));
+      return Subtype(exports.update(instance, spec, value));
     };
 
     return Subtype;
   }
 
   function list(type, name) {
+
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `list` combinator', type);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `list` combinator', name);
     name = name || format('Array<%s>', getName(type));
 
     function List(value, mut) {
       assert(Arr.is(value), 'Invalid argument `value` = `%s` supplied to list type `%s`', value, name);
-
       var frozen = (mut !== true);
-
       // makes List idempotent
       if (List.isList(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
-
       var arr = [];
       for (var i = 0, len = value.length ; i < len ; i++ ) {
         var actual = value[i];
         arr.push(type(actual, mut));
       }
-
       if (frozen) {
         Object.freeze(arr);
       }
@@ -551,13 +537,14 @@
     };
 
     List.update = function updateList(instance, spec, value) {
-      return List(update(instance, spec, value));
+      return List(exports.update(instance, spec, value));
     };
 
     return List;
   }
 
   function dict(domain, codomain, name) {
+
     assert(Type.is(domain), 'Invalid argument `domain` = `%s` supplied to `dict` combinator', domain);
     assert(Type.is(codomain), 'Invalid argument `codomain` = `%s` supplied to `dict` combinator', codomain);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `dict` combinator', name);
@@ -565,14 +552,11 @@
 
     function Dict(value, mut) {
       assert(Obj.is(value), 'Invalid argument `value` = `%s` supplied to dict type `%s`', value, name);
-
       var frozen = (mut !== true);
-
       // makes Dict idempotent
       if (Dict.isDict(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
-
       var obj = {};
       for (var k in value) {
         if (value.hasOwnProperty(k)) {
@@ -581,7 +565,6 @@
           obj[k] = codomain(actual, mut);
         }
       }
-
       if (frozen) {
         Object.freeze(obj);
       }
@@ -612,7 +595,7 @@
 
 
     Dict.update = function updateDict(instance, spec, value) {
-      return Dict(update(instance, spec, value));
+      return Dict(exports.update(instance, spec, value));
     };
 
     return Dict;
@@ -622,24 +605,18 @@
 
     // handle handy syntax for unary functions
     domain = Arr.is(domain) ? domain : [domain];
-
     assert(list(Type).is(domain), 'Invalid argument `domain` = `%s` supplied to `func` combinator', domain);
     assert(Type.is(codomain), 'Invalid argument `codomain` = `%s` supplied to `func` combinator', codomain);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `func` combinator', name);
     name = name || format('(%s) => %s', domain.map(getName).join(', '), getName(codomain));
-
-    // cache the domain length
-    var domainLen = domain.length;
+    var domainLen = domain.length; // cache the domain length
 
     function Func(value) {
-
       // automatically instrument the function if is not already instrumented
       if (!func.is(value)) {
         value = Func.of(value);
       }
-
       assert(Func.is(value), 'Invalid argument `value` = `%s` supplied to func type `%s`', value, name);
-
       return value;
     }
 
@@ -662,36 +639,26 @@
     };
 
     Func.of = function funcOf(f) {
-
       assert(typeof f === 'function');
-
       // makes Func.of idempotent
       if (Func.is(f)) {
         return f;
       }
 
       function fn() {
-
         var args = slice.call(arguments);
         var len = Math.min(args.length, domainLen);
         args = tuple(domain.slice(0, len))(args);
-
         if (len === domainLen) {
-
           /* jshint validthis: true */
           var r = f.apply(this, args);
           r = codomain(r);
-
           return r;
-
         } else {
-
           var curried = Function.prototype.bind.apply(f, [this].concat(args));
           var newdomain = func(domain.slice(len), codomain);
           return newdomain.of(curried);
-
         }
-
       }
 
       fn.func = {
@@ -713,20 +680,16 @@
     return Func.is(f) && Obj.is(f.func);
   };
 
-  return mixin(exports, {
-
-    util: {
-      format: format,
-      getFunctionName: getFunctionName,
-      getName: getName,
-      mixin: mixin,
-      slice: slice,
-      shallowCopy: shallowCopy,
-      update: update
-    },
-
+  var exports = {
+    format: format,
+    getFunctionName: getFunctionName,
+    getName: getName,
+    mixin: mixin,
+    slice: slice,
+    shallowCopy: shallowCopy,
+    update: update,
     assert: assert,
-
+    fail: fail,
     Any: Any,
     Nil: Nil,
     Str: Str,
@@ -739,7 +702,6 @@
     Re: Re,
     Dat: Dat,
     Type: Type,
-
     irreducible: irreducible,
     struct: struct,
     enums: enums,
@@ -750,7 +712,8 @@
     list: list,
     dict: dict,
     func: func
+  };
 
-  });
+  return exports;
 
 }));
