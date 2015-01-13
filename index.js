@@ -283,8 +283,8 @@
       return x instanceof Struct;
     };
 
-    Struct.update = function updateStruct(instance, spec, value) {
-      return new Struct(exports.update(instance, spec, value));
+    Struct.update = function updateStruct(instance, spec) {
+      return new Struct(exports.update(instance, spec));
     };
 
     Struct.extend = function extendStruct(arr, name) {
@@ -455,8 +455,8 @@
       return Arr.is(x) && x.length === len && Tuple.isTuple(x);
     };
 
-    Tuple.update = function updateTuple(instance, spec, value) {
-      return Tuple(exports.update(instance, spec, value));
+    Tuple.update = function updateTuple(instance, spec) {
+      return Tuple(exports.update(instance, spec));
     };
 
     return Tuple;
@@ -489,8 +489,8 @@
       return type.is(x) && predicate(x);
     };
 
-    Subtype.update = function updateSubtype(instance, spec, value) {
-      return Subtype(exports.update(instance, spec, value));
+    Subtype.update = function updateSubtype(instance, spec) {
+      return Subtype(exports.update(instance, spec));
     };
 
     return Subtype;
@@ -536,8 +536,8 @@
       return Arr.is(x) && List.isList(x);
     };
 
-    List.update = function updateList(instance, spec, value) {
-      return List(exports.update(instance, spec, value));
+    List.update = function updateList(instance, spec) {
+      return List(exports.update(instance, spec));
     };
 
     return List;
@@ -594,8 +594,8 @@
     };
 
 
-    Dict.update = function updateDict(instance, spec, value) {
-      return Dict(exports.update(instance, spec, value));
+    Dict.update = function updateDict(instance, spec) {
+      return Dict(exports.update(instance, spec));
     };
 
     return Dict;
