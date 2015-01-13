@@ -178,7 +178,7 @@ assert(Str.is(1)); // => fail!
           <pre><code>
 var x = -2;
 var min = 0;
-// outputs "-2 should be greater then 0"
+// throws "-2 should be greater then 0"
 assert(x > min, '%s should be greater then %s', x, min);
           </code></pre>
           <p>Another way to ensure the correct type is to use types as constructors:</p>
@@ -248,7 +248,7 @@ ReactElement.is(&lt;div/&gt;); // => true
           <p><b>Tech note</b>. All the built-in irreducible types are defined with <code>t.irreducible()</code>.</p>
 
           <div class="alert alert-info">
-            Meta objects are a distinctive feature of tcomb, allowing <b>type reflection</b> at runtime.
+            Meta objects are a distinctive feature of tcomb, allowing <b>type introspection</b> at runtime.
           </div>
 
           <h1>Type combinators</h1>
