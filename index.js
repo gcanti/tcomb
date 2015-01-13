@@ -78,8 +78,8 @@
   }
 
   format.formatters = {
-    s: function formatString(x) { return String(x); },
-    j: function formatJSON(x) {
+    s: function (x) { return String(x); },
+    j: function (x) {
       try {
         return JSON.stringify(x, replacer);
       } catch (e) {
@@ -118,16 +118,16 @@
   }
 
   update.commands = {
-    '$apply': function $apply(f, value) {
+    '$apply': function (f, value) {
       assert(Func.is(f));
       return f(value);
     },
-    '$push': function $push(elements, arr) {
+    '$push': function (elements, arr) {
       assert(Arr.is(elements));
       assert(Arr.is(arr));
       return arr.concat(elements);
     },
-    '$remove': function $remove(keys, obj) {
+    '$remove': function (keys, obj) {
       assert(Arr.is(keys));
       assert(Obj.is(obj));
       for (var i = 0, len = keys.length ; i < len ; i++ ) {
@@ -135,18 +135,18 @@
       }
       return obj;
     },
-    '$set': function $set(value) {
+    '$set': function (value) {
       return value;
     },
-    '$splice': function $splice(splices, arr) {
+    '$splice': function (splices, arr) {
       assert(list(Arr).is(splices));
       assert(Arr.is(arr));
-      return splices.reduce(function reducer(acc, splice) {
+      return splices.reduce(function (acc, splice) {
         acc.splice.apply(acc, splice);
         return acc;
       }, arr);
     },
-    '$swap': function $swap(config, arr) {
+    '$swap': function (config, arr) {
       assert(Obj.is(config));
       assert(Num.is(config.from));
       assert(Num.is(config.to));
@@ -156,7 +156,7 @@
       arr[config.from] = element;
       return arr;
     },
-    '$unshift': function $unshift(elements, arr) {
+    '$unshift': function (elements, arr) {
       assert(Arr.is(elements));
       assert(Arr.is(arr));
       return elements.concat(arr);
@@ -193,51 +193,51 @@
     return Irreducible;
   }
 
-  var Any = irreducible('Any', function isAny() {
+  var Any = irreducible('Any', function () {
     return true;
   });
 
-  var Nil = irreducible('Nil', function isNil(x) {
+  var Nil = irreducible('Nil', function (x) {
     return x === null || x === void 0;
   });
 
-  var Str = irreducible('Str', function isStr(x) {
+  var Str = irreducible('Str', function (x) {
     return typeof x === 'string';
   });
 
-  var Num = irreducible('Num', function isNum(x) {
+  var Num = irreducible('Num', function (x) {
     return typeof x === 'number' && isFinite(x) && !isNaN(x);
   });
 
-  var Bool = irreducible('Bool', function isBool(x) {
+  var Bool = irreducible('Bool', function (x) {
     return x === true || x === false;
   });
 
-  var Arr = irreducible('Arr', function isArr(x) {
+  var Arr = irreducible('Arr', function (x) {
     return x instanceof Array;
   });
 
-  var Obj = irreducible('Obj', function isObj(x) {
+  var Obj = irreducible('Obj', function (x) {
     return !Nil.is(x) && typeof x === 'object' && !Arr.is(x);
   });
 
-  var Func = irreducible('Func', function isFunc(x) {
+  var Func = irreducible('Func', function (x) {
     return typeof x === 'function';
   });
 
-  var Err = irreducible('Err', function isErr(x) {
+  var Err = irreducible('Err', function (x) {
     return x instanceof Error;
   });
 
-  var Re = irreducible('Re', function isRe(x) {
+  var Re = irreducible('Re', function (x) {
     return x instanceof RegExp;
   });
 
-  var Dat = irreducible('Dat', function isDat(x) {
+  var Dat = irreducible('Dat', function (x) {
     return x instanceof Date;
   });
 
-  var Type = irreducible('Type', function isType(x) {
+  var Type = irreducible('Type', function (x) {
     return Func.is(x) && Obj.is(x.meta);
   });
 
@@ -279,15 +279,15 @@
 
     Struct.displayName = name;
 
-    Struct.is = function isStruct(x) {
+    Struct.is = function (x) {
       return x instanceof Struct;
     };
 
-    Struct.update = function updateStruct(instance, spec) {
+    Struct.update = function (instance, spec) {
       return new Struct(exports.update(instance, spec));
     };
 
-    Struct.extend = function extendStruct(arr, name) {
+    Struct.extend = function (arr, name) {
       arr = [].concat(arr).map(function (x) {
         return Obj.is(x) ? x : x.meta.props;
       });
@@ -325,15 +325,15 @@
 
     Union.displayName = name;
 
-    Union.is = function isUnion(x) {
-      return types.some(function isType(type) {
+    Union.is = function (x) {
+      return types.some(function (type) {
         return type.is(x);
       });
     };
 
     // default dispatch implementation
-    Union.dispatch = function dispatch(x) {
-      for (var i = 0, len = types.length ; i < len ; i++ ) {
+    Union.dispatch = function (x) {
+      for (var i = 0 ; i < len ; i++ ) {
         if (types[i].is(x)) {
           return types[i];
         }
@@ -366,7 +366,7 @@
 
     Maybe.displayName = name;
 
-    Maybe.is = function isMaybe(x) {
+    Maybe.is = function (x) {
       return Nil.is(x) || type.is(x);
     };
 
@@ -394,17 +394,17 @@
 
     Enums.displayName = name;
 
-    Enums.is = function isEnums(x) {
+    Enums.is = function (x) {
       return Str.is(x) && map.hasOwnProperty(x);
     };
 
     return Enums;
   }
 
-  enums.of = function enumsOf(keys, name) {
+  enums.of = function (keys, name) {
     keys = Str.is(keys) ? keys.split(' ') : keys;
     var value = {};
-    keys.forEach(function setEnum(k) {
+    keys.forEach(function (k) {
       value[k] = k;
     });
     return enums(value, name);
@@ -417,11 +417,17 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `tuple` combinator', name);
     name = name || format('[%s]', types.map(getTypeName).join(', '));
 
+    function isTuple(x) {
+      return types.every(function (type, i) {
+        return type.is(x[i]);
+      });
+    }
+
     function Tuple(value, mut) {
       assert(Arr.is(value) && value.length === len, 'Invalid argument `value` = `%s` supplied to tuple type `%s`, expected an `Arr` of length `%s`', value, name, len);
       var frozen = (mut !== true);
       // makes Tuple idempotent
-      if (Tuple.isTuple(value) && Object.isFrozen(value) === frozen) {
+      if (isTuple(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
       var arr = [];
@@ -445,17 +451,11 @@
 
     Tuple.displayName = name;
 
-    Tuple.isTuple = function isTuple(x) {
-      return types.every(function isType(type, i) {
-        return type.is(x[i]);
-      });
+    Tuple.is = function (x) {
+      return Arr.is(x) && x.length === len && isTuple(x);
     };
 
-    Tuple.is = function isTuple(x) {
-      return Arr.is(x) && x.length === len && Tuple.isTuple(x);
-    };
-
-    Tuple.update = function updateTuple(instance, spec) {
+    Tuple.update = function (instance, spec) {
       return Tuple(exports.update(instance, spec));
     };
 
@@ -485,11 +485,11 @@
 
     Subtype.displayName = name;
 
-    Subtype.is = function isSubtype(x) {
+    Subtype.is = function (x) {
       return type.is(x) && predicate(x);
     };
 
-    Subtype.update = function updateSubtype(instance, spec) {
+    Subtype.update = function (instance, spec) {
       return Subtype(exports.update(instance, spec));
     };
 
@@ -502,11 +502,15 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `list` combinator', name);
     name = name || format('Array<%s>', getTypeName(type));
 
+    function isList(x) {
+      return x.every(type.is);
+    }
+
     function List(value, mut) {
       assert(Arr.is(value), 'Invalid argument `value` = `%s` supplied to list type `%s`', value, name);
       var frozen = (mut !== true);
       // makes List idempotent
-      if (List.isList(value) && Object.isFrozen(value) === frozen) {
+      if (isList(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
       var arr = [];
@@ -528,15 +532,11 @@
 
     List.displayName = name;
 
-    List.isList = function isList(x) {
-      return x.every(type.is);
+    List.is = function (x) {
+      return Arr.is(x) && isList(x);
     };
 
-    List.is = function isList(x) {
-      return Arr.is(x) && List.isList(x);
-    };
-
-    List.update = function updateList(instance, spec) {
+    List.update = function (instance, spec) {
       return List(exports.update(instance, spec));
     };
 
@@ -550,11 +550,20 @@
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `dict` combinator', name);
     name = name || format('{[key:%s]: %s}', getTypeName(domain), getTypeName(codomain));
 
+    function isDict(x) {
+      for (var k in x) {
+        if (x.hasOwnProperty(k)) {
+          if (!domain.is(k) || !codomain.is(x[k])) { return false; }
+        }
+      }
+      return true;
+    }
+
     function Dict(value, mut) {
       assert(Obj.is(value), 'Invalid argument `value` = `%s` supplied to dict type `%s`', value, name);
       var frozen = (mut !== true);
       // makes Dict idempotent
-      if (Dict.isDict(value) && Object.isFrozen(value) === frozen) {
+      if (isDict(value) && Object.isFrozen(value) === frozen) {
         return value;
       }
       var obj = {};
@@ -580,25 +589,19 @@
 
     Dict.displayName = name;
 
-    Dict.isDict = function isDict(x) {
-      for (var k in x) {
-        if (x.hasOwnProperty(k)) {
-          if (!domain.is(k) || !codomain.is(x[k])) { return false; }
-        }
-      }
-      return true;
+    Dict.is = function (x) {
+      return Obj.is(x) && isDict(x);
     };
 
-    Dict.is = function isDict(x) {
-      return Obj.is(x) && Dict.isDict(x);
-    };
-
-
-    Dict.update = function updateDict(instance, spec) {
+    Dict.update = function (instance, spec) {
       return Dict(exports.update(instance, spec));
     };
 
     return Dict;
+  }
+
+  function isInstrumented(f) {
+    return Func.is(f) && Obj.is(f.type);
   }
 
   function func(domain, codomain, name) {
@@ -612,9 +615,9 @@
     var domainLen = domain.length; // cache the domain length
 
     function Func(value) {
-      // automatically instrument the function if is not already instrumented
-      if (!func.is(value)) {
-        value = Func.of(value);
+      // automatically instrument the function
+      if (!isInstrumented(value)) {
+        return Func.of(value);
       }
       assert(Func.is(value), 'Invalid argument `value` = `%s` supplied to func type `%s`', value, name);
       return value;
@@ -629,17 +632,19 @@
 
     Func.displayName = name;
 
-    Func.is = function isFunc(x) {
-      return func.is(x) &&
-        x.func.domain.length === domainLen &&
-        x.func.domain.every(function isEqual(type, i) {
+    Func.is = function (x) {
+      return isInstrumented(x) &&
+        x.type.domain.length === domainLen &&
+        x.type.domain.every(function (type, i) {
           return type === domain[i];
         }) &&
-        x.func.codomain === codomain;
+        x.type.codomain === codomain;
     };
 
-    Func.of = function funcOf(f) {
+    Func.of = function (f) {
+
       assert(typeof f === 'function');
+
       // makes Func.of idempotent
       if (Func.is(f)) {
         return f;
@@ -647,13 +652,12 @@
 
       function fn() {
         var args = slice.call(arguments);
-        var len = Math.min(args.length, domainLen);
-        args = tuple(domain.slice(0, len))(args);
+        var len = args.length;
+        var argsType = tuple(domain.slice(0, len));
+        args = argsType(args);
         if (len === domainLen) {
           /* jshint validthis: true */
-          var r = f.apply(this, args);
-          r = codomain(r);
-          return r;
+          return codomain(f.apply(this, args));
         } else {
           var curried = Function.prototype.bind.apply(f, [this].concat(args));
           var newdomain = func(domain.slice(len), codomain);
@@ -661,11 +665,13 @@
         }
       }
 
-      fn.func = {
+      fn.type = {
         domain: domain,
         codomain: codomain,
         f: f
       };
+
+      fn.displayName = getFunctionName(f);
 
       return fn;
 
@@ -674,11 +680,6 @@
     return Func;
 
   }
-
-  // returns true if x is an instrumented function
-  func.is = function isFunc(f) {
-    return Func.is(f) && Obj.is(f.func);
-  };
 
   var exports = {
     format: format,
