@@ -88,13 +88,13 @@
     }
   };
 
-  function getName(type) {
-    assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `getName()`', type);
+  function getTypeName(type) {
+    assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `getTypeName()`', type);
     return type.meta.name;
   }
 
   function blockNew(x, type) {
-    assert(!(x instanceof type), 'Operator `new` is forbidden for type `%s`', getName(type));
+    assert(!(x instanceof type), 'Operator `new` is forbidden for type `%s`', getTypeName(type));
   }
 
   function shallowCopy(x) {
@@ -246,7 +246,7 @@
     assert(dict(Str, Type).is(props), 'Invalid argument `props` = `%s` supplied to `struct` combinator', props);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `struct` combinator', name);
     name = name || format('{%s}', Object.keys(props).map(function (prop) {
-      return format('%s: %s', prop, getName(props[prop]));
+      return format('%s: %s', prop, getTypeName(props[prop]));
     }).join(', '));
 
     function Struct(value, mut) {
@@ -304,7 +304,7 @@
 
     assert(list(Type).is(types), 'Invalid argument `types` = `%s` supplied to `union` combinator', types);
     var len = types.length;
-    var defaultName = types.map(getName).join(' | ');
+    var defaultName = types.map(getTypeName).join(' | ');
     assert(len >= 2, 'Invalid argument `types` = `%s` supplied to `union` combinator, provide at least two types', defaultName);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `union` combinator', name);
     name = name || defaultName;
@@ -351,7 +351,7 @@
       return type;
     }
     assert(Nil.is(name) || Str.is(name), 'Invalid argument `name` = `%s` supplied to `maybe` combinator', name);
-    name = name || ('?' + getName(type));
+    name = name || ('?' + getTypeName(type));
 
     function Maybe(value, mut) {
       blockNew(this, Maybe);
@@ -415,7 +415,7 @@
     assert(list(Type).is(types), 'Invalid argument `types` = `%s` supplied to `tuple` combinator', types);
     var len = types.length; // cache types length
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `tuple` combinator', name);
-    name = name || format('[%s]', types.map(getName).join(', '));
+    name = name || format('[%s]', types.map(getTypeName).join(', '));
 
     function Tuple(value, mut) {
       assert(Arr.is(value) && value.length === len, 'Invalid argument `value` = `%s` supplied to tuple type `%s`, expected an `Arr` of length `%s`', value, name, len);
@@ -467,7 +467,7 @@
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `subtype` combinator', type);
     assert(Func.is(predicate), 'Invalid argument `predicate` = `%s` supplied to `subtype` combinator', predicate);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `subtype` combinator', name);
-    name = name || format('{%s | %s}', getName(type), getFunctionName(predicate));
+    name = name || format('{%s | %s}', getTypeName(type), getFunctionName(predicate));
 
     function Subtype(value, mut) {
       blockNew(this, Subtype);
@@ -500,7 +500,7 @@
 
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `list` combinator', type);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `list` combinator', name);
-    name = name || format('Array<%s>', getName(type));
+    name = name || format('Array<%s>', getTypeName(type));
 
     function List(value, mut) {
       assert(Arr.is(value), 'Invalid argument `value` = `%s` supplied to list type `%s`', value, name);
@@ -548,7 +548,7 @@
     assert(Type.is(domain), 'Invalid argument `domain` = `%s` supplied to `dict` combinator', domain);
     assert(Type.is(codomain), 'Invalid argument `codomain` = `%s` supplied to `dict` combinator', codomain);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `dict` combinator', name);
-    name = name || format('{[key:%s]: %s}', getName(domain), getName(codomain));
+    name = name || format('{[key:%s]: %s}', getTypeName(domain), getTypeName(codomain));
 
     function Dict(value, mut) {
       assert(Obj.is(value), 'Invalid argument `value` = `%s` supplied to dict type `%s`', value, name);
@@ -608,7 +608,7 @@
     assert(list(Type).is(domain), 'Invalid argument `domain` = `%s` supplied to `func` combinator', domain);
     assert(Type.is(codomain), 'Invalid argument `codomain` = `%s` supplied to `func` combinator', codomain);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `func` combinator', name);
-    name = name || format('(%s) => %s', domain.map(getName).join(', '), getName(codomain));
+    name = name || format('(%s) => %s', domain.map(getTypeName).join(', '), getTypeName(codomain));
     var domainLen = domain.length; // cache the domain length
 
     function Func(value) {
@@ -683,7 +683,7 @@
   var exports = {
     format: format,
     getFunctionName: getFunctionName,
-    getName: getName,
+    getTypeName: getTypeName,
     mixin: mixin,
     slice: slice,
     shallowCopy: shallowCopy,

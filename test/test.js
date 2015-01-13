@@ -23,7 +23,7 @@ var subtype = t.subtype;
 var list = t.list;
 var dict = t.dict;
 var func = t.func;
-var getName = t.getName;
+var getTypeName = t.getTypeName;
 var mixin = t.mixin;
 var format = t.format;
 
@@ -460,7 +460,7 @@ describe('getFunctionName(f, [defaultName])', function () {
 
 });
 
-describe('getName(type)', function () {
+describe('getTypeName(type)', function () {
 
   var UnnamedStruct = struct({});
   var NamedStruct = struct({}, 'NamedStruct');
@@ -482,27 +482,27 @@ describe('getName(type)', function () {
   var NamedFunc = func(Str, Str, 'NamedFunc');
 
   it('should return the name of a named type', function () {
-    eq(getName(NamedStruct), 'NamedStruct');
-    eq(getName(NamedUnion), 'NamedUnion');
-    eq(getName(NamedMaybe), 'NamedMaybe');
-    eq(getName(NamedEnums), 'NamedEnums');
-    eq(getName(NamedTuple), 'NamedTuple');
-    eq(getName(NamedSubtype), 'NamedSubtype');
-    eq(getName(NamedList), 'NamedList');
-    eq(getName(NamedDict), 'NamedDict');
-    eq(getName(NamedFunc), 'NamedFunc');
+    eq(getTypeName(NamedStruct), 'NamedStruct');
+    eq(getTypeName(NamedUnion), 'NamedUnion');
+    eq(getTypeName(NamedMaybe), 'NamedMaybe');
+    eq(getTypeName(NamedEnums), 'NamedEnums');
+    eq(getTypeName(NamedTuple), 'NamedTuple');
+    eq(getTypeName(NamedSubtype), 'NamedSubtype');
+    eq(getTypeName(NamedList), 'NamedList');
+    eq(getTypeName(NamedDict), 'NamedDict');
+    eq(getTypeName(NamedFunc), 'NamedFunc');
   });
 
   it('should return a meaningful name of a unnamed type', function () {
-    eq(getName(UnnamedStruct), '{}');
-    eq(getName(UnnamedUnion), 'Str | Num');
-    eq(getName(UnnamedMaybe), '?Str');
-    eq(getName(UnnamedEnums), '"a" | "b"');
-    eq(getName(UnnamedTuple), '[Str, Num]');
-    eq(getName(UnnamedSubtype), '{Str | notEmpty}');
-    eq(getName(UnnamedList), 'Array<Str>');
-    eq(getName(UnnamedDict), '{[key:Str]: Str}');
-    eq(getName(UnnamedFunc), '(Str) => Str');
+    eq(getTypeName(UnnamedStruct), '{}');
+    eq(getTypeName(UnnamedUnion), 'Str | Num');
+    eq(getTypeName(UnnamedMaybe), '?Str');
+    eq(getTypeName(UnnamedEnums), '"a" | "b"');
+    eq(getTypeName(UnnamedTuple), '[Str, Num]');
+    eq(getTypeName(UnnamedSubtype), '{Str | notEmpty}');
+    eq(getTypeName(UnnamedList), 'Array<Str>');
+    eq(getTypeName(UnnamedDict), '{[key:Str]: Str}');
+    eq(getTypeName(UnnamedFunc), '(Str) => Str');
   });
 
 });
@@ -582,7 +582,7 @@ describe('irreducible types constructors', function () {
         /* jshint ignore:start */
         var x = new T();
         /* jshint ignore:end */
-      }, 'Operator `new` is forbidden for type `' + getName(T) + '`');
+      }, 'Operator `new` is forbidden for type `' + getTypeName(T) + '`');
     });
 
   });
@@ -951,7 +951,7 @@ describe('struct', function () {
         y: Num
       }, 'Point');
       var Point3D = Point.extend({z: Num}, 'Point3D');
-      eq(getName(Point3D), 'Point3D');
+      eq(getTypeName(Point3D), 'Point3D');
       eq(Point3D.meta.props.x, Num);
       eq(Point3D.meta.props.y, Num);
       eq(Point3D.meta.props.z, Num);
@@ -961,7 +961,7 @@ describe('struct', function () {
       var Type = struct({a: Str}, 'Type');
       var Mixin = [{b: Num, c: Bool}];
       var NewType = Type.extend(Mixin, 'NewType');
-      eq(getName(NewType), 'NewType');
+      eq(getTypeName(NewType), 'NewType');
       eq(NewType.meta.props.a, Str);
       eq(NewType.meta.props.b, Num);
       eq(NewType.meta.props.c, Bool);
@@ -1703,10 +1703,10 @@ describe('func', function () {
 
     it('should preserve `this`', function () {
       var o = {name: 'giulio'};
-      o.getName = func([], Str).of(function () {
+      o.getTypeName = func([], Str).of(function () {
         return this.name;
       });
-      eq(o.getName(), 'giulio');
+      eq(o.getTypeName(), 'giulio');
     });
 
     it('should handle function types', function () {
