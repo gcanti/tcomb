@@ -626,7 +626,7 @@
     assert(list(Type).is(domain), 'Invalid argument `domain` = `%s` supplied to `func` combinator', domain);
     assert(Type.is(codomain), 'Invalid argument `codomain` = `%s` supplied to `func` combinator', codomain);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `func` combinator', name);
-    name = name || format('(%s) -> %s', domain.map(getName).join(', '), getName(codomain));
+    name = name || format('(%s) => %s', domain.map(getName).join(', '), getName(codomain));
 
     // cache the domain length
     var domainLen = domain.length;
