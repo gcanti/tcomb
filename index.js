@@ -11,28 +11,24 @@
 
   'use strict';
 
-  function onFail(message) {
+  function fail(message) {
     // start debugger only once
-    if (!onFail.failed) {
+    if (!fail.failed) {
       /*jshint debug: true*/
       debugger;
     }
-    onFail.failed = true;
-    throw new Error(message);
+    fail.failed = true;
+    throw new TypeError(message);
   }
 
-  var options = {
-    onFail: onFail
+  var exports = {
+    fail: fail
   };
-
-  function fail(message) {
-    options.onFail(message);
-  }
 
   function assert(guard, message) {
     if (guard !== true) {
       message = message ? format.apply(null, slice.call(arguments, 1)) : 'assert failed';
-      fail(message);
+      exports.fail(message);
     }
   }
 
@@ -101,11 +97,6 @@
   function getName(type) {
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `getName()`', type);
     return type.meta.name;
-  }
-
-  function getKind(type) {
-    assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `geKind()`', type);
-    return type.meta.kind;
   }
 
   function blockNew(x, type) {
@@ -365,7 +356,7 @@
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `maybe` combinator', type);
 
     // makes the combinator idempotent and handle Any, Nil
-    if (getKind(type) === 'maybe' || type === Any || type === Nil) {
+    if (type.meta.kind === 'maybe' || type === Any || type === Nil) {
       return type;
     }
 
@@ -722,11 +713,10 @@
     return Func.is(f) && Obj.is(f.func);
   };
 
-  return {
+  return mixin(exports, {
 
     util: {
       format: format,
-      getKind: getKind,
       getFunctionName: getFunctionName,
       getName: getName,
       mixin: mixin,
@@ -735,9 +725,7 @@
       update: update
     },
 
-    options: options,
     assert: assert,
-    fail: fail,
 
     Any: Any,
     Nil: Nil,
@@ -762,5 +750,7 @@
     list: list,
     dict: dict,
     func: func
-  };
+
+  });
+
 }));

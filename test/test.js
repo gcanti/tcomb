@@ -24,7 +24,6 @@ var list = t.list;
 var dict = t.dict;
 var func = t.func;
 var getName = t.util.getName;
-var getKind = t.util.getKind;
 var mixin = t.util.mixin;
 var format = t.util.format;
 
@@ -343,9 +342,9 @@ describe('assert', function () {
     }, '1 !== 2');
   });
 
-  it('should handle custom onFail behaviour', function () {
-    var onFail = t.options.onFail;
-    t.options.onFail = function (message) {
+  it('should handle custom fail behaviour', function () {
+    var fail = t.fail;
+    t.fail = function (message) {
       try {
         throw new Error(message);
       } catch (e) {
@@ -355,7 +354,7 @@ describe('assert', function () {
     doesNotThrow(function () {
       assert(1 === 2, 'report error');
     });
-    t.options.onFail = onFail;
+    t.fail = fail;
   });
 
 });
@@ -479,6 +478,8 @@ describe('getName(type)', function () {
   var NamedList = list(Str, 'NamedList');
   var UnnamedDict = dict(Str, Str);
   var NamedDict = dict(Str, Str, 'NamedDict');
+  var UnnamedFunc = func(Str, Str);
+  var NamedFunc = func(Str, Str, 'NamedFunc');
 
   it('should return the name of a named type', function () {
     eq(getName(NamedStruct), 'NamedStruct');
@@ -489,6 +490,7 @@ describe('getName(type)', function () {
     eq(getName(NamedSubtype), 'NamedSubtype');
     eq(getName(NamedList), 'NamedList');
     eq(getName(NamedDict), 'NamedDict');
+    eq(getName(NamedFunc), 'NamedFunc');
   });
 
   it('should return a meaningful name of a unnamed type', function () {
@@ -500,32 +502,7 @@ describe('getName(type)', function () {
     eq(getName(UnnamedSubtype), '{Str | notEmpty}');
     eq(getName(UnnamedList), 'Array<Str>');
     eq(getName(UnnamedDict), '{[key:Str]: Str}');
-  });
-
-});
-
-describe('getKind', function () {
-
-  var NamedStruct = struct({}, 'NamedStruct');
-  var NamedUnion = union([Str, Num], 'NamedUnion');
-  var NamedMaybe = maybe(Str, 'NamedMaybe');
-  var NamedEnums = enums({}, 'NamedEnums');
-  var NamedTuple = tuple([Str, Num], 'NamedTuple');
-  var NamedSubtype = subtype(Str, function (x) { return x !== ''; }, 'NamedSubtype');
-  var NamedList = list(Str, 'NamedList');
-  var NamedDict = dict(Str, Str, 'NamedDict');
-
-  it('should return the name of a named type', function () {
-    eq(getKind(Any), 'irreducible');
-    eq(getKind(Str), 'irreducible');
-    eq(getKind(NamedStruct), 'struct');
-    eq(getKind(NamedUnion), 'union');
-    eq(getKind(NamedMaybe), 'maybe');
-    eq(getKind(NamedEnums), 'enums');
-    eq(getKind(NamedTuple), 'tuple');
-    eq(getKind(NamedSubtype), 'subtype');
-    eq(getKind(NamedList), 'list');
-    eq(getKind(NamedDict), 'dict');
+    eq(getName(UnnamedFunc), '(Str) => Str');
   });
 
 });
