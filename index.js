@@ -500,7 +500,7 @@
 
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `list` combinator', type);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `list` combinator', name);
-    name = name || format('Array<%s>', getTypeName(type));
+    name = name || format('%s[]', getTypeName(type));
 
     function isList(x) {
       return x.every(type.is);

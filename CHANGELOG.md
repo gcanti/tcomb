@@ -1,11 +1,13 @@
 # v0.5.0
 
-- changed default name for func combinator
-- t.update is now overridable
+- changed default name for `func` combinator
+- changed default name for `list` combinator
+- `t.update` is now overridable
 
 **BREAKING**
 
-- removed `options.onFail`, override t.fail instead
+- moved `fail` to `assert.fail`
+- removed `options.onFail`, override `assert.fail` instead
 - removed `getKind`
 - removed `util` namespace
 - renamed `getName` to `getTypeName`
