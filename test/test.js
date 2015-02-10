@@ -500,7 +500,7 @@ describe('getTypeName(type)', function () {
     eq(getTypeName(UnnamedEnums), '"a" | "b"');
     eq(getTypeName(UnnamedTuple), '[Str, Num]');
     eq(getTypeName(UnnamedSubtype), '{Str | notEmpty}');
-    eq(getTypeName(UnnamedList), 'Str[]');
+    eq(getTypeName(UnnamedList), 'Array<Str>');
     eq(getTypeName(UnnamedDict), '{[key:Str]: Str}');
     eq(getTypeName(UnnamedFunc), '(Str) => Str');
   });

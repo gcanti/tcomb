@@ -1,7 +1,7 @@
 {
   "name": "tcomb",
-  "version": "0.5.0",
-  "description": "Pragmatic runtime type checking for JavaScript",
+  "version": "1.0.0",
+  "description": "Type checking for JavaScript",
   "main": "index.js",
   "scripts": {
     "cover": "istanbul cover _mocha -- --ui bdd -R dot"

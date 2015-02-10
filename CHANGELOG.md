@@ -1,4 +1,4 @@
-# v0.5.0
+# v1.0.0
 
 - changed default name for `func` combinator
 - changed default name for `list` combinator
@@ -6,8 +6,7 @@
 
 **BREAKING**
 
-- moved `fail` to `assert.fail`
-- removed `options.onFail`, override `assert.fail` instead
+- removed `options.onFail`, override `exports.fail` instead
 - removed `getKind`
 - removed `util` namespace
 - renamed `getName` to `getTypeName`

@@ -1,12 +1,12 @@
 {
   "name": "tcomb",
   "main": "index.js",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "homepage": "https://github.com/gcanti/tcomb",
   "authors": [
     "gcanti <giulio.canti@gmail.com>"
   ],
-  "description": "Runtime types checking for JavaScript ",
+  "description": "Type checking for JavaScript",
   "moduleType": [
     "amd",
     "globals",

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>tcomb.js v0.4 Guide</title>
+    <title>tcomb.js v1.0 Guide</title>
     <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.5/es5-shim.min.js"></script>
@@ -20,7 +20,7 @@
       <header>
         <div class="row">
           <div class="col-xs-6">
-            <a href="../index.html">tcomb v0.4</a>
+            <a href="../index.html">tcomb v1.0</a>
           </div>
           <div class="col-xs-6 text-right">
             Open source (MIT). Made by Giulio Canti
@@ -85,17 +85,13 @@
             </li>
             <li><b>API</b>
               <ul>
-                <li><a href="#options">options</a>
-                    <ul>
-                      <li>onFail</li>
-                    </ul>
-                </li>
+                <li><a href="#fail">fail</a></li>
                 <li><a href="#util">util</a>
                     <ul>
                       <li>format</li>
                       <li>getKind</li>
                       <li>getFunctionName</li>
-                      <li>getName</li>
+                      <li>getTypeName</li>
                       <li>mixin</li>
                     </ul>
                 </li>
@@ -717,29 +713,26 @@ var updated = Type.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3, 2
 
           <h1>API</h1>
 
-          <a name="options"><h2>Options</h2></a>
+          <a name="fail"><h2>fail</h2></a>
 
-          <h3>onFail</h3>
           <p>The default behaviour when failures occur is to start the debugger:</p>
           <pre><code>
-var failed = false;
-
-function onFail(message) {
-  if (!failed) {
+function fail(message) {
+  if (!fail.failed) {
     debugger;
   }
-  failed = true;
-  throw new Error(message);
+  fail.failed = true;
+  throw new TypeError(message);
 }
           </code></pre>
-          <p>You can override the default behaviour re-defining the <code>onFail(message?)</code> hook:</p>
+          <p>You can override the default behaviour re-defining the <code>t.fail</code> function:</p>
           <pre><code>
-t.options.onFail = function (message) {
+t.fail = function (message) {
   // your code here
 };
           </code></pre>
 
-          <a name="util"><h2>util</h2></a>
+          <a name="util"><h2>utils</h2></a>
           <p>There is a bunch of functions used internally by tcomb which are exported for convenience:</p>
 
           <h3>format(format, ...values?)</h3>
@@ -749,13 +742,6 @@ format('Invalid argument `name` = `%s` supplied to `%s`', 1, 'MyType');
 // => 'Invalid argument `name` = `1` supplied to `MyType`'
           </code></pre>
 
-          <h3>getKind(type)</h3>
-          <p>Returns a type's kind:</p>
-          <pre><code>
-getKind(Str);       // => 'irreducible'
-getKind(list(Str)); // => 'list'
-          </code></pre>
-
           <h3>getFunctionName(f)</h3>
           <p>Returns a function's <code>name</code> or <code>displayName</code> if specified, otherwise fallbacks on '&lt;function&ltarity&gt&gt;':</p>
           <pre><code>
@@ -763,10 +749,10 @@ getFunctionName(getKind); // => 'getKind'
 getFunctionName(function () {}); // => '&lt;function0&gt;'
           </code></pre>
 
-          <h3>getName(type)</h3>
+          <h3>getTypeName(type)</h3>
           <p>Returns a type's name:</p>
           <pre><code>
-getName(Str); // => 'Str'
+getTypeName(Str); // => 'Str'
           </code></pre>
           <p>If name is not specified, fallbacks according to <a href="http://flowtype.org">http://flowtype.org</a></p>
 

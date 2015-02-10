@@ -80,7 +80,7 @@
   format.formatters = {
     s: function (x) { return String(x); },
     j: function (x) {
-      try {
+      try { // handle circular references
         return JSON.stringify(x, replacer);
       } catch (e) {
         return String(x);
@@ -500,7 +500,7 @@
 
     assert(Type.is(type), 'Invalid argument `type` = `%s` supplied to `list` combinator', type);
     assert(maybe(Str).is(name), 'Invalid argument `name` = `%s` supplied to `list` combinator', name);
-    name = name || format('%s[]', getTypeName(type));
+    name = name || format('Array<%s>', getTypeName(type));
 
     function isList(x) {
       return x.every(type.is);
