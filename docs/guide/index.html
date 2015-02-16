@@ -83,18 +83,13 @@
                   </li>
               </ul>
             </li>
-            <li><b>API</b>
+            <li><a href="#utils"><b>Utils</b></a>
               <ul>
-                <li><a href="#fail">fail</a></li>
-                <li><a href="#util">util</a>
-                    <ul>
-                      <li>format</li>
-                      <li>getKind</li>
-                      <li>getFunctionName</li>
-                      <li>getTypeName</li>
-                      <li>mixin</li>
-                    </ul>
-                </li>
+                <li>fail</li>
+                <li>format</li>
+                <li>getFunctionName</li>
+                <li>getTypeName</li>
+                <li>mixin</li>
               </ul>
             </li>
           <ul>
@@ -244,7 +239,7 @@ ReactElement.is(&lt;div/&gt;); // => true
           <p><b>Tech note</b>. All the built-in irreducible types are defined with <code>t.irreducible()</code>.</p>
 
           <div class="alert alert-info">
-            Meta objects are a distinctive feature of tcomb, allowing <b>type introspection</b> at runtime.
+            Meta objects are a distinctive feature of tcomb, allowing <b>runtime type introspection</b>.
           </div>
 
           <h1>Type combinators</h1>
@@ -711,9 +706,10 @@ var updated = Type.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3, 2
           <h3>Adding other commands</h3>
           <p>You can add your custom commands updating the <code>util.update.commands</code> hash.</p>
 
-          <h1>API</h1>
+          <a name="utils"><h1>Utils</h1></a>
+          <p>There is a bunch of functions used internally by tcomb which are exported for convenience:</p>
 
-          <a name="fail"><h2>fail</h2></a>
+          <h2>fail(message: string): void</h2>
 
           <p>The default behaviour when failures occur is to start the debugger:</p>
           <pre><code>
@@ -732,24 +728,30 @@ t.fail = function (message) {
 };
           </code></pre>
 
-          <a name="util"><h2>utils</h2></a>
-          <p>There is a bunch of functions used internally by tcomb which are exported for convenience:</p>
+          <a name="fail"><h2>update(instance: Object, spec: Object): Object</h2></a>
 
-          <h3>format(format, ...values?)</h3>
+          <p>You can override the default behaviour re-defining the <code>t.update</code> function:</p>
+          <pre><code>
+t.update = function (instance, spec) {
+  // your code here
+};
+          </code></pre>
+
+          <h2>format(format: string, ...values?: any): string</h2>
           <p>Like <a href="http://nodejs.org/api/util.html#util_util_format_format">util.format in Node</a></p>
           <pre><code>
 format('Invalid argument `name` = `%s` supplied to `%s`', 1, 'MyType');
 // => 'Invalid argument `name` = `1` supplied to `MyType`'
           </code></pre>
 
-          <h3>getFunctionName(f)</h3>
-          <p>Returns a function's <code>name</code> or <code>displayName</code> if specified, otherwise fallbacks on '&lt;function&ltarity&gt&gt;':</p>
+          <h2>getFunctionName(f: Function): string</h2>
+          <p>Returns a function's <code>name</code> or <code>displayName</code> if specified, otherwise fallbacks to '&lt;function&ltarity&gt&gt;':</p>
           <pre><code>
-getFunctionName(getKind); // => 'getKind'
+getFunctionName(function a() {}); // => 'a'
 getFunctionName(function () {}); // => '&lt;function0&gt;'
           </code></pre>
 
-          <h3>getTypeName(type)</h3>
+          <h2>getTypeName(type: Type): string</h2>
           <p>Returns a type's name:</p>
           <pre><code>
 getTypeName(Str); // => 'Str'
@@ -757,13 +759,13 @@ getTypeName(Str); // => 'Str'
           <p>If name is not specified, fallbacks according to <a href="http://flowtype.org">http://flowtype.org</a></p>
 
 
-          <h3>mixin(target, source, override?)</h3>
-          <p>Safe version of mixin, properties can be overwritten:</p>
+          <h2>mixin(target: Object, source: Object, override?: boolean): Object</h2>
+          <p>Safe version of mixin, properties cannot be overwritten...</p>
           <pre><code>
 mixin({a: 1}, {b: 2}); // => {a: 1, b: 2}
 mixin({a: 1}, {a: 2}); // => fail!
           </code></pre>
-          <p>unless <code>override = true</code></p>
+          <p>...unless <code>override = true</code></p>
 
         </div>
       </div>

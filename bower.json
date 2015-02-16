@@ -26,15 +26,11 @@
   "license": "MIT",
   "ignore": [
     "**/.*",
+    "Gruntfile.js",
     "node_modules",
     "test",
-    "coverage",
-    "package.json",
-    "Gruntfile.js",
-    ".jshintrc",
-    "tcomb.sjs",
-    "CHANGELOG.md",
-    "LICENSE",
-    "README.md"
+    "docs",
+    "dev",
+    "definitions"
   ]
 }
