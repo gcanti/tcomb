@@ -1,3 +1,7 @@
+# v1.0.1
+
+- react-native compatibility, fix #89
+
 # v1.0.0
 
 - changed default name for `func` combinator
