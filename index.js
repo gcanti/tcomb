@@ -12,12 +12,6 @@
   'use strict';
 
   function fail(message) {
-    // start debugger only once
-    if (!fail.failed) {
-      /*jshint debug: true*/
-      debugger;
-    }
-    fail.failed = true;
     throw new TypeError(message);
   }
 
