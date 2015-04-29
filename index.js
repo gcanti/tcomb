@@ -160,6 +160,10 @@
     }
   };
 
+  function create(type, value, mut) {
+    return type.meta.kind === 'struct' ? new type(value, mut) : type(value, mut);
+  }
+
   //
   // irreducibles
   //
@@ -257,7 +261,7 @@
         if (props.hasOwnProperty(k)) {
           var expected = props[k];
           var actual = value[k];
-          this[k] = expected(actual, mut);
+          this[k] = create(expected, actual, mut);
         }
       }
       if (mut !== true) {
@@ -308,7 +312,7 @@
       assert(Func.is(Union.dispatch), 'Unimplemented `dispatch()` function for union type `%s`', name);
       var type = Union.dispatch(value);
       assert(Type.is(type), 'The `dispatch()` function of union type `%s` returns no type constructor', name);
-      return type(value, mut);
+      return create(type, value, mut);
     }
 
     Union.meta = {
@@ -349,7 +353,7 @@
 
     function Maybe(value, mut) {
       blockNew(this, Maybe);
-      return Nil.is(value) ? null : type(value, mut);
+      return Nil.is(value) ? null : create(type, value, mut);
     }
 
     Maybe.meta = {
@@ -428,7 +432,7 @@
       for (var i = 0 ; i < len ; i++) {
         var expected = types[i];
         var actual = value[i];
-        arr.push(expected(actual, mut));
+        arr.push(create(expected, actual, mut));
       }
       if (frozen) {
         Object.freeze(arr);
@@ -465,7 +469,7 @@
 
     function Subtype(value, mut) {
       blockNew(this, Subtype);
-      var x = type(value, mut);
+      var x = create(type, value, mut);
       assert(predicate(x), 'Invalid argument `value` = `%s` supplied to subtype type `%s`', value, name);
       return x;
     }
@@ -510,7 +514,7 @@
       var arr = [];
       for (var i = 0, len = value.length ; i < len ; i++ ) {
         var actual = value[i];
-        arr.push(type(actual, mut));
+        arr.push(create(type, actual, mut));
       }
       if (frozen) {
         Object.freeze(arr);
@@ -563,9 +567,9 @@
       var obj = {};
       for (var k in value) {
         if (value.hasOwnProperty(k)) {
-          k = domain(k);
+          k = create(domain, k);
           var actual = value[k];
-          obj[k] = codomain(actual, mut);
+          obj[k] = create(codomain, actual, mut);
         }
       }
       if (frozen) {
@@ -651,7 +655,7 @@
         args = argsType(args);
         if (len === domainLen) {
           /* jshint validthis: true */
-          return codomain(f.apply(this, args));
+          return create(codomain, f.apply(this, args));
         } else {
           var curried = Function.prototype.bind.apply(f, [this].concat(args));
           var newdomain = func(domain.slice(len), codomain);
