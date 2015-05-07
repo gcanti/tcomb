@@ -1059,15 +1059,21 @@ describe('enums', function () {
       North: 0,
       East: 1,
       South: 2,
-      West: 3
+      West: 3,
+      1: 'North-East',
+      2.5: 'South-East'
     });
 
     it('should return true when x is an instance of the enum', function () {
       ok(Direction.is('North'));
+      ok(Direction.is(1));
+      ok(Direction.is('1'));
+      ok(Direction.is(2.5));
     });
 
     it('should return false when x is not an instance of the enum', function () {
       ko(Direction.is('North-East'));
+      ko(Direction.is(2));
     });
 
   });
@@ -1075,15 +1081,19 @@ describe('enums', function () {
   describe('#of(keys)', function () {
 
     it('should return an enum', function () {
-      var Size = enums.of(['large', 'small']);
+      var Size = enums.of(['large', 'small', 1, 10.9]);
       ok(Size.meta.map.large === 'large');
       ok(Size.meta.map.small === 'small');
+      ok(Size.meta.map['1'] === 1);
+      ok(Size.meta.map[10.9] === 10.9);
     });
 
     it('should handle a string', function () {
-      var Size = enums.of('large small');
+      var Size = enums.of('large small 10');
       ok(Size.meta.map.large === 'large');
       ok(Size.meta.map.small === 'small');
+      ok(Size.meta.map['10'] === '10');
+      ok(Size.meta.map[10] === '10');
     });
 
   });
