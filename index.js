@@ -393,7 +393,7 @@
     Enums.displayName = name;
 
     Enums.is = function (x) {
-      return Str.is(x) && map.hasOwnProperty(x);
+      return map.hasOwnProperty(x);
     };
 
     return Enums;
