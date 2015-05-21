@@ -650,17 +650,10 @@
 
       function fn() {
         var args = slice.call(arguments);
-        var len = args.length;
-        var argsType = tuple(domain.slice(0, len));
+        var argsType = tuple(domain);
         args = argsType(args);
-        if (len === domainLen) {
-          /* jshint validthis: true */
-          return create(codomain, f.apply(this, args));
-        } else {
-          var curried = Function.prototype.bind.apply(f, [this].concat(args));
-          var newdomain = func(domain.slice(len), codomain);
-          return newdomain.of(curried);
-        }
+        /* jshint validthis: true */
+        return create(codomain, f.apply(this, args));
       }
 
       fn.type = {
