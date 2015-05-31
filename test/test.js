@@ -25,7 +25,6 @@ var dict = t.dict;
 var func = t.func;
 var getTypeName = t.getTypeName;
 var mixin = t.mixin;
-var format = t.format;
 
 //
 // setup
@@ -215,6 +214,8 @@ describe('update', function () {
     it('should handle $set command', function () {
       var updated = update(instance, {a: {$set: 2}});
       eq(updated, {a: 2, b: 2});
+      updated = update(instance, {c: {$set: 3}});
+      eq(updated, {a: 1, b: 2, c: 3});
     });
 
     it('should handle $remove command', function () {
@@ -336,12 +337,6 @@ describe('assert', function () {
     }, 'my message');
   });
 
-  it('should format the specified message', function () {
-    throwsWithMessage(function () {
-      assert(1 === 2, '%s !== %s', 1, 2);
-    }, '1 !== 2');
-  });
-
   it('should handle custom fail behaviour', function () {
     var fail = t.fail;
     t.fail = function (message) {
@@ -362,45 +357,6 @@ describe('assert', function () {
 //
 // utils
 //
-
-describe('format(str, [...])', function () {
-
-  it('should format strings', function () {
-    eq(format('%s', 'a'), 'a');
-    eq(format('%s', 2), '2');
-    eq(format('%s === %s', 1, 1), '1 === 1');
-  });
-
-  it('should format JSON', function () {
-    eq(format('%j', {a: 1}), '{"a":1}');
-  });
-
-  it('should handle undefined formatters', function () {
-    eq(format('%o', 'a'), '%o a');
-  });
-
-  it('should handle escaping %', function () {
-    eq(format('%%s'), '%s');
-  });
-
-  it('should not consume an argument with a single %', function () {
-    eq(format('%s%', '100'), '100%');
-  });
-
-  it('should handle less arguments than placeholders', function () {
-    eq(format('%s %s', 'a'), 'a %s');
-  });
-
-  it('should handle more arguments than placeholders', function () {
-    eq(format('%s', 'a', 'b', 'c'), 'a b c');
-  });
-
-  it('should be extensible', function () {
-    format.formatters.l = function (x) { return x.length; };
-    eq(format('%l', ['a', 'b', 'c']), '3');
-  });
-
-});
 
 describe('mixin(x, y, [overwrite])', function () {
 
@@ -440,27 +396,7 @@ describe('mixin(x, y, [overwrite])', function () {
 
 });
 
-describe('getFunctionName(f, [defaultName])', function () {
-
-  var getFunctionName = t.getFunctionName;
-
-  it('should return the name of a named function', function () {
-    eq(getFunctionName(function myfunc(){}), 'myfunc');
-  });
-
-  it('should return the value of `displayName` if specified', function () {
-    var f = function myfunc(){};
-    f.displayName = 'mydisplayname';
-    eq(getFunctionName(f), 'mydisplayname');
-  });
-
-  it('should fallback on function arity if nothing is specified', function () {
-    eq(getFunctionName(function (a, b, c) { return a + b + c; }), '<function3>');
-  });
-
-});
-
-describe('getTypeName(type)', function () {
+describe('getTypeName(constructor)', function () {
 
   var UnnamedStruct = struct({});
   var NamedStruct = struct({}, 'NamedStruct');
@@ -480,6 +416,10 @@ describe('getTypeName(type)', function () {
   var NamedDict = dict(Str, Str, 'NamedDict');
   var UnnamedFunc = func(Str, Str);
   var NamedFunc = func(Str, Str, 'NamedFunc');
+
+  it('should return the name of a function', function () {
+    eq(getTypeName(function myname(){}), 'myname');
+  });
 
   it('should return the name of a named type', function () {
     eq(getTypeName(NamedStruct), 'NamedStruct');
@@ -501,7 +441,7 @@ describe('getTypeName(type)', function () {
     eq(getTypeName(UnnamedTuple), '[Str, Num]');
     eq(getTypeName(UnnamedSubtype), '{Str | notEmpty}');
     eq(getTypeName(UnnamedList), 'Array<Str>');
-    eq(getTypeName(UnnamedDict), '{[key:Str]: Str}');
+    eq(getTypeName(UnnamedDict), '{[key: Str]: Str}');
     eq(getTypeName(UnnamedFunc), '(Str) => Str');
   });
 
@@ -526,7 +466,7 @@ describe('Any', function () {
         /* jshint ignore:start */
         var x = new T();
         /* jshint ignore:end */
-      }, 'Operator `new` is forbidden for type `Any`');
+      }, 'Cannot use the new operator to instantiate a type Any');
     });
 
   });
@@ -582,7 +522,7 @@ describe('irreducible types constructors', function () {
         /* jshint ignore:start */
         var x = new T();
         /* jshint ignore:end */
-      }, 'Operator `new` is forbidden for type `' + getTypeName(T) + '`');
+      }, 'Cannot use the new operator to instantiate a type ' + getTypeName(T));
     });
 
   });
@@ -777,6 +717,7 @@ describe('Func', function () {
       ko(Func.is(0));
       ko(Func.is(''));
       ko(Func.is([]));
+      ko(Func.is({}));
       /* jshint ignore:start */
       ko(Func.is(new String('1')));
       ko(Func.is(new Number(1)));
@@ -888,19 +829,20 @@ describe('struct', function () {
 
       throwsWithMessage(function () {
         struct();
-      }, 'Invalid argument `props` = `undefined` supplied to `struct` combinator');
+      }, 'Invalid argument props supplied to struct combinator');
 
       throwsWithMessage(function () {
         struct({a: null});
-      }, 'Invalid argument `props` = `[object Object]` supplied to `struct` combinator');
+      }, 'Invalid argument props supplied to struct combinator');
 
       throwsWithMessage(function () {
         struct({}, 1);
-      }, 'Invalid argument `name` = `1` supplied to `struct` combinator');
+      }, 'Invalid argument name supplied to struct combinator');
 
     });
 
   });
+
   describe('constructor', function () {
 
     it('should be idempotent', function () {
@@ -915,7 +857,7 @@ describe('struct', function () {
     it('should accept only valid values', function () {
       throwsWithMessage(function () {
         Point(1);
-      }, 'Invalid argument `value` = `1` supplied to struct type `{x: Num, y: Num}`');
+      }, 'Invalid argument value supplied to struct {x: Num, y: Num}');
     });
 
   });
@@ -1022,11 +964,11 @@ describe('enums', function () {
 
       throwsWithMessage(function () {
         enums();
-      }, 'Invalid argument `map` = `undefined` supplied to `enums` combinator');
+      }, 'Invalid argument map supplied to enums combinator');
 
       throwsWithMessage(function () {
         enums({}, 1);
-      }, 'Invalid argument `name` = `1` supplied to `enums` combinator');
+      }, 'Invalid argument name supplied to enums combinator');
 
     });
 
@@ -1041,14 +983,14 @@ describe('enums', function () {
         /* jshint ignore:start */
         var x = new T('a');
         /* jshint ignore:end */
-      }, 'Operator `new` is forbidden for type `T`');
+      }, 'Cannot use the new operator to instantiate a type T');
     });
 
     it('should accept only valid values', function () {
       eq(T('a'), 'a');
       throwsWithMessage(function () {
         T('b');
-      }, 'Invalid argument `value` = `b` supplied to enums type `T`, expected one of ["a"]');
+      }, 'Invalid argument value supplied to enums T, expected one of ["a"]');
     });
 
   });
@@ -1131,19 +1073,19 @@ describe('union', function () {
 
       throwsWithMessage(function () {
         union();
-      }, 'Invalid argument `types` = `undefined` supplied to `union` combinator');
+      }, 'Invalid argument types supplied to union combinator: must be an array');
 
       throwsWithMessage(function () {
         union([]);
-      }, 'Invalid argument `types` = `` supplied to `union` combinator, provide at least two types');
+      }, 'Invalid argument types supplied to union combinator: provide at least two types');
 
       throwsWithMessage(function () {
-        union([Circle]);
-      }, 'Invalid argument `types` = `Circle` supplied to `union` combinator, provide at least two types');
+        union([1]);
+      }, 'Invalid argument types supplied to union combinator: at least one element is not a type not a constructor');
 
       throwsWithMessage(function () {
         union([Circle, Point], 1);
-      }, 'Invalid argument `name` = `1` supplied to `union` combinator');
+      }, 'Invalid argument name supplied to union combinator');
 
     });
 
@@ -1156,7 +1098,7 @@ describe('union', function () {
         var T = union([Str, Num], 'T');
         T.dispatch = null;
         T(1);
-      }, 'Unimplemented `dispatch()` function for union type `T`');
+      }, 'Unimplemented dispatch() function for union T');
     });
 
     it('should have a default dispatch() implementation', function () {
@@ -1168,7 +1110,7 @@ describe('union', function () {
       throwsWithMessage(function () {
         var T = union([Str, Num], 'T');
         T(true);
-      }, 'The `dispatch()` function of union type `T` returns no type constructor');
+      }, 'The dispatch() function of union T returns no type');
     });
 
     it('should build instances when dispatch() is implemented', function () {
@@ -1183,7 +1125,7 @@ describe('union', function () {
         /* jshint ignore:start */
         var x = new T('a');
         /* jshint ignore:end */
-      }, 'Operator `new` is forbidden for type `T`');
+      }, 'Cannot use the new operator to instantiate a type T');
     });
 
     it('should not throw if used with new and union types are instantiables with new', function () {
@@ -1225,11 +1167,11 @@ describe('maybe', function () {
 
       throwsWithMessage(function () {
         maybe();
-      }, 'Invalid argument `type` = `undefined` supplied to `maybe` combinator');
+      }, 'Invalid argument type supplied to maybe combinator');
 
       throwsWithMessage(function () {
         maybe(Point, 1);
-      }, 'Invalid argument `name` = `1` supplied to `maybe` combinator');
+      }, 'Invalid argument name supplied to maybe combinator');
 
     });
 
@@ -1256,7 +1198,7 @@ describe('maybe', function () {
         var T = maybe(Str, 'T');
         var x = new T();
         /* jshint ignore:end */
-      }, 'Operator `new` is forbidden for type `T`');
+      }, 'Cannot use the new operator to instantiate a type T');
     });
 
     it('should coerce values', function () {
@@ -1304,11 +1246,15 @@ describe('tuple', function () {
 
       throwsWithMessage(function () {
         tuple();
-      }, 'Invalid argument `types` = `undefined` supplied to `tuple` combinator');
+      }, 'Invalid argument types supplied to tuple combinator: must be an array');
+
+      throwsWithMessage(function () {
+        tuple([1]);
+      }, 'Invalid argument types supplied to tuple combinator: at least one element is not a type not a constructor');
 
       throwsWithMessage(function () {
         tuple([Point, Point], 1);
-      }, 'Invalid argument `name` = `1` supplied to `tuple` combinator');
+      }, 'Invalid argument name supplied to tuple combinator');
 
     });
 
@@ -1329,11 +1275,11 @@ describe('tuple', function () {
 
       throwsWithMessage(function () {
         T(1);
-      }, 'Invalid argument `value` = `1` supplied to tuple type `T`, expected an `Arr` of length `2`');
+      }, 'Invalid argument value supplied to tuple T, expected an array of length 2');
 
       throwsWithMessage(function () {
         T([1, 1]);
-      }, 'Invalid argument `value` = `1` supplied to struct type `S`');
+      }, 'Invalid argument value supplied to struct S');
 
     });
 
@@ -1394,11 +1340,11 @@ describe('list', function () {
 
       throwsWithMessage(function () {
         list();
-      }, 'Invalid argument `type` = `undefined` supplied to `list` combinator');
+      }, 'Invalid argument type supplied to list combinator');
 
       throwsWithMessage(function () {
         list(Point, 1);
-      }, 'Invalid argument `name` = `1` supplied to `list` combinator');
+      }, 'Invalid argument name supplied to list combinator');
 
     });
 
@@ -1418,11 +1364,11 @@ describe('list', function () {
 
       throwsWithMessage(function () {
         T(1);
-      }, 'Invalid argument `value` = `1` supplied to list type `T`');
+      }, 'Invalid argument value supplied to list T');
 
       throwsWithMessage(function () {
         T([1]);
-      }, 'Invalid argument `value` = `1` supplied to struct type `S`');
+      }, 'Invalid argument value supplied to struct S');
 
     });
 
@@ -1483,15 +1429,15 @@ describe('subtype', function () {
 
       throwsWithMessage(function () {
         subtype();
-      }, 'Invalid argument `type` = `undefined` supplied to `subtype` combinator');
+      }, 'Invalid argument type subtype combinator');
 
       throwsWithMessage(function () {
         subtype(Point, null);
-      }, 'Invalid argument `predicate` = `null` supplied to `subtype` combinator');
+      }, 'Invalid argument predicate supplied to subtype combinator');
 
       throwsWithMessage(function () {
         subtype(Point, True, 1);
-      }, 'Invalid argument `name` = `1` supplied to `subtype` combinator');
+      }, 'Invalid argument name supplied to subtype combinator');
 
     });
 
@@ -1505,7 +1451,7 @@ describe('subtype', function () {
         var T = subtype(Str, function () { return true; }, 'T');
         var x = new T();
         /* jshint ignore:end */
-      }, 'Operator `new` is forbidden for type `T`');
+      }, 'Cannot use the new operator to instantiate a type T');
     });
 
     it('should coerce values', function () {
@@ -1519,7 +1465,7 @@ describe('subtype', function () {
       var T = subtype(Point, predicate, 'T');
       throwsWithMessage(function () {
         T({x: 0, y: 0});
-      }, 'Invalid argument `value` = `[object Object]` supplied to subtype type `T`');
+      }, 'Invalid argument value supplied to subtype T');
     });
 
   });
@@ -1567,15 +1513,15 @@ describe('dict', function () {
 
       throwsWithMessage(function () {
         dict();
-      }, 'Invalid argument `domain` = `undefined` supplied to `dict` combinator');
+      }, 'Invalid argument domain supplied to dict combinator');
 
       throwsWithMessage(function () {
         dict(Str);
-      }, 'Invalid argument `codomain` = `undefined` supplied to `dict` combinator');
+      }, 'Invalid argument codomain supplied to dict combinator');
 
       throwsWithMessage(function () {
         dict(Str, Point, 1);
-      }, 'Invalid argument `name` = `1` supplied to `dict` combinator');
+      }, 'Invalid argument name supplied to dict combinator');
 
     });
 
@@ -1598,15 +1544,15 @@ describe('dict', function () {
 
       throwsWithMessage(function () {
         T(1);
-      }, 'Invalid argument `value` = `1` supplied to dict type `T`');
+      }, 'Invalid argument value supplied to dict T');
 
       throwsWithMessage(function () {
         T({a: 1});
-      }, 'Invalid argument `value` = `1` supplied to struct type `S`');
+      }, 'Invalid argument value supplied to struct S');
 
       throwsWithMessage(function () {
         T({forbidden: {}});
-      }, 'Invalid argument `value` = `forbidden` supplied to subtype type `Domain`');
+      }, 'Invalid argument value supplied to subtype Domain');
 
     });
 
@@ -1690,11 +1636,11 @@ describe('func', function () {
 
       throwsWithMessage(function () {
         sum(1, 2, 3);
-      }, 'Invalid argument `value` = `1,2,3` supplied to tuple type `[Num, Num]`, expected an `Arr` of length `2`');
+      }, 'Invalid argument value supplied to tuple [Num, Num], expected an array of length 2');
 
       throwsWithMessage(function () {
         sum('a', 2);
-      }, 'Invalid argument `value` = `a` supplied to irreducible type `Num`');
+      }, 'Invalid argument value supplied to irreducible Num');
 
     });
 
@@ -1707,7 +1653,7 @@ describe('func', function () {
 
       throwsWithMessage(function () {
         sum(1, 2);
-      }, 'Invalid argument `value` = `a` supplied to irreducible type `Num`');
+      }, 'Invalid argument value supplied to irreducible Num');
 
     });
 
@@ -1748,7 +1694,7 @@ describe('func', function () {
       var Type = func([Num, Num, Num], Num);
       var sum = Type.of(function (a, b, c) {
         return a + b + c;
-      });
+      }, true);
       eq(sum(1, 2, 3), 6);
       eq(sum(1, 2)(3), 6);
       eq(sum(1)(2, 3), 6);
@@ -1767,19 +1713,116 @@ describe('func', function () {
       var T = func([Num, Num], Num);
       var sum = T.of(function (a, b) {
         return a + b;
-      });
+      }, true);
 
       throwsWithMessage(function () {
         sum('a');
-      }, 'Invalid argument `value` = `a` supplied to irreducible type `Num`');
+      }, 'Invalid argument value supplied to irreducible Num');
 
       throwsWithMessage(function () {
         var sum1 = sum(1);
         sum1('a');
-      }, 'Invalid argument `value` = `a` supplied to irreducible type `Num`');
+      }, 'Invalid argument value supplied to irreducible Num');
 
     });
 
+  });
+
+  describe('uncurried', function () {
+
+    it('should not curry functions', function () {
+      var Type = func([Num, Num, Num], Num);
+      var sum = Type.of(function (a, b, c) {
+        return a + b + c;
+      });
+      eq(sum(1, 2, 3), 6);
+      throwsWithMessage(function () {
+        sum(1, 2);
+      }, 'Invalid argument value supplied to tuple [Num, Num, Num], expected an array of length 3');
+    });
+
+  });
+
+});
+
+describe('ES6 classes', function () {
+
+  function Class(a) {
+    this.a = a;
+  }
+
+  var c = new Class('a');
+
+  it('should be handled by subtype', function () {
+    var T = t.subtype(Class, function isA(x) {
+      return x.a === 'a';
+    });
+    eq(T.is(c), true);
+    throwsWithMessage(function () {
+      T(new Class('b'));
+    }, 'Invalid argument value supplied to subtype {Class | isA}');
+  });
+
+  it('should be handled by struct', function () {
+    var T = t.struct({
+      c: Class
+    });
+    eq(T.is(new T({c: c})), true);
+    throwsWithMessage(function () {
+      T({c: 1});
+    }, 'Invalid argument value supplied to constructor Class');
+  });
+
+  it('should be handled by maybe', function () {
+    var T = t.maybe(Class);
+    eq(T.is(null), true);
+    eq(T.is(c), true);
+    throwsWithMessage(function () {
+      T(1);
+    }, 'Invalid argument value supplied to constructor Class');
+  });
+
+  it('should be handled by tuple', function () {
+    var T = t.tuple([Class]);
+    eq(T.is([c]), true);
+    throwsWithMessage(function () {
+      T([1]);
+    }, 'Invalid argument value supplied to constructor Class');
+  });
+
+  it('should be handled by list', function () {
+    var T = t.list(Class);
+    eq(T.is([c]), true);
+    throwsWithMessage(function () {
+      T([1]);
+    }, 'Invalid argument value supplied to constructor Class');
+  });
+
+  it('should be handled by dict', function () {
+    var T = t.dict(t.Str, Class);
+    eq(T.is({a: c}), true);
+    throwsWithMessage(function () {
+      T({a: 1});
+    }, 'Invalid argument value supplied to constructor Class');
+  });
+
+  it('should be handled by union', function () {
+    var T = t.union([t.Str, Class]);
+    eq(T.is(c), true);
+    throwsWithMessage(function () {
+      T(1);
+    }, 'The dispatch() function of union Str | Class returns no type');
+  });
+
+  it('should be handled by func', function () {
+    var T = t.func(Class, t.Str);
+    var f = T.of(function (c) {
+      return c.constructor.name;
+    });
+    eq(f(c), 'Class');
+    throwsWithMessage(function () {
+      f(1);
+    }, 'Invalid argument value supplied to constructor Class');
   });
 
 });

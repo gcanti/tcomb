@@ -1,10 +1,11 @@
 {
   "name": "tcomb",
-  "version": "1.0.3",
+  "version": "2.0.0-beta",
   "description": "Type checking for JavaScript",
   "main": "index.js",
   "scripts": {
-    "cover": "istanbul cover _mocha -- --ui bdd -R dot"
+    "lint": "eslint index.js",
+    "test": "npm run lint && mocha"
   },
   "repository": {
     "type": "git",
@@ -17,15 +18,8 @@
   },
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-cli": "^0.1.13",
-    "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": "^0.5.1",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-mocha-test": "^0.11.0",
-    "istanbul": "^0.3.0",
-    "jshint-stylish": "^0.4.0",
-    "mocha": "^1.21.4"
+    "eslint": "^0.22.1",
+    "mocha": "^2.2.5"
   },
   "tags": [
     "type",

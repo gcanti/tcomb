@@ -1,5 +1,2 @@
 *.log
-*.swp
 node_modules
-dev
-definitions

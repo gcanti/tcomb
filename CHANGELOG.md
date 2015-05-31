@@ -10,6 +10,26 @@
 
 **Note**: Gaps between patch versions are faulty/broken releases.
 
+## v2.0.0
+
+- **New Feature**
+  - add support to types defined as ES6 classes #99
+  - optimized for production code: asserts and freeze only in development mode
+  - add `is(x, type)` function
+  - add `isType(x)` function
+- **Breaking change**
+  - numeric types on enums #93  (thanks @m0x72)
+  - remove asserts when process.env.NODE_ENV === 'production' #100
+  - do not freeze if process.env.NODE_ENV === 'production' #103
+  - func without currying #96 (thanks @tmcw)
+  - remove useless exports #104
+  - drop bower support #101 
+  - remove useless exports
+    * Type
+    * slice
+    * shallowCopy
+    * getFunctionName
+
 ## v1.0.3
 
 - **Internal**
