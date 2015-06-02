@@ -518,7 +518,7 @@ Functions have the following `meta` object:
 }
 ```
 
-### The `of(f, uncurried)` function
+### The `of(f: Function, curried?: boolean)` function
 
 ```js
 func(A, B).of(f);
@@ -557,7 +557,7 @@ const add2 = add(2);
 add2(1); // And this returns: 3
 ```
 
-### The `is()` function
+### The `is(x: any)` function
 
 ```js
 func(A, B).is(x);
