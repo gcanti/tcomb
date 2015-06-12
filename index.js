@@ -55,12 +55,12 @@ function is(x, type) {
     isInstanceOf(x, type); // type should be a class constructor
 }
 
-function create(type, value, mut) {
+function create(type, value) {
   if (isType(type)) {
     return isStruct(type) ?
       // for structs the new operator is allowed
-      new type(value, mut) :
-      type(value, mut);
+      new type(value) :
+      type(value);
   }
 
   if (process.env.NODE_ENV !== 'production') {
@@ -367,7 +367,7 @@ function union(types, name) {
 
   var displayName = name || defaultName;
 
-  function Union(value, mut) {
+  function Union(value) {
 
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Union);
@@ -380,7 +380,7 @@ function union(types, name) {
       assert(isType(type), 'The dispatch() function of union ' + displayName + ' returns no type');
     }
 
-    return create(type, value, mut);
+    return create(type, value);
   }
 
   Union.meta = {
@@ -424,11 +424,11 @@ function maybe(type, name) {
 
   name = name || ('?' + getTypeName(type));
 
-  function Maybe(value, mut) {
+  function Maybe(value) {
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Maybe);
     }
-    return isNil(value) ? null : create(type, value, mut);
+    return isNil(value) ? null : create(type, value);
   }
 
   Maybe.meta = {
@@ -568,13 +568,13 @@ function subtype(type, predicate, name) {
 
   var displayName = name || defaultName;
 
-  function Subtype(value, mut) {
+  function Subtype(value) {
 
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Subtype);
     }
 
-    var x = create(type, value, mut);
+    var x = create(type, value);
 
     if (process.env.NODE_ENV !== 'production') {
       assert(predicate(x), 'Invalid argument value supplied to subtype ' + displayName);
@@ -620,7 +620,7 @@ function list(type, name) {
     });
   }
 
-  function List(value, mut) {
+  function List(value) {
 
     if (process.env.NODE_ENV !== 'production') {
       assert(isArray(value), 'Invalid argument value supplied to list ' + displayName);
@@ -635,7 +635,7 @@ function list(type, name) {
     var arr = [];
     for (var i = 0, len = value.length; i < len; i++ ) {
       var actual = value[i];
-      arr.push(create(type, actual, mut));
+      arr.push(create(type, actual));
     }
 
     if (process.env.NODE_ENV !== 'production') {
@@ -687,7 +687,7 @@ function dict(domain, codomain, name) {
     return true;
   }
 
-  function Dict(value, mut) {
+  function Dict(value) {
 
     if (process.env.NODE_ENV !== 'production') {
       assert(isObject(value), 'Invalid argument value supplied to dict ' + displayName);
@@ -705,7 +705,7 @@ function dict(domain, codomain, name) {
       if (value.hasOwnProperty(k)) {
         k = create(domain, k);
         var actual = value[k];
-        obj[k] = create(codomain, actual, mut);
+        obj[k] = create(codomain, actual);
       }
     }
 

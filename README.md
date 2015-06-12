@@ -5,12 +5,12 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 
 # Features
 
-- **immutability**: instances are immutables in development mode
-- **speed**: asserts are active only in development mode and stripped in production code.
-- **DDD**: write complex domain models in a breeze and with a small code footprint
-- **debugging**: you can customize the behaviour when an assert fails leveraging the power of Chrome DevTools
-- **runtime type introspection**: every model written with tcomb is inspectable at runtime
-- **JSON**: encodes/decodes domain models to/from JSON for free
+1. **immutability**: instances are immutables (using `Object.freeze`) in development
+2. **speed**: asserts are active only in development mode and stripped in production code.
+3. **DDD**: write complex domain models in a breeze and with a small code footprint
+4. **debugging**: you can customize the behaviour when an assert fails leveraging the power of Chrome DevTools
+5. **runtime type introspection**: every model written with tcomb is inspectable at runtime
+6. **JSON**: encodes/decodes domain models to/from JSON for free
 
 # Documentation
 
