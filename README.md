@@ -12,6 +12,29 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 5. **runtime type introspection**: every model written with tcomb is inspectable at runtime
 6. **JSON**: encodes/decodes domain models to/from JSON for free
 
+# Quick example
+
+```js
+import t from 'tcomb';
+
+// define a custom integer type
+const Integer = t.subtype(t.Num, n => n % 1 === 0);
+
+const Person = t.struct({
+  name: t.Str,              // required string
+  surname: t.maybe(t.Str),  // optional string
+  age: Integer,             // required integer
+  tags: t.list(t.Str)       // a list of strings
+});
+
+const person = new Person({
+  name: 'Giulio',
+  surname: 'Canti',
+  age: 41,
+  tags: ['developer', 'rock climber']
+});
+```
+
 # Documentation
 
 [GUIDE.md](GUIDE.md)
