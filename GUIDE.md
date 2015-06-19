@@ -205,7 +205,7 @@ If you don't care of values you can use `enums.of(keys, name?)` where:
 const Country = t.enums.of('IT US', 'Country');
 
 // same as
-const Country = t.enums(['IT', 'US'], 'Country');
+const Country = t.enums.of(['IT', 'US'], 'Country');
 
 // same as
 const Country = t.enums({
