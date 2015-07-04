@@ -17,6 +17,7 @@
   - optimized for production code: asserts and freeze only in development mode
   - add `is(x, type)` function
   - add `isType(x)` function
+  - add `stringify(x)` function
 - **Breaking change**
   - numeric types on enums #93  (thanks @m0x72)
   - remove asserts when process.env.NODE_ENV === 'production' #100
