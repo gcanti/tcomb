@@ -11,6 +11,12 @@
 
 **Note**: Gaps between patch versions are faulty/broken releases.
 
+## v2.1.0
+
+- **New Feature**
+  - Added aliases for pre-defined irreducible types #112
+  - added `options.verbose` (default `true`) to handle messages (set `options.verbose = false` to improve performances in development)
+
 ## v2.0.1
 
 - **Experimental**

@@ -6,6 +6,10 @@ Node
 npm install tcomb
 ```
 
+```js
+import t from 'tcomb';
+```
+
 # The idea
 
 What's a type? In tcomb **a type is represented by a function** `T` such that:
@@ -20,22 +24,22 @@ An *irreducible* type is a type that can't be built with other types. Examples o
 
 **JavaScript native types**
 
-* `Str`: strings
-* `Num`: numbers
-* `Bool`: booleans
-* `Arr`: arrays
-* `Obj`: plain objects
-* `Func`: functions
-* `Err`: errors
-* `Re`: regular expressions
-* `Dat`: dates
+* `t.String`: strings (short alias `t.Str`)
+* `t.Number`: numbers (short alias `t.Numr`)
+* `t.Boolean`: booleans (short alias `t.Bool`)
+* `t.Array`: arrays (short alias `t.Arr`)
+* `t.Object`: plain objects (short alias `t.Obj`)
+* `t.Function`: functions (short alias `t.Func`)
+* `t.Error`: errors (short alias `t.Err`)
+* `t.RegExp`: regular expressions (short alias `t.Re`)
+* `t.Date`: dates (short alias `t.Dat`)
 
 There are 2 additional irriducible types defined in tcomb:
 
 **Additional types**
 
-* `Nil`: `null` or `undefined`
-* `Any`: any type
+* `t.Nil`: `null` or `undefined`
+* `t.Any`: any type
 
 ## Type checking with the `is` function
 
@@ -44,11 +48,11 @@ Every type defined with tcomb owns a static predicate `is(x: any) -> boolean` us
 ```js
 const t = require('tcomb');
 
-t.Str.is('a string'); // => true
-t.Str.is(1);          // => false
+t.String.is('a string'); // => true
+t.String.is(1);          // => false
 
-t.Num.is('a string'); // => false
-t.Num.is(1);          // => true
+t.Number.is('a string'); // => false
+t.Number.is(1);          // => true
 
 // and so on...
 ```
@@ -58,8 +62,8 @@ t.Num.is(1);          // => true
 tcomb provides a built-in `t.assert(guard: boolean, message?: string)` function, if an assert fails a `TypeError` is thrown.
 
 ```js
-assert(Str.is('a string')); // => ok
-assert(Str.is(1)); // => throws
+assert(t.String.is('a string')); // => ok
+assert(t.String.is(1)); // => throws
 ```
 
 * `guard` is a boolean condition
@@ -75,8 +79,8 @@ assert(x > min, `${x} should be greater then ${min}`);
 Another way to ensure the correct type is to use types as constructors:
 
 ```js
-const s1 = Str('a string'); // => ok
-const s2 = Str(1); // => throws
+const s1 = t.String('a string'); // => ok
+const s2 = t.String(1); // => throws
 ```
 
 ## Adding safety to legacy code
@@ -95,8 +99,8 @@ const p = new Point(1, 'a'); // silent error
 // Now with asserts inserted:
 
 function Point (x, y) {
-  this.x = Num(x);
-  this.y = Num(y);
+  this.x = t.Number(x);
+  this.y = t.Number(y);
 }
 
 const p = new Point(1, 'a'); // => throws
@@ -122,12 +126,12 @@ Every type owns a `meta` object containing the following properties:
 * `kind`: the type kind, equal to `"irreducible"` for irreducible types
 * `is`: the predicate
 
-Example: the `meta` object of `Str`:
+Example: the `meta` object of `t.String`:
 
 ```js
 {
   kind: 'irreducible',
-  is: function isStr(x) {
+  is: function isString(x) {
     return typeof x === 'string';
   }
 }
@@ -153,7 +157,7 @@ Example:
 
 ```js
 // defines a type representing positive numbers
-const Positive = t.subtype(t.Num, n => return n >= 0, 'Positive');
+const Positive = t.subtype(t.Number, (n) => n >= 0, 'Positive');
 
 Positive.is(1);  // => true
 Positive.is(-1); // => false
@@ -197,8 +201,8 @@ Enums have the following `meta` object:
 
 If you don't care of values you can use `enums.of(keys, name?)` where:
 
-*   `keys: Array<Str|Number> | Str` is the array of enums or a string where the enums are separated by spaces
-*   `name: ?Str` is an optional string useful for debugging purposes
+*   `keys: Array<string|number> | string` is the array of enums or a string where the enums are separated by spaces
+*   `name: ?string` is an optional string useful for debugging purposes
 
 ```js
 // values will mirror the keys
@@ -223,8 +227,8 @@ You can define a struct type using the `struct(props, name?)` combinator where:
 
 ```js
 const Point = t.struct({
-  x: Num,
-  y: Num
+  x: t.Number,
+  y: t.Number
 }, 'Point');
 
 // constructor usage, `p` is immutable, new is optional
@@ -262,7 +266,7 @@ Every struct constructor owns an `extend(mixins, name)` function where:
 *   `name` the name of the new struct
 
 ```js
-const Point3D = Point.extend({z: Num}, 'Point3D');
+const Point3D = Point.extend({z: t.Number}, 'Point3D');
 
 // multiple inheritance
 const A = struct({...});
@@ -275,9 +279,9 @@ const E = A.extend([B, MixinC, MixinD]);
 `extend` supports **prototypal inheritance**:
 
 ```js
-const Rectangle = struct({
-  width: Num,
-  height: Num
+const Rectangle = t.struct({
+  width: t.Number,
+  height: t.Number
 });
 
 Rectangle.prototype.getArea = function () {
@@ -285,7 +289,7 @@ Rectangle.prototype.getArea = function () {
 };
 
 const Cube = Rectangle.extend({
-  thickness: Num
+  thickness: t.Number
 });
 
 // typeof Cube.prototype.getArea === 'function'
@@ -297,7 +301,7 @@ Cube.prototype.getVolume = function () {
 > **Note**. Repeated props are not allowed:
 
 ```js
-const Wrong = Point.extend({x: Num}); // => throws
+const Wrong = Point.extend({x: t.Number}); // => throws
 ```
 
 ## The tuple combinator
@@ -310,7 +314,7 @@ You can define a tuple type using the `tuple(types, name)` combinator where:
 Instances of tuples are plain old JavaScript arrays.
 
 ```js
-const Area = tuple([Num, Num]);
+const Area = t.tuple([t.Number, t.Number]);
 
 // constructor usage, `area` is immutable
 const area = Area([1, 2]);
@@ -335,7 +339,7 @@ You can define a list type using the `list(type, name)` combinator where:
 Instances of lists are plain old JavaScript arrays.
 
 ```js
-const Path = list(Point);
+const Path = t.list(Point);
 
 // costructor usage, `path` is immutable
 const path = Path([
@@ -364,7 +368,7 @@ You can define a dictionary type using the `dict(domain, codomain, name)` combin
 Instances of dicts are plain old JavaScript objects.
 
 ```js
-const Tel = dict(Str, Num);
+const Tel = dict(String, t.Number);
 
 // costructor usage, `tel` is immutable
 const tel = Tel({'jack': 4098, 'sape': 4139});
@@ -388,7 +392,7 @@ You can define a union of types using the `union(types, name)` combinator where:
 * `name` is an optional string useful for debugging purposes
 
 ```js
-const ReactKey = union([Str, Num]);
+const ReactKey = t.union([t.String, t.Number]);
 
 ReactKey.is('a');  // => true
 ReactKey.is(1);    // => true
@@ -416,8 +420,8 @@ An example implementation for the `ReactKey` union:
 
 ```js
 ReactKey.dispatch = function (x) {
-  if (Str.is(x)) return Str;
-  if (Num.is(x)) return Num;
+  if (t.String.is(x)) return t.String;
+  if (t.Number.is(x)) return t.Number;
 };
 
 // now you can do this without a fail
@@ -437,7 +441,7 @@ You can define a maybe type using the `maybe(type, name)` combinator where:
 
 ```js
 // the value of a radio input where null = no selection
-const Radio = maybe(Str);
+const Radio = t.maybe(t.String);
 
 Radio.is('a');     // => true
 Radio.is(null);    // => true
@@ -458,16 +462,16 @@ Maybes have the following `meta` object:
 Typed functions may be defined like this:
 
 ```js
-// add takes two `Num`s and returns a `Num`
-const add = func([Num, Num], Num)
+// add takes two `t.Number`s and returns a `t.Number`
+const add = t.func([t.Number, t.Number], t.Number)
     .of(function (x, y) { return x + y; });
 ```
 
 And used like this:
 
 ```js
-add("Hello", 2); // Raises error: Invalid `Hello` supplied to `Num`
-add("Hello");    // Raises error: Invalid `Hello` supplied to `Num`
+add("Hello", 2); // Raises error: Invalid `Hello` supplied to `t.Number`
+add("Hello");    // Raises error: Invalid `Hello` supplied to `t.Number`
 
 add(1, 2);       // Returns: 3
 add(1)(2);       // Returns: 3
@@ -484,28 +488,28 @@ Returns a function type whose functions have their domain and codomain specified
 `func` can be used to define function types using native types:
 
 ```js
-// An `A` takes a `Str` and returns an `Num`
-const A = func(Str, Num);
+// An `A` takes a `t.String` and returns an `t.Number`
+const A = t.func(t.String, t.Number);
 ```
 
 The domain and codomain can also be specified using types from any combinator including `func`:
 
 ```js
-// A `B` takes a `Func` (which takes a `Str` and returns a `Num`) and returns a `Str`.
-const B = func(func(Str, Num), Str);
+// A `B` takes a `Func` (which takes a `t.String` and returns a `t.Number`) and returns a `t.String`.
+const B = t.func(t.func(t.String, t.Number), t.String);
 
-// An `ExcitedStr` is a `Str` containing an exclamation mark
-const ExcitedStr = subtype(Str, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedStr');
+// An `ExcitedString` is a `t.String` containing an exclamation mark
+const ExcitedString = t.subtype(t.String, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedString');
 
-// An `Exciter` takes a `Str` and returns an `ExcitedStr`
-const Exciter = func(Str, ExcitedStr);
+// An `Exciter` takes a `t.String` and returns an `ExcitedString`
+const Exciter = t.func(t.String, ExcitedString);
 ```
 
 Additionally the domain can be expressed as a list of types:
 
 ```js
-// A `C` takes an `A`, a `B` and a `Str` and returns a `Num`
-const C = func([A, B, Str], Num);
+// A `C` takes an `A`, a `B` and a `t.String` and returns a `t.Number`
+const C = t.func([A, B, t.String], t.Number);
 ```
 
 Functions have the following `meta` object:
@@ -533,10 +537,10 @@ const simpleQuestionator = Exciter.of(function (s) { return s + '?'; });
 const simpleExciter      = Exciter.of(function (s) { return s + '!'; });
 
 // Raises error:
-// Invalid `Hello?` supplied to `ExcitedStr`, insert a valid value for the subtype
+// Invalid `Hello?` supplied to `ExcitedString`, insert a valid value for the subtype
 simpleQuestionator('Hello');
 
-// Raises error: Invalid `1` supplied to `Str`
+// Raises error: Invalid `1` supplied to `String`
 simpleExciter(1);
 
 // Returns: 'Hello!'
@@ -547,11 +551,11 @@ The returned function may also be partially applied passing a `curried` addition
 
 ```js
 // We can reasonably suggest that add has the following type signature
-// add : Num -> Num -> Num
-const add = func([Num, Num], Num)
+// add : t.Number -> t.Number -> t.Number
+const add = t.func([t.Number, t.Number], t.Number)
     .of(function (x, y) { return x + y }, true);
 
-const addHello = add("Hello"); // As this raises: "Error: Invalid `Hello` supplied to `Num`"
+const addHello = add("Hello"); // As this raises: "Error: Invalid `Hello` supplied to `t.Number`"
 
 const add2 = add(2);
 add2(1); // And this returns: 3
@@ -571,8 +575,8 @@ Exciter.is(simpleQuestionator); // Returns: true
 
 const id = function (x) { return x; };
 
-func([Num, Num], Num).is(func([Num, Num], Num).of(id)); // Returns: true
-func([Num, Num], Num).is(func(Num, Num).of(id));        // Returns: false
+t.func([t.Number, t.Number], t.Number).is(func([t.Number, t.Number], t.Number).of(id)); // Returns: true
+t.func([t.Number, t.Number], t.Number).is(func(t.Number, t.Number).of(id));        // Returns: false
 ```
 
 ### Rules
@@ -583,10 +587,10 @@ func([Num, Num], Num).is(func(Num, Num).of(id));        // Returns: false
 
 ## Updating immutable instances
 
-You can update an immutable instance with the `update` static function
+You can update an immutable instance with the `update` static function provided to all types:
 
 ```js
-Type.update(instance, spec)
+MyType.update(instance, spec)
 ```
 
 The following commands are compatible with the [Facebook Immutability Helpers](http://facebook.github.io/react/docs/update.html):
@@ -609,17 +613,17 @@ p = Point.update(p, {x: {'$set': 3}}); // => {x: 3, y: 2}
 ### Removing a value form a dict
 
 ```js
-const Type = dict(Str, Num);
-const instance = Type({a: 1, b: 2});
-const updated = Type.update(instance, {$remove: ['a']}); // => {b: 2}
+const MyType = dict(t.String, t.Number);
+const instance = MyType({a: 1, b: 2});
+const updated = MyType.update(instance, {$remove: ['a']}); // => {b: 2}
 ```
 
 ### Swapping two list elements
 
 ```js
-const Type = list(Num);
-const instance = Type([1, 2, 3, 4]);
-const updated = Type.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3, 2, 4]
+const MyType = list(t.Number);
+const instance = MyType([1, 2, 3, 4]);
+const updated = MyType.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3, 2, 4]
 ```
 
 ### Adding other commands
@@ -663,7 +667,7 @@ t.update = function (instance, spec) {
 Returns a type's name:
 
 ```js
-getTypeName(Str); // => 'Str'
+t.getTypeName(String); // => 'String'
 ```
 
 If name is not specified, fallbacks according to [http://flowtype.org](http://flowtype.org)
@@ -673,8 +677,8 @@ If name is not specified, fallbacks according to [http://flowtype.org](http://fl
 Safe version of mixin, properties cannot be overwritten...
 
 ```js
-mixin({a: 1}, {b: 2}); // => {a: 1, b: 2}
-mixin({a: 1}, {a: 2}); // => throws
+t.mixin({a: 1}, {b: 2}); // => {a: 1, b: 2}
+t.mixin({a: 1}, {a: 2}); // => throws
 ```
 
 ...unless `override = true`

@@ -99,16 +99,14 @@ function getTypeName(constructor) {
 
 // configurable
 exports.fail = function fail(message) {
-  throw new TypeError(message);
+  throw new TypeError('[tcomb] ' + message);
 };
 
 function assert(guard, message) {
   if (guard !== true) {
-    exports.fail(message || 'assert failed');
+    exports.fail(message || 'Assert failed');
   }
 }
-
-var slice = Array.prototype.slice;
 
 // safe mixin: cannot override props unless specified
 function mixin(target, source, overwrite) {
@@ -117,7 +115,7 @@ function mixin(target, source, overwrite) {
     if (source.hasOwnProperty(k)) {
       if (overwrite !== true) {
         if (process.env.NODE_ENV !== 'production') {
-          assert(!target.hasOwnProperty(k), 'Cannot overwrite property ' + k + ' in mixin(' + stringify(target) + ', ' + stringify(source) + ')');
+          assert(!target.hasOwnProperty(k), 'Invalid call to mixin(): cannot overwrite property ' + stringify(k) + ' of target object');
         }
       }
       target[k] = source[k];
@@ -142,7 +140,7 @@ function shallowCopy(x) {
 function update(instance, spec) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isObject(spec), 'Invalid argument spec = ' + stringify(spec) + ' supplied to function update(instance, spec): expected an object');
+    assert(isObject(spec), 'Invalid argument spec = ' + stringify(spec) + ' supplied to function update(instance, spec): expected an object containing commands');
   }
 
   var value = shallowCopy(instance);
@@ -267,34 +265,34 @@ var Any = irreducible('Any', function () {
 
 var Nil = irreducible('Nil', isNil);
 
-var Str = irreducible('Str', isString);
+var Str = irreducible('String', isString);
 
-var Num = irreducible('Num', isNumber);
+var Num = irreducible('Number', isNumber);
 
-var Bool = irreducible('Bool', isBoolean);
+var Bool = irreducible('Boolean', isBoolean);
 
-var Arr = irreducible('Arr', isArray);
+var Arr = irreducible('Array', isArray);
 
-var Obj = irreducible('Obj', isObject);
+var Obj = irreducible('Object', isObject);
 
-var Func = irreducible('Func', isFunction);
+var Func = irreducible('Function', isFunction);
 
-var Err = irreducible('Err', function (x) {
+var Err = irreducible('Error', function (x) {
   return isInstanceOf(x, Error);
 });
 
-var Re = irreducible('Re', function (x) {
+var Re = irreducible('RegExp', function (x) {
   return isInstanceOf(x, RegExp);
 });
 
-var Dat = irreducible('Dat', function (x) {
+var Dat = irreducible('Date', function (x) {
   return isInstanceOf(x, Date);
 });
 
 function struct(props, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(dict(Str, Func).is(props), 'Invalid argument props = ' + stringify(props) + ' supplied to struct(props, name): expected a dictionary of types');
+    assert(dict(Str, Func).is(props), 'Invalid argument props = ' + stringify(props) + ' supplied to struct(props, name): expected a dictionary of tcomb types');
     assert(isTypeName(name), 'Invalid argument name = ' + stringify(props) + ' supplied to struct(props, name): expected a string');
   }
 
@@ -807,7 +805,7 @@ function func(domain, codomain, name) {
     }
 
     function fn() {
-      var args = slice.call(arguments);
+      var args = Array.prototype.slice.call(arguments);
       var len = curried ?
         args.length :
         domain.length;
@@ -853,14 +851,23 @@ mixin(exports, {
   Any: Any,
   Nil: Nil,
   Str: Str,
+  String: Str,
   Num: Num,
+  Number: Num,
   Bool: Bool,
+  Boolean: Bool,
   Arr: Arr,
+  Array: Arr,
   Obj: Obj,
+  Object: Obj,
   Func: Func,
+  Function: Func,
   Err: Err,
+  Error: Err,
   Re: Re,
+  RegExp: Re,
   Dat: Dat,
+  Date: Dat,
   irreducible: irreducible,
   struct: struct,
   enums: enums,
