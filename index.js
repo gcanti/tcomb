@@ -1,6 +1,14 @@
 'use strict';
 
+exports.options = {
+  verbose: true
+};
+
 function stringify(x) {
+  // set options.verbose = false to improve performances in development
+  if (!exports.options.verbose) {
+    return String(x);
+  }
   try { // handle "Converting circular structure to JSON" error
     return JSON.stringify(x, null, 2);
   } catch (e) {

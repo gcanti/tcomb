@@ -7,8 +7,14 @@
 > - [Documentation]
 > - [Internal]
 > - [Polish]
+> - [Experimental]
 
 **Note**: Gaps between patch versions are faulty/broken releases.
+
+## v2.0.1
+
+- **Experimental**
+  - added `options.verbose` (default `true`) to handle messages (set `options.verbose = false` to improve performances in development)
 
 ## v2.0.0
 
@@ -24,7 +30,7 @@
   - do not freeze if process.env.NODE_ENV === 'production' #103
   - func without currying #96 (thanks @tmcw)
   - remove useless exports #104
-  - drop bower support #101 
+  - drop bower support #101
   - remove useless exports
     * Type
     * slice

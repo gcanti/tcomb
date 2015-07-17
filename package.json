@@ -1,7 +1,7 @@
 {
   "name": "tcomb",
-  "version": "2.0.0",
-  "description": "Type checking for JavaScript",
+  "version": "2.0.1",
+  "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
   "scripts": {
     "lint": "eslint index.js",
