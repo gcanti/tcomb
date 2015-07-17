@@ -838,7 +838,7 @@ describe('struct', function () {
 
       throwsWithMessage(function () {
         struct({}, 1);
-      }, '[tcomb] Invalid argument name = {} supplied to struct(props, name): expected a string');
+      }, '[tcomb] Invalid argument name = 1 supplied to struct(props, name): expected a string');
 
     });
 
@@ -1824,27 +1824,6 @@ describe('ES6 classes', function () {
     throwsWithMessage(function () {
       f(1);
     }, '[tcomb] The value 1 is not an instance of Class');
-  });
-
-});
-
-describe('clone', function () {
-
-  var structuredClone = require('realistic-structured-clone');
-  var cloneDeep = require('lodash/lang/cloneDeep');
-  var T = t.struct({
-    name: t.String
-  }, 'T');
-  var instance = T({name: 'Giulio'});
-
-  it('should throw', function () {
-    throwsWithMessage(function () {
-      structuredClone(instance);
-    });
-  });
-
-  it('should not throw', function () {
-    var clone = structuredClone(cloneDeep(instance));
   });
 
 });

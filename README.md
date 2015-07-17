@@ -34,7 +34,7 @@ Write complex domain models in a breeze and with a small code footprint. tcomb s
 
 Instances are immutables by default using `Object.freeze`. This means you can use all the standard javascript objects and arrays. You don't have to change how you normally code.
 
-## Speed*
+## Speed
 
 `Object.freeze` and the asserts are executed only during development and stripped out in production (`process.env.NODE_ENV = 'production'`).
 

@@ -293,7 +293,7 @@ function struct(props, name) {
 
   if (process.env.NODE_ENV !== 'production') {
     assert(dict(Str, Func).is(props), 'Invalid argument props = ' + stringify(props) + ' supplied to struct(props, name): expected a dictionary of tcomb types');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(props) + ' supplied to struct(props, name): expected a string');
+    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to struct(props, name): expected a string');
   }
 
   var defaultName = '{' + Object.keys(props).map(function (prop) {
@@ -462,7 +462,7 @@ function enums(map, name) {
     assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to enums(map, name): expected a string');
   }
 
-  var defaultName = Object.keys(map).map(function (k) { return JSON.stringify(k); }).join(' | ');
+  var defaultName = Object.keys(map).map(function (k) { return stringify(k); }).join(' | ');
 
   var displayName = name || defaultName;
 
