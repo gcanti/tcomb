@@ -25,7 +25,7 @@ An *irreducible* type is a type that can't be built with other types. Examples o
 **JavaScript native types**
 
 * `t.String`: strings (short alias `t.Str`)
-* `t.Number`: numbers (short alias `t.Numr`)
+* `t.Number`: numbers (short alias `t.Num`)
 * `t.Boolean`: booleans (short alias `t.Bool`)
 * `t.Array`: arrays (short alias `t.Arr`)
 * `t.Object`: plain objects (short alias `t.Obj`)
