@@ -11,6 +11,12 @@
 
 **Note**: Gaps between patch versions are faulty/broken releases.
 
+## v2.1.0
+
+- **New Feature**
+  - added aliases for pre-defined irreducible types fix #112
+  - added overridable `stringify` function to handle error messages and improve performances in development (replaces the experimental `options.verbose`)
+
 ## v2.0.1
 
 - **Experimental**

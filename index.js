@@ -1,20 +1,14 @@
 'use strict';
 
-exports.options = {
-  verbose: true
-};
-
 function stringify(x) {
-  // set options.verbose = false to improve performances in development
-  if (!exports.options.verbose) {
-    return String(x);
-  }
   try { // handle "Converting circular structure to JSON" error
     return JSON.stringify(x, null, 2);
   } catch (e) {
     return String(x);
   }
 }
+
+exports.stringify = stringify;
 
 function isInstanceOf(x, constructor) {
   return x instanceof constructor;
@@ -81,7 +75,7 @@ function create(type, value) {
 
   if (process.env.NODE_ENV !== 'production') {
     // type should be a class constructor and value some instance, just check membership and return the value
-    assert(isInstanceOf(value, type), 'The value ' + stringify(value) + ' is not an instance of ' + getFunctionName(type));
+    assert(isInstanceOf(value, type), 'The value ' + exports.stringify(value) + ' is not an instance of ' + getFunctionName(type));
   }
 
   return value;
@@ -99,16 +93,14 @@ function getTypeName(constructor) {
 
 // configurable
 exports.fail = function fail(message) {
-  throw new TypeError(message);
+  throw new TypeError('[tcomb] ' + message);
 };
 
 function assert(guard, message) {
   if (guard !== true) {
-    exports.fail(message || 'assert failed');
+    exports.fail(message || 'Assert failed');
   }
 }
-
-var slice = Array.prototype.slice;
 
 // safe mixin: cannot override props unless specified
 function mixin(target, source, overwrite) {
@@ -117,7 +109,7 @@ function mixin(target, source, overwrite) {
     if (source.hasOwnProperty(k)) {
       if (overwrite !== true) {
         if (process.env.NODE_ENV !== 'production') {
-          assert(!target.hasOwnProperty(k), 'Cannot overwrite property ' + k + ' in mixin(' + stringify(target) + ', ' + stringify(source) + ')');
+          assert(!target.hasOwnProperty(k), 'Invalid call to mixin(): cannot overwrite property ' + exports.stringify(k) + ' of target object');
         }
       }
       target[k] = source[k];
@@ -142,7 +134,7 @@ function shallowCopy(x) {
 function update(instance, spec) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isObject(spec), 'Invalid argument spec = ' + stringify(spec) + ' supplied to function update(instance, spec): expected an object');
+    assert(isObject(spec), 'Invalid argument spec = ' + exports.stringify(spec) + ' supplied to function update(instance, spec): expected an object containing commands');
   }
 
   var value = shallowCopy(instance);
@@ -235,7 +227,7 @@ update.commands = {
 function irreducible(name, predicate) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isString(name), 'Invalid argument name = ' + stringify(name) + ' supplied to irreducible(name, predicate)');
+    assert(isString(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to irreducible(name, predicate)');
     assert(isFunction(predicate), 'Invalid argument predicate supplied to irreducible(name, predicate)');
   }
 
@@ -243,7 +235,7 @@ function irreducible(name, predicate) {
 
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Irreducible);
-      assert(predicate(value), 'Invalid argument value = ' + stringify(value) + ' supplied to irreducible type ' + name);
+      assert(predicate(value), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to irreducible type ' + name);
     }
 
     return value;
@@ -267,35 +259,35 @@ var Any = irreducible('Any', function () {
 
 var Nil = irreducible('Nil', isNil);
 
-var Str = irreducible('Str', isString);
+var Str = irreducible('String', isString);
 
-var Num = irreducible('Num', isNumber);
+var Num = irreducible('Number', isNumber);
 
-var Bool = irreducible('Bool', isBoolean);
+var Bool = irreducible('Boolean', isBoolean);
 
-var Arr = irreducible('Arr', isArray);
+var Arr = irreducible('Array', isArray);
 
-var Obj = irreducible('Obj', isObject);
+var Obj = irreducible('Object', isObject);
 
-var Func = irreducible('Func', isFunction);
+var Func = irreducible('Function', isFunction);
 
-var Err = irreducible('Err', function (x) {
+var Err = irreducible('Error', function (x) {
   return isInstanceOf(x, Error);
 });
 
-var Re = irreducible('Re', function (x) {
+var Re = irreducible('RegExp', function (x) {
   return isInstanceOf(x, RegExp);
 });
 
-var Dat = irreducible('Dat', function (x) {
+var Dat = irreducible('Date', function (x) {
   return isInstanceOf(x, Date);
 });
 
 function struct(props, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(dict(Str, Func).is(props), 'Invalid argument props = ' + stringify(props) + ' supplied to struct(props, name): expected a dictionary of types');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(props) + ' supplied to struct(props, name): expected a string');
+    assert(dict(Str, Func).is(props), 'Invalid argument props = ' + exports.stringify(props) + ' supplied to struct(props, name): expected a dictionary of tcomb types');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to struct(props, name): expected a string');
   }
 
   var defaultName = '{' + Object.keys(props).map(function (prop) {
@@ -311,7 +303,7 @@ function struct(props, name) {
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isObject(value), 'Invalid argument value = ' + stringify(value) + ' supplied to struct ' + displayName + ': expected an object');
+      assert(isObject(value), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to struct ' + displayName + ': expected an object');
     }
 
     if (!isInstanceOf(this, Struct)) { // makes `new` optional
@@ -354,7 +346,7 @@ function struct(props, name) {
         return x;
       }
       if (process.env.NODE_ENV !== 'production') {
-        assert(isStruct(x), 'Invalid argument structs[' + i + '] = ' + stringify(structs[i]) + ' supplied to ' + displayName + '.extend(structs, name)');
+        assert(isStruct(x), 'Invalid argument structs[' + i + '] = ' + exports.stringify(structs[i]) + ' supplied to ' + displayName + '.extend(structs, name)');
       }
       return x.meta.props;
     });
@@ -370,8 +362,8 @@ function struct(props, name) {
 function union(types, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isArray(types) && types.every(isFunction) && types.length >= 2, 'Invalid argument types = ' + stringify(types) + ' supplied to union(types, name): expected an array of at least 2 types');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to union(types, name): expected a string');
+    assert(isArray(types) && types.every(isFunction) && types.length >= 2, 'Invalid argument types = ' + exports.stringify(types) + ' supplied to union(types, name): expected an array of at least 2 types');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to union(types, name): expected a string');
   }
 
   var defaultName = types.map(getTypeName).join(' | ');
@@ -422,7 +414,7 @@ function union(types, name) {
 function maybe(type, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(type), 'Invalid argument type = ' + stringify(type) + ' supplied to maybe(type, name): expected a type');
+    assert(isFunction(type), 'Invalid argument type = ' + exports.stringify(type) + ' supplied to maybe(type, name): expected a type');
   }
 
   if (isMaybe(type) || type === Any || type === Nil) { // makes the combinator idempotent and handle Any, Nil
@@ -430,7 +422,7 @@ function maybe(type, name) {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to maybe(type, name): expected a string');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to maybe(type, name): expected a string');
   }
 
   name = name || ('?' + getTypeName(type));
@@ -460,18 +452,18 @@ function maybe(type, name) {
 function enums(map, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isObject(map), 'Invalid argument map = ' + stringify(map) + ' supplied to enums(map, name): expected a hash of strings / numbers');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to enums(map, name): expected a string');
+    assert(isObject(map), 'Invalid argument map = ' + exports.stringify(map) + ' supplied to enums(map, name): expected a hash of strings / numbers');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to enums(map, name): expected a string');
   }
 
-  var defaultName = Object.keys(map).map(function (k) { return JSON.stringify(k); }).join(' | ');
+  var defaultName = Object.keys(map).map(function (k) { return exports.stringify(k); }).join(' | ');
 
   var displayName = name || defaultName;
 
   function Enums(value) {
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Enums);
-      assert(Enums.is(value), 'Invalid argument value = ' + stringify(value) + ' supplied to enums ' + displayName + ': expected one of ' + stringify(Object.keys(map)));
+      assert(Enums.is(value), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to enums ' + displayName + ': expected one of ' + exports.stringify(Object.keys(map)));
     }
     return value;
   }
@@ -503,8 +495,8 @@ enums.of = function (keys, name) {
 function tuple(types, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isArray(types) && types.every(isFunction), 'Invalid argument types = ' + stringify(types) + ' supplied to tuple(types, name): expected an array of types');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to tuple(types, name): expected a string');
+    assert(isArray(types) && types.every(isFunction), 'Invalid argument types = ' + exports.stringify(types) + ' supplied to tuple(types, name): expected an array of types');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to tuple(types, name): expected a string');
   }
 
   var defaultName = '[' + types.map(getTypeName).join(', ') + ']';
@@ -520,7 +512,7 @@ function tuple(types, name) {
   function Tuple(value) {
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isArray(value) && value.length === types.length, 'Invalid argument value = ' + stringify(value) + ' supplied to tuple ' + displayName + ': expected an array of length ' + types.length);
+      assert(isArray(value) && value.length === types.length, 'Invalid argument value = ' + exports.stringify(value) + ' supplied to tuple ' + displayName + ': expected an array of length ' + types.length);
     }
 
     if (isTuple(value)) { // makes Tuple idempotent
@@ -569,9 +561,9 @@ function tuple(types, name) {
 function subtype(type, predicate, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(type), 'Invalid argument type = ' + stringify(type) + ' supplied to subtype(type, predicate, name): expected a type');
+    assert(isFunction(type), 'Invalid argument type = ' + exports.stringify(type) + ' supplied to subtype(type, predicate, name): expected a type');
     assert(isFunction(predicate), 'Invalid argument predicate supplied to subtype(type, predicate, name): expected a function');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to subtype(type, predicate, name): expected a string');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to subtype(type, predicate, name): expected a string');
   }
 
   var defaultName = '{' + getTypeName(type) + ' | ' + getFunctionName(predicate) + '}';
@@ -587,7 +579,7 @@ function subtype(type, predicate, name) {
     var x = create(type, value);
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(predicate(x), 'Invalid argument value = ' + stringify(value) + ' supplied to subtype ' + displayName);
+      assert(predicate(x), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to subtype ' + displayName);
     }
 
     return x;
@@ -616,8 +608,8 @@ function subtype(type, predicate, name) {
 function list(type, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(type), 'Invalid argument type = ' + stringify(type) + ' supplied to list(type, name): expected a type');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to list(type, name): expected a string');
+    assert(isFunction(type), 'Invalid argument type = ' + exports.stringify(type) + ' supplied to list(type, name): expected a type');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to list(type, name): expected a string');
   }
 
   var defaultName = 'Array<' + getTypeName(type) + '>';
@@ -633,7 +625,7 @@ function list(type, name) {
   function List(value) {
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isArray(value), 'Invalid argument value = ' + stringify(value) + ' supplied to list ' + displayName);
+      assert(isArray(value), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to list ' + displayName);
     }
 
     if (isList(value)) { // makes List idempotent
@@ -677,9 +669,9 @@ function list(type, name) {
 function dict(domain, codomain, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(domain), 'Invalid argument domain = ' + stringify(domain) + ' supplied to dict(domain, codomain, name): expected a type');
-    assert(isFunction(codomain), 'Invalid argument codomain = ' + stringify(codomain) + ' supplied to dict(domain, codomain, name): expected a type');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to dict(domain, codomain, name): expected a string');
+    assert(isFunction(domain), 'Invalid argument domain = ' + exports.stringify(domain) + ' supplied to dict(domain, codomain, name): expected a type');
+    assert(isFunction(codomain), 'Invalid argument codomain = ' + exports.stringify(codomain) + ' supplied to dict(domain, codomain, name): expected a type');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to dict(domain, codomain, name): expected a string');
   }
 
   var defaultName = '{[key: ' + getTypeName(domain) + ']: ' + getTypeName(codomain) + '}';
@@ -700,7 +692,7 @@ function dict(domain, codomain, name) {
   function Dict(value) {
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isObject(value), 'Invalid argument value = ' + stringify(value) + ' supplied to dict ' + displayName);
+      assert(isObject(value), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to dict ' + displayName);
     }
 
     if (isDict(value)) { // makes Dict idempotent
@@ -755,9 +747,9 @@ function func(domain, codomain, name) {
   domain = isArray(domain) ? domain : [domain]; // handle handy syntax for unary functions
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(list(Func).is(domain), 'Invalid argument domain = ' + stringify(domain) + ' supplied to func(domain, codomain, name): expected an array of types');
-    assert(isFunction(codomain), 'Invalid argument codomain = ' + stringify(codomain) + ' supplied to func(domain, codomain, name): expected a type');
-    assert(isTypeName(name), 'Invalid argument name = ' + stringify(name) + ' supplied to func(domain, codomain, name): expected a string');
+    assert(list(Func).is(domain), 'Invalid argument domain = ' + exports.stringify(domain) + ' supplied to func(domain, codomain, name): expected an array of types');
+    assert(isFunction(codomain), 'Invalid argument codomain = ' + exports.stringify(codomain) + ' supplied to func(domain, codomain, name): expected a type');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to func(domain, codomain, name): expected a string');
   }
 
   var defaultName = '(' + domain.map(getTypeName).join(', ') + ') => ' + getTypeName(codomain);
@@ -771,7 +763,7 @@ function func(domain, codomain, name) {
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(FuncType.is(value), 'Invalid argument value = ' + stringify(value) + ' supplied to func ' + displayName);
+      assert(FuncType.is(value), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to func ' + displayName);
     }
 
     return value;
@@ -799,7 +791,7 @@ function func(domain, codomain, name) {
 
     if (process.env.NODE_ENV !== 'production') {
       assert(isFunction(f), 'Invalid argument f supplied to func.of ' + displayName + ': expected a function');
-      assert(isNil(curried) || isBoolean(curried), 'Invalid argument curried = ' + stringify(curried) + ' supplied to func.of ' + displayName + ': expected a boolean');
+      assert(isNil(curried) || isBoolean(curried), 'Invalid argument curried = ' + exports.stringify(curried) + ' supplied to func.of ' + displayName + ': expected a boolean');
     }
 
     if (FuncType.is(f)) { // makes FuncType.of idempotent
@@ -807,7 +799,7 @@ function func(domain, codomain, name) {
     }
 
     function fn() {
-      var args = slice.call(arguments);
+      var args = Array.prototype.slice.call(arguments);
       var len = curried ?
         args.length :
         domain.length;
@@ -843,7 +835,6 @@ function func(domain, codomain, name) {
 }
 
 mixin(exports, {
-  stringify: stringify,
   is: is,
   isType: isType,
   getTypeName: getTypeName,
@@ -853,14 +844,23 @@ mixin(exports, {
   Any: Any,
   Nil: Nil,
   Str: Str,
+  String: Str,
   Num: Num,
+  Number: Num,
   Bool: Bool,
+  Boolean: Bool,
   Arr: Arr,
+  Array: Arr,
   Obj: Obj,
+  Object: Obj,
   Func: Func,
+  Function: Func,
   Err: Err,
+  Error: Err,
   Re: Re,
+  RegExp: Re,
   Dat: Dat,
+  Date: Dat,
   irreducible: irreducible,
   struct: struct,
   enums: enums,

@@ -1,5 +1,4 @@
 .*
 *.log
-Gruntfile.js
 node_modules
 test
