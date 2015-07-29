@@ -14,8 +14,8 @@
 ## v2.1.0
 
 - **New Feature**
-  - Added aliases for pre-defined irreducible types #112
-  - added `options.verbose` (default `true`) to handle messages (set `options.verbose = false` to improve performances in development)
+  - added aliases for pre-defined irreducible types fix #112
+  - added overridable `stringify` function to handle error messages and improve performances in development (replaces the experimental `options.verbose`)
 
 ## v2.0.1
 

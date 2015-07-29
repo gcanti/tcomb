@@ -8,11 +8,11 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 
 ## Lightweight
 
-3.35KB gzipped.
+3KB gzipped.
 
 ## Domain Driven Design
 
-Write complex domain models in a breeze and with a small code footprint. tcomb supports:
+Write complex domain models in a breeze and with a small code footprint. Supported types:
 
 * user defined types
 * structs
@@ -30,21 +30,53 @@ Write complex domain models in a breeze and with a small code footprint. tcomb s
 - [JavaScript, Types and Sets - Part I](https://gcanti.github.io/2014/09/29/javascript-types-and-sets.html)
 - [JavaScript, Types and Sets - Part II](https://gcanti.github.io/2014/10/07/javascript-types-and-sets-part-II.html)
 
-## Immutability
+## Safety
 
-Instances are immutables by default using `Object.freeze`. This means you can use all the standard javascript objects and arrays. You don't have to change how you normally code.
+All models defined by tcomb are type checked (using a built-in `assert(guard, [message])` function).
+
+## Immutability and immutability helpers
+
+Instances are immutables by default using `Object.freeze`. This means you can use standard JavaScript objects and arrays. You don't have to change how you normally code. You can update an immutable instance with the provided `update` function:
+
+```js
+MyType.update(instance, spec)
+```
+
+The following commands are compatible with the [Facebook Immutability Helpers](http://facebook.github.io/react/docs/update.html):
+
+* `$push`
+* `$unshift`
+* `$splice`
+* `$set`
+* `$apply`
+* `$merge`
 
 ## Speed
 
-`Object.freeze` and the asserts are executed only during development and stripped out in production (`process.env.NODE_ENV = 'production'`).
+`Object.freeze` and the asserts are executed only during development and stripped out in production (using `process.env.NODE_ENV = 'production'` tests).
 
 ## Debugging with Chrome DevTools
 
 You can customize the behaviour when an assert fails leveraging the power of Chrome DevTools.
 
+```js
+import t from 'tcomb';
+
+// default behaviour
+t.fail = function fail(message) {
+  throw new TypeError('[tcomb] ' + message); // set "Pause on exceptions" on the "Sources" panel
+};
+
+// .. or define your own handler
+t.fail = function fail(message) {
+  debugger; // starts the Chrome DevTools debugger
+  throw new TypeError('[tcomb] ' + message);
+};
+```
+
 ## Runtime type introspection
 
-Every model written with tcomb is inspectable at runtime. You can reuse the informations stored in your types. See:
+Every model is inspectable at runtime. You can read and reuse the informations stored in your types (in a `meta` object). See:
 
 - [tcomb-validation](https://github.com/gcanti/tcomb-validation)
 - [tcomb-form](https://github.com/gcanti/tcomb-form)
@@ -56,7 +88,7 @@ Encodes / decodes your domain models to / from JSON for free. See:
 
 - [JSON Deserialization Into An Object Model](https://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
 
-# Quick example
+# Code example
 
 ```js
 import t from 'tcomb';

@@ -587,7 +587,7 @@ t.func([t.Number, t.Number], t.Number).is(func(t.Number, t.Number).of(id));     
 
 ## Updating immutable instances
 
-You can update an immutable instance with the `update` static function provided to all types:
+You can update an immutable instance with the provided `update` function:
 
 ```js
 MyType.update(instance, spec)
@@ -595,12 +595,12 @@ MyType.update(instance, spec)
 
 The following commands are compatible with the [Facebook Immutability Helpers](http://facebook.github.io/react/docs/update.html):
 
-* $push
-* $unshift
-* $splice
-* $set
-* $apply
-* $merge
+* `$push`
+* `$unshift`
+* `$splice`
+* `$set`
+* `$apply`
+* `$merge`
 
 Example:
 
@@ -682,3 +682,12 @@ t.mixin({a: 1}, {a: 2}); // => throws
 ```
 
 ...unless `override = true`
+
+## stringify(x: any): String
+
+Used internally to format the error messages. Since it uses by default `JSON.stringify` and can be slow in a performance intensive application so you may want to override it:
+
+```js
+// override with a less verbose but much faster function
+t.stringify = String;
+```
