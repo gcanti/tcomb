@@ -233,7 +233,7 @@ describe('update', function () {
         a: 1,
         b: 'one',
         c: [1000, 1000000]
-      },{
+      }, {
         a: 2,
         b: 'two',
         c: [2000, 2000000]
@@ -322,13 +322,13 @@ describe('assert', function () {
 
   it('should throw a default message', function () {
     throwsWithMessage(function () {
-      assert(1 === 2);
+      assert(1 === 2); // eslint-disable-line
     }, '[tcomb] Assert failed');
   });
 
   it('should throw the specified message', function () {
     throwsWithMessage(function () {
-      assert(1 === 2, 'my message');
+      assert(1 === 2, 'my message'); // eslint-disable-line
     }, '[tcomb] my message');
   });
 
@@ -342,7 +342,7 @@ describe('assert', function () {
       }
     };
     doesNotThrow(function () {
-      assert(1 === 2, 'report error');
+      assert(1 === 2, 'report error'); // eslint-disable-line
     });
     t.fail = fail;
   });
@@ -458,9 +458,7 @@ describe('t.Any', function () {
 
     it('should throw if used with new', function () {
       throwsWithMessage(function () {
-        /* jshint ignore:start */
-        var x = new T();
-        /* jshint ignore:end */
+        var x = new T(); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate a type Any');
     });
 
@@ -520,9 +518,7 @@ describe('irreducible types constructors', function () {
 
     it('should throw if used with new', function () {
       throwsWithMessage(function () {
-        /* jshint ignore:start */
-        var x = new T();
-        /* jshint ignore:end */
+        var x = new T(); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate a type ' + getTypeName(T));
     });
 
@@ -590,9 +586,7 @@ describe('t.Number', function () {
     it('should return true when x is a number', function () {
       ok(t.Number.is(0));
       ok(t.Number.is(1));
-      /* jshint ignore:start */
-      ko(t.Number.is(new Number(1)));
-      /* jshint ignore:end */
+      ko(t.Number.is(new Number(1))); // eslint-disable-line
     });
 
     it('should return false when x is not a number', function () {
@@ -624,7 +618,7 @@ describe('t.String', function () {
       ok(t.String.is(''));
       ok(t.String.is('a'));
       /* jshint ignore:start */
-      ko(t.String.is(new String('a')));
+      ko(t.String.is(new String('a'))); // eslint-disable-line
       /* jshint ignore:end */
     });
 
@@ -707,9 +701,7 @@ describe('Func', function () {
 
     it('should return true when x is a function', function () {
       ok(t.Function.is(noop));
-      /* jshint ignore:start */
-      ok(t.Function.is(new Function()));
-      /* jshint ignore:end */
+      ok(t.Function.is(new Function())); // eslint-disable-line
     });
 
     it('should return false when x is not a function', function () {
@@ -719,11 +711,9 @@ describe('Func', function () {
       ko(t.Function.is(''));
       ko(t.Function.is([]));
       ko(t.Function.is({}));
-      /* jshint ignore:start */
-      ko(t.Function.is(new String('1')));
-      ko(t.Function.is(new Number(1)));
-      ko(t.Function.is(new Boolean()));
-      /* jshint ignore:end */
+      ko(t.Function.is(new String('1'))); // eslint-disable-line
+      ko(t.Function.is(new Number(1))); // eslint-disable-line
+      ko(t.Function.is(new Boolean())); // eslint-disable-line
       ko(t.Function.is(/a/));
       ko(t.Function.is(new RegExp('a')));
       ko(t.Function.is(new Error()));
@@ -748,11 +738,9 @@ describe('Err', function () {
       ko(t.Error.is(0));
       ko(t.Error.is(''));
       ko(t.Error.is([]));
-      /* jshint ignore:start */
-      ko(t.Error.is(new String('1')));
-      ko(t.Error.is(new Number(1)));
-      ko(t.Error.is(new Boolean()));
-      /* jshint ignore:end */
+      ko(t.Error.is(new String('1'))); // eslint-disable-line
+      ko(t.Error.is(new Number(1))); // eslint-disable-line
+      ko(t.Error.is(new Boolean())); // eslint-disable-line
       ko(t.Error.is(/a/));
       ko(t.Error.is(new RegExp('a')));
       ko(t.Error.is(new Date()));
@@ -777,11 +765,9 @@ describe('Re', function () {
       ko(t.RegExp.is(0));
       ko(t.RegExp.is(''));
       ko(t.RegExp.is([]));
-      /* jshint ignore:start */
-      ko(t.RegExp.is(new String('1')));
-      ko(t.RegExp.is(new Number(1)));
-      ko(t.RegExp.is(new Boolean()));
-      /* jshint ignore:end */
+      ko(t.RegExp.is(new String('1'))); // eslint-disable-line
+      ko(t.RegExp.is(new Number(1))); // eslint-disable-line
+      ko(t.RegExp.is(new Boolean())); // eslint-disable-line
       ko(t.RegExp.is(new Error()));
       ko(t.RegExp.is(new Date()));
     });
@@ -804,11 +790,9 @@ describe('Dat', function () {
       ko(t.Date.is(0));
       ko(t.Date.is(''));
       ko(t.Date.is([]));
-      /* jshint ignore:start */
-      ko(t.Date.is(new String('1')));
-      ko(t.Date.is(new Number(1)));
-      ko(t.Date.is(new Boolean()));
-      /* jshint ignore:end */
+      ko(t.Date.is(new String('1'))); // eslint-disable-line
+      ko(t.Date.is(new Number(1))); // eslint-disable-line
+      ko(t.Date.is(new Boolean())); // eslint-disable-line
       ko(t.Date.is(new Error()));
       ko(t.Date.is(/a/));
       ko(t.Date.is(new RegExp('a')));
@@ -939,13 +923,13 @@ describe('struct', function () {
         return this.area() * this.l;
       };
 
-      assert('function' === typeof Rectangle.prototype.area);
-      assert('function' === typeof Cube.prototype.area);
+      assert(typeof Rectangle.prototype.area === 'function');
+      assert(typeof Cube.prototype.area === 'function');
       assert(undefined === Rectangle.prototype.volume);
-      assert('function' === typeof Cube.prototype.volume);
+      assert(typeof Cube.prototype.volume === 'function');
       assert(Cube.prototype.constructor === Cube);
 
-      var c = new Cube({w:2, h:2, l:2});
+      var c = new Cube({w: 2, h: 2, l: 2});
       eq(c.volume(), 8);
     });
 
@@ -981,9 +965,7 @@ describe('enums', function () {
 
     it('should throw if used with new', function () {
       throwsWithMessage(function () {
-        /* jshint ignore:start */
-        var x = new T('a');
-        /* jshint ignore:end */
+        var x = new T('a'); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate a type T');
     });
 
@@ -1123,9 +1105,7 @@ describe('union', function () {
       throwsWithMessage(function () {
         var T = union([t.String, t.Number], 'T');
         T.dispatch = function () { return t.String; };
-        /* jshint ignore:start */
-        var x = new T('a');
-        /* jshint ignore:end */
+        var x = new T('a'); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate a type T');
     });
 
@@ -1195,10 +1175,8 @@ describe('maybe', function () {
 
     it('should throw if used with new', function () {
       throwsWithMessage(function () {
-        /* jshint ignore:start */
         var T = maybe(t.String, 'T');
-        var x = new T();
-        /* jshint ignore:end */
+        var x = new T(); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate a type T');
     });
 
@@ -1448,10 +1426,8 @@ describe('subtype', function () {
 
     it('should throw if used with new and a type that is not instantiable with new', function () {
       throwsWithMessage(function () {
-        /* jshint ignore:start */
         var T = subtype(t.String, function () { return true; }, 'T');
-        var x = new T();
-        /* jshint ignore:end */
+        var x = new T(); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate a type T');
     });
 
