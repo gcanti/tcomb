@@ -411,6 +411,51 @@ function union(types, name) {
   return Union;
 }
 
+function intersection(types, name) {
+
+  if (process.env.NODE_ENV !== 'production') {
+    assert(isArray(types) && types.every(isFunction) && types.length >= 2, 'Invalid argument types = ' + exports.stringify(types) + ' supplied to intersection(types, name): expected an array of at least 2 types');
+    assert(isTypeName(name), 'Invalid argument name = ' + exports.stringify(name) + ' supplied to intersection(types, name): expected a string');
+  }
+
+  var defaultName = types.map(getTypeName).join(' & ');
+
+  var displayName = name || defaultName;
+
+  function Intersection(value) {
+
+    if (process.env.NODE_ENV !== 'production') {
+      forbidNewOperator(this, Intersection);
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      assert(Intersection.is(value), 'Invalid argument value = ' + exports.stringify(value) + ' supplied to intersection ' + displayName);
+    }
+
+    return value;
+  }
+
+  Intersection.meta = {
+    kind: 'intersection',
+    types: types,
+    name: name
+  };
+
+  Intersection.displayName = displayName;
+
+  Intersection.is = function (x) {
+    return types.every(function (type) {
+      return is(x, type);
+    });
+  };
+
+  Intersection.update = function (instance, spec) {
+    return Intersection(exports.update(instance, spec));
+  };
+
+  return Intersection;
+}
+
 function maybe(type, name) {
 
   if (process.env.NODE_ENV !== 'production') {
@@ -870,5 +915,6 @@ mixin(exports, {
   subtype: subtype,
   list: list,
   dict: dict,
-  func: func
+  func: func,
+  intersection: intersection
 });

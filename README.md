@@ -52,6 +52,7 @@ Write complex domain models in a breeze and with a small code footprint. Support
 * enums
 * subtypes
 * unions
+* intersections
 * the option type
 * tuples
 * dictionaries
