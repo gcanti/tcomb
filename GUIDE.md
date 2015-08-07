@@ -446,11 +446,11 @@ MinMax.is('abc'); // => true
 MinMax.is('a'); // => false
 ```
 
-Unions have the following `meta` object:
+Intersections have the following `meta` object:
 
 ```js
 {
-  kind: 'union',
+  kind: 'intersection',
   types: types
 }
 ```
