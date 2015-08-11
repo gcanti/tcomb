@@ -430,6 +430,31 @@ const key = ReactKey('a');
 
 tcomb provides a default implementation of `dispatch` which you can override.
 
+## The intersection combinator
+
+You can define an intersection of types using the `intersection(types, name)` combinator where:
+
+* `types` is a list of types
+* `name` is an optional string useful for debugging purposes
+
+```js
+const Min = t.subtype(t.String, function (s) { return s.length > 2; }, 'Min');
+const Max = t.subtype(t.String, function (s) { return s.length < 5; }, 'Max');
+const MinMax = t.intersection([Min, Max], 'MinMax');
+
+MinMax.is('abc'); // => true
+MinMax.is('a'); // => false
+```
+
+Intersections have the following `meta` object:
+
+```js
+{
+  kind: 'intersection',
+  types: types
+}
+```
+
 ## The maybe combinator
 
 In tcomb optional values of type `T` can be represented by `union([Nil, T])`. Since it's very common to handle optional values, tcomb provide an ad-hoc combinator.

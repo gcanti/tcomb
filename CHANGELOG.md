@@ -11,6 +11,11 @@
 
 **Note**: Gaps between patch versions are faulty/broken releases.
 
+## v2.2.0
+
+- **New Feature**
+  - added `intersection` combinator fix #111
+
 ## v2.1.0
 
 - **New Feature**
