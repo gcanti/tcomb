@@ -16,6 +16,21 @@
 - **New Feature**
   - added `intersection` combinator fix #111
 
+    **Example**
+
+    ```js
+    const Min = t.subtype(t.String, function (s) { return s.length > 2; }, 'Min');
+    const Max = t.subtype(t.String, function (s) { return s.length < 5; }, 'Max');
+    const MinMax = t.intersection([Min, Max], 'MinMax');
+
+    MinMax.is('abc'); // => true
+    MinMax.is('a'); // => false
+    MinMax.is('abcde'); // => false
+    ```
+
+- **Internal**
+  - optimised the generation of default names for types
+
 ## v2.1.0
 
 - **New Feature**

@@ -444,6 +444,7 @@ const MinMax = t.intersection([Min, Max], 'MinMax');
 
 MinMax.is('abc'); // => true
 MinMax.is('a'); // => false
+MinMax.is('abcde'); // => false
 ```
 
 Intersections have the following `meta` object:
