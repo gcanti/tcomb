@@ -1,10 +1,11 @@
 {
   "name": "tcomb",
-  "version": "1.0.3",
-  "description": "Type checking for JavaScript",
+  "version": "1.1.0",
+  "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
   "scripts": {
-    "cover": "istanbul cover _mocha -- --ui bdd -R dot"
+    "build": "grunt build",
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
