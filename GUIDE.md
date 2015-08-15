@@ -7,7 +7,7 @@ npm install tcomb
 ```
 
 ```js
-import t from 'tcomb';
+var t = require('tcomb');
 ```
 
 # The idea
@@ -46,7 +46,7 @@ There are 2 additional irriducible types defined in tcomb:
 Every type defined with tcomb owns a static predicate `is(x: any) -> boolean` useful for type checking:
 
 ```js
-const t = require('tcomb');
+var t = require('tcomb');
 
 t.String.is('a string'); // => true
 t.String.is(1);          // => false
@@ -70,8 +70,8 @@ assert(t.String.is(1)); // => throws
 * `message` optional string useful for debugging
 
 ```js
-const x = -2;
-const min = 0;
+var x = -2;
+var min = 0;
 // throws "-2 should be greater then 0"
 assert(x > min, `${x} should be greater then ${min}`);
 ```
@@ -79,8 +79,8 @@ assert(x > min, `${x} should be greater then ${min}`);
 Another way to ensure the correct type is to use types as constructors:
 
 ```js
-const s1 = t.String('a string'); // => ok
-const s2 = t.String(1); // => throws
+var s1 = t.String('a string'); // => ok
+var s2 = t.String(1); // => throws
 ```
 
 ## Adding safety to legacy code
@@ -94,7 +94,7 @@ function Point (x, y) {
   this.y = y;
 }
 
-const p = new Point(1, 'a'); // silent error
+var p = new Point(1, 'a'); // silent error
 
 // Now with asserts inserted:
 
@@ -103,7 +103,7 @@ function Point (x, y) {
   this.y = t.Number(y);
 }
 
-const p = new Point(1, 'a'); // => throws
+var p = new Point(1, 'a'); // => throws
 ```
 
 ## Defining new irreducibles
@@ -111,10 +111,10 @@ const p = new Point(1, 'a'); // => throws
 To define your own irreducible types use the `t.irreducible(name: string, predicate: (x: any) => boolean)` combinator:
 
 ```js
-const t = require('tcomb');
-const React = require('react');
+var t = require('tcomb');
+var React = require('react');
 
-const ReactElement = t.irreducible('ReactElement', React.isValidElement);
+var ReactElement = t.irreducible('ReactElement', React.isValidElement);
 
 ReactElement.is(<div/>); // => true
 ```
@@ -157,7 +157,7 @@ Example:
 
 ```js
 // defines a type representing positive numbers
-const Positive = t.subtype(t.Number, (n) => n >= 0, 'Positive');
+var Positive = t.subtype(t.Number, (n) => n >= 0, 'Positive');
 
 Positive.is(1);  // => true
 Positive.is(-1); // => false
@@ -181,7 +181,7 @@ You can define an enum type using the `enums(map: Object, name?: string)` combin
 * `name` is an optional string useful for debugging purposes
 
 ```js
-const Country = t.enums({
+var Country = t.enums({
   IT: 'Italy',
   US: 'United States'
 }, 'Country');
@@ -206,13 +206,13 @@ If you don't care of values you can use `enums.of(keys, name?)` where:
 
 ```js
 // values will mirror the keys
-const Country = t.enums.of('IT US', 'Country');
+var Country = t.enums.of('IT US', 'Country');
 
 // same as
-const Country = t.enums.of(['IT', 'US'], 'Country');
+var Country = t.enums.of(['IT', 'US'], 'Country');
 
 // same as
-const Country = t.enums({
+var Country = t.enums({
   IT: 'IT',
   US: 'US'
 }, 'Country');
@@ -226,13 +226,13 @@ You can define a struct type using the `struct(props, name?)` combinator where:
 * `name` is an optional string useful for debugging purposes
 
 ```js
-const Point = t.struct({
+var Point = t.struct({
   x: t.Number,
   y: t.Number
 }, 'Point');
 
 // constructor usage, `p` is immutable, new is optional
-const p = new Point({x: 1, y: 2});
+var p = new Point({x: 1, y: 2});
 
 Point.is(p); // => true
 ```
@@ -266,20 +266,20 @@ Every struct constructor owns an `extend(mixins, name)` function where:
 *   `name` the name of the new struct
 
 ```js
-const Point3D = Point.extend({z: t.Number}, 'Point3D');
+var Point3D = Point.extend({z: t.Number}, 'Point3D');
 
 // multiple inheritance
-const A = struct({...});
-const B = struct({...});
-const MixinC = {...};
-const MixinD = {...};
-const E = A.extend([B, MixinC, MixinD]);
+var A = struct({...});
+var B = struct({...});
+var MixinC = {...};
+var MixinD = {...};
+var E = A.extend([B, MixinC, MixinD]);
 ```
 
 `extend` supports **prototypal inheritance**:
 
 ```js
-const Rectangle = t.struct({
+var Rectangle = t.struct({
   width: t.Number,
   height: t.Number
 });
@@ -288,7 +288,7 @@ Rectangle.prototype.getArea = function () {
   return this.width * this.height;
 };
 
-const Cube = Rectangle.extend({
+var Cube = Rectangle.extend({
   thickness: t.Number
 });
 
@@ -301,7 +301,7 @@ Cube.prototype.getVolume = function () {
 > **Note**. Repeated props are not allowed:
 
 ```js
-const Wrong = Point.extend({x: t.Number}); // => throws
+var Wrong = Point.extend({x: t.Number}); // => throws
 ```
 
 ## The tuple combinator
@@ -314,10 +314,10 @@ You can define a tuple type using the `tuple(types, name)` combinator where:
 Instances of tuples are plain old JavaScript arrays.
 
 ```js
-const Area = t.tuple([t.Number, t.Number]);
+var Area = t.tuple([t.Number, t.Number]);
 
 // constructor usage, `area` is immutable
-const area = Area([1, 2]);
+var area = Area([1, 2]);
 ```
 
 Tuples have the following `meta` object:
@@ -339,10 +339,10 @@ You can define a list type using the `list(type, name)` combinator where:
 Instances of lists are plain old JavaScript arrays.
 
 ```js
-const Path = t.list(Point);
+var Path = t.list(Point);
 
 // costructor usage, `path` is immutable
-const path = Path([
+var path = Path([
   {x: 0, y: 0}, // tcomb hydrates automatically using the `Point` constructor
   {x: 1, y: 1}
 ]);
@@ -368,10 +368,10 @@ You can define a dictionary type using the `dict(domain, codomain, name)` combin
 Instances of dicts are plain old JavaScript objects.
 
 ```js
-const Tel = dict(String, t.Number);
+var Tel = dict(String, t.Number);
 
 // costructor usage, `tel` is immutable
-const tel = Tel({'jack': 4098, 'sape': 4139});
+var tel = Tel({'jack': 4098, 'sape': 4139});
 ```
 
 Dicts have the following `meta` object:
@@ -392,7 +392,7 @@ You can define a union of types using the `union(types, name)` combinator where:
 * `name` is an optional string useful for debugging purposes
 
 ```js
-const ReactKey = t.union([t.String, t.Number]);
+var ReactKey = t.union([t.String, t.Number]);
 
 ReactKey.is('a');  // => true
 ReactKey.is(1);    // => true
@@ -425,7 +425,7 @@ ReactKey.dispatch = function (x) {
 };
 
 // now you can do this without a fail
-const key = ReactKey('a');
+var key = ReactKey('a');
 ```
 
 tcomb provides a default implementation of `dispatch` which you can override.
@@ -438,9 +438,9 @@ You can define an intersection of types using the `intersection(types, name)` co
 * `name` is an optional string useful for debugging purposes
 
 ```js
-const Min = t.subtype(t.String, function (s) { return s.length > 2; }, 'Min');
-const Max = t.subtype(t.String, function (s) { return s.length < 5; }, 'Max');
-const MinMax = t.intersection([Min, Max], 'MinMax');
+var Min = t.subtype(t.String, function (s) { return s.length > 2; }, 'Min');
+var Max = t.subtype(t.String, function (s) { return s.length < 5; }, 'Max');
+var MinMax = t.intersection([Min, Max], 'MinMax');
 
 MinMax.is('abc'); // => true
 MinMax.is('a'); // => false
@@ -467,7 +467,7 @@ You can define a maybe type using the `maybe(type, name)` combinator where:
 
 ```js
 // the value of a radio input where null = no selection
-const Radio = t.maybe(t.String);
+var Radio = t.maybe(t.String);
 
 Radio.is('a');     // => true
 Radio.is(null);    // => true
@@ -489,7 +489,7 @@ Typed functions may be defined like this:
 
 ```js
 // add takes two `t.Number`s and returns a `t.Number`
-const add = t.func([t.Number, t.Number], t.Number)
+var add = t.func([t.Number, t.Number], t.Number)
     .of(function (x, y) { return x + y; });
 ```
 
@@ -515,27 +515,27 @@ Returns a function type whose functions have their domain and codomain specified
 
 ```js
 // An `A` takes a `t.String` and returns an `t.Number`
-const A = t.func(t.String, t.Number);
+var A = t.func(t.String, t.Number);
 ```
 
 The domain and codomain can also be specified using types from any combinator including `func`:
 
 ```js
 // A `B` takes a `Func` (which takes a `t.String` and returns a `t.Number`) and returns a `t.String`.
-const B = t.func(t.func(t.String, t.Number), t.String);
+var B = t.func(t.func(t.String, t.Number), t.String);
 
 // An `ExcitedString` is a `t.String` containing an exclamation mark
-const ExcitedString = t.subtype(t.String, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedString');
+var ExcitedString = t.subtype(t.String, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedString');
 
 // An `Exciter` takes a `t.String` and returns an `ExcitedString`
-const Exciter = t.func(t.String, ExcitedString);
+var Exciter = t.func(t.String, ExcitedString);
 ```
 
 Additionally the domain can be expressed as a list of types:
 
 ```js
 // A `C` takes an `A`, a `B` and a `t.String` and returns a `t.Number`
-const C = t.func([A, B, t.String], t.Number);
+var C = t.func([A, B, t.String], t.Number);
 ```
 
 Functions have the following `meta` object:
@@ -559,8 +559,8 @@ Returns a function where the domain and codomain are typechecked against the fun
 If the function is passed values which are outside of the domain or returns values which are outside of the codomain it will raise an error:
 
 ```js
-const simpleQuestionator = Exciter.of(function (s) { return s + '?'; });
-const simpleExciter      = Exciter.of(function (s) { return s + '!'; });
+var simpleQuestionator = Exciter.of(function (s) { return s + '?'; });
+var simpleExciter      = Exciter.of(function (s) { return s + '!'; });
 
 // Raises error:
 // Invalid `Hello?` supplied to `ExcitedString`, insert a valid value for the subtype
@@ -578,12 +578,12 @@ The returned function may also be partially applied passing a `curried` addition
 ```js
 // We can reasonably suggest that add has the following type signature
 // add : t.Number -> t.Number -> t.Number
-const add = t.func([t.Number, t.Number], t.Number)
+var add = t.func([t.Number, t.Number], t.Number)
     .of(function (x, y) { return x + y }, true);
 
-const addHello = add("Hello"); // As this raises: "Error: Invalid `Hello` supplied to `t.Number`"
+var addHello = add("Hello"); // As this raises: "Error: Invalid `Hello` supplied to `t.Number`"
 
-const add2 = add(2);
+var add2 = add(2);
 add2(1); // And this returns: 3
 ```
 
@@ -599,7 +599,7 @@ Returns `true` if x belongs to the type.
 Exciter.is(simpleExciter);      // Returns: true
 Exciter.is(simpleQuestionator); // Returns: true
 
-const id = function (x) { return x; };
+var id = function (x) { return x; };
 
 t.func([t.Number, t.Number], t.Number).is(func([t.Number, t.Number], t.Number).of(id)); // Returns: true
 t.func([t.Number, t.Number], t.Number).is(func(t.Number, t.Number).of(id));        // Returns: false
@@ -631,7 +631,7 @@ The following commands are compatible with the [Facebook Immutability Helpers](h
 Example:
 
 ```js
-const p = new Point({x: 1, y: 2});
+var p = new Point({x: 1, y: 2});
 
 p = Point.update(p, {x: {'$set': 3}}); // => {x: 3, y: 2}
 ```
@@ -639,17 +639,17 @@ p = Point.update(p, {x: {'$set': 3}}); // => {x: 3, y: 2}
 ### Removing a value form a dict
 
 ```js
-const MyType = dict(t.String, t.Number);
-const instance = MyType({a: 1, b: 2});
-const updated = MyType.update(instance, {$remove: ['a']}); // => {b: 2}
+var MyType = dict(t.String, t.Number);
+var instance = MyType({a: 1, b: 2});
+var updated = MyType.update(instance, {$remove: ['a']}); // => {b: 2}
 ```
 
 ### Swapping two list elements
 
 ```js
-const MyType = list(t.Number);
-const instance = MyType([1, 2, 3, 4]);
-const updated = MyType.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3, 2, 4]
+var MyType = list(t.Number);
+var instance = MyType([1, 2, 3, 4]);
+var updated = MyType.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3, 2, 4]
 ```
 
 ### Adding other commands

@@ -10,13 +10,13 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 # Code example
 
 ```js
-import t from 'tcomb';
+var t = require('tcomb');
 
 // a user defined type
-const Integer = t.subtype(t.Number, (n) => n % 1 === 0);
+var Integer = t.subtype(t.Number, function (n) => { return n % 1 === 0; });
 
 // a struct
-const Person = t.struct({
+var Person = t.struct({
   name: t.String,              // required string
   surname: t.maybe(t.String),  // optional string
   age: Integer,                // required integer
@@ -29,7 +29,7 @@ Person.prototype.getFullName = function () {
 };
 
 // an instance of Person (the keyword new is optional)
-const person = new Person({
+var person = new Person({
   name: 'Giulio',
   surname: 'Canti',
   age: 41,
@@ -71,7 +71,7 @@ Blog posts:
 All models are type checked:
 
 ```js
-const person = new Person({
+var person = new Person({
   name: 'Giulio',
   // missing required field "age"
   tags: ['js developer', 'rock climber']
@@ -91,7 +91,7 @@ See "Debugging with Chrome DevTools" section for details.
 Instances are immutables using `Object.freeze`. This means you can use standard JavaScript objects and arrays. You don't have to change how you normally code. You can update an immutable instance with the provided `update(instance, spec)` function:
 
 ```js
-const person2 = Person.update(person, {
+var person2 = Person.update(person, {
   name: {$set: 'Guido'}
 });
 ```
@@ -151,6 +151,10 @@ Encodes / decodes your domain models to / from JSON for free.
 
 - [Giulio Canti](https://github.com/gcanti) mantainer
 - [Becky Conning](https://github.com/beckyconning) `func` combinator ideas and documentation.
+
+# Similar projects
+
+- [immu](https://github.com/scottcorgan/immu)
 
 # License
 
