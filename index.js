@@ -1,14 +1,13 @@
 'use strict';
 
-function stringify(x) {
+// configurable
+exports.stringify = function stringify(x) {
   try { // handle "Converting circular structure to JSON" error
     return JSON.stringify(x, null, 2);
   } catch (e) {
     return String(x);
   }
-}
-
-exports.stringify = stringify;
+};
 
 function isInstanceOf(x, constructor) {
   return x instanceof constructor;
@@ -60,17 +59,13 @@ function isTypeName(name) {
 
 // Returns true if x is of type `type`
 function is(x, type) {
-  return isType(type) ?
-    type.is(x) :
-    isInstanceOf(x, type); // type should be a class constructor
+  return isType(type) ? type.is(x) : isInstanceOf(x, type); // type should be a class constructor
 }
 
 function create(type, value) {
   if (isType(type)) {
-    return isStruct(type) ?
-      // for structs the new operator is allowed
-      new type(value) :
-      type(value);
+    // for structs the new operator is allowed
+    return isStruct(type) ? new type(value) : type(value);
   }
 
   if (process.env.NODE_ENV !== 'production') {
@@ -86,9 +81,7 @@ function getFunctionName(f) {
 }
 
 function getTypeName(constructor) {
-  if (isType(constructor)) {
-    return constructor.displayName;
-  }
+  if (isType(constructor)) { return constructor.displayName; }
   return getFunctionName(constructor);
 }
 
@@ -123,12 +116,10 @@ function forbidNewOperator(x, type) {
   assert(!isInstanceOf(x, type), 'Cannot use the new operator to instantiate a type ' + getTypeName(type));
 }
 
-function shallowCopy(x) {
-  return isArray(x) ?
-    x.concat() :
-    isObject(x) ?
-      mixin({}, x) :
-      x;
+function getShallowCopy(x) {
+  if (isArray(x)) { return x.concat(); }
+  if (isObject(x)) { return mixin({}, x); }
+  return x;
 }
 
 // immutability helper
@@ -138,7 +129,7 @@ function update(instance, spec) {
     assert(isObject(spec), 'Invalid argument spec = ' + exports.stringify(spec) + ' supplied to function update(instance, spec): expected an object containing commands');
   }
 
-  var value = shallowCopy(instance);
+  var value = getShallowCopy(instance);
   for (var k in spec) {
     if (spec.hasOwnProperty(k)) {
       if (update.commands.hasOwnProperty(k)) {
@@ -152,86 +143,83 @@ function update(instance, spec) {
   return value;
 }
 
-update.commands = {
+// built-in commands
 
-  $apply: function (f, value) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      assert(isFunction(f), 'Invalid argument f supplied to immutability helper { $apply: f }: expected a function');
-    }
-
-    return f(value);
-  },
-
-  $push: function (elements, arr) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      assert(isArray(elements), 'Invalid argument elements supplied to immutability helper { $push: elements }: expected an array');
-      assert(isArray(arr), 'Invalid value supplied to immutability helper "$push": expected an array');
-    }
-
-    return arr.concat(elements);
-  },
-
-  $remove: function (keys, obj) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      assert(isArray(keys), 'Invalid argument keys supplied to immutability helper { $remove: keys }: expected an array');
-      assert(isObject(obj), 'Invalid value supplied to immutability helper $remove: expected an object');
-    }
-
-    for (var i = 0, len = keys.length; i < len; i++ ) {
-      delete obj[keys[i]];
-    }
-    return obj;
-  },
-
-  $set: function (value) {
-    return value;
-  },
-
-  $splice: function (splices, arr) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      assert(list(Arr).is(splices), 'Invalid argument splices supplied to immutability helper { $splice: splices }: expected an array of arrays');
-      assert(isArray(arr), 'Invalid value supplied to immutability helper $splice: expected an array');
-    }
-
-    return splices.reduce(function (acc, splice) {
-      acc.splice.apply(acc, splice);
-      return acc;
-    }, arr);
-  },
-
-  $swap: function (config, arr) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      assert(isObject(config), 'Invalid argument config supplied to immutability helper { $swap: config }: expected an object');
-      assert(isNumber(config.from), 'Invalid argument config.from supplied to immutability helper { $swap: config }: expected a number');
-      assert(isNumber(config.to), 'Invalid argument config.to supplied to immutability helper { $swap: config }: expected a number');
-      assert(isArray(arr), 'Invalid value supplied to immutability helper $swap');
-    }
-
-    var element = arr[config.to];
-    arr[config.to] = arr[config.from];
-    arr[config.from] = element;
-    return arr;
-  },
-
-  $unshift: function (elements, arr) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      assert(isArray(elements), 'Invalid argument elements supplied to immutability helper {$unshift: elements}');
-      assert(isArray(arr), 'Invalid value supplied to immutability helper $unshift');
-    }
-
-    return elements.concat(arr);
-  },
-
-  $merge: function (obj, value) {
-    return mixin(mixin({}, value), obj, true);
+function $apply(f, value) {
+  if (process.env.NODE_ENV !== 'production') {
+    assert(isFunction(f), 'Invalid argument f supplied to immutability helper { $apply: f }: expected a function');
   }
+  return f(value);
+}
 
+function $push(elements, arr) {
+  if (process.env.NODE_ENV !== 'production') {
+    assert(isArray(elements), 'Invalid argument elements supplied to immutability helper { $push: elements }: expected an array');
+    assert(isArray(arr), 'Invalid value supplied to immutability helper "$push": expected an array');
+  }
+  return arr.concat(elements);
+}
+
+function $remove(keys, obj) {
+  if (process.env.NODE_ENV !== 'production') {
+    assert(isArray(keys), 'Invalid argument keys supplied to immutability helper { $remove: keys }: expected an array');
+    assert(isObject(obj), 'Invalid value supplied to immutability helper $remove: expected an object');
+  }
+  for (var i = 0, len = keys.length; i < len; i++ ) {
+    delete obj[keys[i]];
+  }
+  return obj;
+}
+
+function $set(value) {
+  return value;
+}
+
+function $splice(splices, arr) {
+  if (process.env.NODE_ENV !== 'production') {
+    assert(list(Arr).is(splices), 'Invalid argument splices supplied to immutability helper { $splice: splices }: expected an array of arrays');
+    assert(isArray(arr), 'Invalid value supplied to immutability helper $splice: expected an array');
+  }
+  return splices.reduce(function (acc, splice) {
+    acc.splice.apply(acc, splice);
+    return acc;
+  }, arr);
+}
+
+function $swap(config, arr) {
+  if (process.env.NODE_ENV !== 'production') {
+    assert(isObject(config), 'Invalid argument config supplied to immutability helper { $swap: config }: expected an object');
+    assert(isNumber(config.from), 'Invalid argument config.from supplied to immutability helper { $swap: config }: expected a number');
+    assert(isNumber(config.to), 'Invalid argument config.to supplied to immutability helper { $swap: config }: expected a number');
+    assert(isArray(arr), 'Invalid value supplied to immutability helper $swap');
+  }
+  var element = arr[config.to];
+  arr[config.to] = arr[config.from];
+  arr[config.from] = element;
+  return arr;
+}
+
+function $unshift(elements, arr) {
+  if (process.env.NODE_ENV !== 'production') {
+    assert(isArray(elements), 'Invalid argument elements supplied to immutability helper {$unshift: elements}');
+    assert(isArray(arr), 'Invalid value supplied to immutability helper $unshift');
+  }
+  return elements.concat(arr);
+}
+
+function $merge(obj, value) {
+  return mixin(mixin({}, value), obj, true);
+}
+
+update.commands = {
+  $apply: $apply,
+  $push: $push,
+  $remove: $remove,
+  $set: $set,
+  $splice: $splice,
+  $swap: $swap,
+  $unshift: $unshift,
+  $merge: $merge
 };
 
 function irreducible(name, predicate) {
