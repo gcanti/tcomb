@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
-    "eslint": "^0.22.1",
+    "eslint": "^1.2.0",
     "mocha": "^2.2.5"
   },
   "tags": [
