@@ -1842,4 +1842,39 @@ describe('ES6 classes', function () {
 
 });
 
+describe('match', function () {
 
+  it('should match on type constructors', function () {
+    eq(t.match(1,
+      t.String, function () { return 'a string'; },
+      t.Number, function (n) { return 2 * n; }
+    ), 2);
+  });
+
+  it('should handle an optional guard', function () {
+    eq(t.match(1,
+      t.String, function () { return 'a string'; },
+      t.Number, function () { return false; }, function (n) { return 2 * n; },
+      t.Number, function (n) { return 3 * n; }
+    ), 3);
+  });
+
+  it('should throw if no match is found', function () {
+    throwsWithMessage(function () {
+      t.match(true,
+        t.String, function () { return 'a string'; },
+        t.Number, function (n) { return 2 * n; }
+      );
+    }, '[tcomb] Match error');
+  });
+
+  it('should throw if cases are misplaced', function () {
+    throwsWithMessage(function () {
+      t.match(true,
+        t.String, function () { return 'a string'; },
+        t.Number
+      );
+    }, '[tcomb] Invalid block in clause #2');
+  });
+
+});

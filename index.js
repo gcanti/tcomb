@@ -898,6 +898,36 @@ function func(domain, codomain, name) {
 
 }
 
+function match(x) {
+  var type, guard, f, count;
+  for (var i = 1, len = arguments.length; i < len; ) {
+    type = arguments[i];
+    guard = arguments[i + 1];
+    f = arguments[i + 2];
+
+    if (isFunction(f) && !isType(f)) {
+      i = i + 3;
+    }
+    else {
+      f = guard;
+      guard = Any.is;
+      i = i + 2;
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      count = (count || 0) + 1;
+      assert(isType(type), 'Invalid type in clause #' + count);
+      assert(isFunction(guard), 'Invalid guard in clause #' + count + '');
+      assert(isFunction(f), 'Invalid block in clause #' + count + '');
+    }
+
+    if (type.is(x) && guard(x)) {
+      return f(x);
+    }
+  }
+  exports.fail('Match error');
+}
+
 mixin(exports, {
   is: is,
   isType: isType,
@@ -935,5 +965,6 @@ mixin(exports, {
   list: list,
   dict: dict,
   func: func,
-  intersection: intersection
+  intersection: intersection,
+  match: match
 });
