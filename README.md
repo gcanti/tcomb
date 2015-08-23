@@ -167,7 +167,14 @@ console.log(result); // => 'a number'
 
 # Similar projects
 
-- [immu](https://github.com/scottcorgan/immu)
+* [immu](https://github.com/scottcorgan/immu)
+* [immutable](https://github.com/facebook/immutable-js)
+* [mori](https://github.com/swannodette/mori)
+* [seamless-immutable](https://github.com/rtfeldman/seamless-immutable)
+* [deep-freeze](https://www.npmjs.com/package/deep-freeze)
+* [freezer](https://github.com/arqex/freezer)
+* [icedam](https://github.com/winkler1/icedam)
+* [immutable-store](https://github.com/christianalfoni/immutable-store)
 
 # License
 
