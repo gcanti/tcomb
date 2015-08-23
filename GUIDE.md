@@ -665,12 +665,12 @@ match(x: t.Any, cases...)
 where each case has the following structure
 
 ```
-type, [guard], result
+type, [guard], block
 ```
 
 - `type` a tcomb type
 - `guard` an optional predicate `(x) => t.Any`
-- `result` a function `(x) => t.Any` called when the match succeded
+- `block` a function `(x) => t.Any` called when the match succeded
 
 Example:
 

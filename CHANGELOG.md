@@ -12,6 +12,47 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+## v2.3.0
+
+- **New Feature**
+  - Better error messages for assert failures, fix #120
+
+  The messages now have the following general form:
+
+  ```
+  Invalid value <value> supplied to <context>
+  ```
+
+  where context is a slash-separated string with the following properties:
+
+  - the first element is the name of the "root"
+  - the following elements have the form: `<field name>: <field type>`
+
+  Note: for more readable messages remember to give types a name
+
+  Example:
+
+  ```js
+  var Person = t.struct({
+    name: t.String
+  }, 'Person'); // <- remember to give types a name
+
+  var User = t.struct({
+    email: t.String,
+    profile: Person
+  }, 'User');
+
+  var mynumber = t.Number('a');
+  // => Invalid value "a" supplied to Number
+
+  var myuser = User({ email: 1 });
+  // => Invalid value 1 supplied to User/email: String
+
+  myuser = User({ email: 'email', profile: { name: 2 } });
+  // => Invalid value 2 supplied to User/profile: Person/name: String
+  ```
+
+
 ## v2.2.1
 
 - **Experimental**

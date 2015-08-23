@@ -214,7 +214,7 @@ describe('t.update(instance, spec)', function () {
       var Struct = t.struct({
         a: t.Number,
         b: t.String,
-        c: t.tuple([t.Number, t.Number]),
+        c: t.tuple([t.Number, t.Number])
       });
       var List = t.list(Struct);
       var instance = List([{
@@ -357,7 +357,7 @@ describe('t.mixin(x, y, [overwrite])', function () {
       var o1 = {a: 1};
       var o2 = {a: 2, b: 2};
       t.mixin(o1, o2);
-    }, '[tcomb] Invalid call to mixin(): cannot overwrite property "a" of target object');
+    }, '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "a" of target object');
   });
 
   it('should not throw if a property already exists but overwrite = true', function () {
@@ -451,7 +451,7 @@ describe('t.Any', function () {
     it('should throw if used with new', function () {
       throwsWithMessage(function () {
         var x = new T(); // eslint-disable-line
-      }, '[tcomb] Cannot use the new operator to instantiate a type Any');
+      }, '[tcomb] Cannot use the new operator to instantiate the type Any');
     });
 
   });
@@ -485,7 +485,7 @@ describe('irreducibles types', function () {
   it('should throw if used with an invalid name argument', function () {
     throwsWithMessage(function () {
       t.irreducible(null, function () { return true; });
-    }, '[tcomb] Invalid argument name = null supplied to irreducible(name, predicate)');
+    }, '[tcomb] Invalid argument name null supplied to irreducible(name, predicate) (expected a string)');
   });
 
   [
@@ -511,7 +511,7 @@ describe('irreducibles types', function () {
     it('should throw if used with new', function () {
       throwsWithMessage(function () {
         var x = new T(); // eslint-disable-line
-      }, '[tcomb] Cannot use the new operator to instantiate a type ' + t.getTypeName(T));
+      }, '[tcomb] Cannot use the new operator to instantiate the type ' + t.getTypeName(T));
     });
 
   });
@@ -806,15 +806,15 @@ describe('t.struct(props, [name])', function () {
 
       throwsWithMessage(function () {
         t.struct();
-      }, '[tcomb] Invalid argument props = undefined supplied to struct(props, name): expected a dictionary of tcomb types');
+      }, '[tcomb] Invalid argument props undefined supplied to struct(props, [name]) combinator (expected a dictionary String -> Type)');
 
       throwsWithMessage(function () {
         t.struct({a: null});
-      }, '[tcomb] Invalid argument props = {\n  "a": null\n} supplied to struct(props, name): expected a dictionary of tcomb types');
+      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to struct(props, [name]) combinator (expected a dictionary String -> Type)');
 
       throwsWithMessage(function () {
         t.struct({}, 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to struct(props, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to struct(props, [name]) combinator (expected a string)');
 
     });
 
@@ -834,7 +834,10 @@ describe('t.struct(props, [name])', function () {
     it('should accept only valid values', function () {
       throwsWithMessage(function () {
         Point(1);
-      }, '[tcomb] Invalid argument value = 1 supplied to struct {x: Number, y: Number}: expected an object');
+      }, '[tcomb] Invalid value 1 supplied to {x: Number, y: Number} (expected an object)');
+      throwsWithMessage(function () {
+        Point({});
+      }, '[tcomb] Invalid value undefined supplied to {x: Number, y: Number}/x: Number');
     });
 
   });
@@ -941,11 +944,11 @@ describe('t.enums(map, [name])', function () {
 
       throwsWithMessage(function () {
         t.enums();
-      }, '[tcomb] Invalid argument map = undefined supplied to enums(map, name): expected a hash of strings / numbers');
+      }, '[tcomb] Invalid argument map undefined supplied to enums(map, [name]) combinator (expected a dictionary of String -> String | Number)');
 
       throwsWithMessage(function () {
         t.enums({}, 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to enums(map, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to enums(map, [name]) combinator (expected a string)');
 
     });
 
@@ -958,14 +961,14 @@ describe('t.enums(map, [name])', function () {
     it('should throw if used with new', function () {
       throwsWithMessage(function () {
         var x = new T('a'); // eslint-disable-line
-      }, '[tcomb] Cannot use the new operator to instantiate a type T');
+      }, '[tcomb] Cannot use the new operator to instantiate the type T');
     });
 
     it('should accept only valid values', function () {
       eq(T('a'), 'a');
       throwsWithMessage(function () {
         T('b');
-      }, '[tcomb] Invalid argument value = "b" supplied to enums T: expected one of [\n  "a"\n]');
+      }, '[tcomb] Invalid value "b" supplied to T (expected one of [\n  "a"\n])');
     });
 
   });
@@ -1048,33 +1051,25 @@ describe('t.union(types, [name])', function () {
 
       throwsWithMessage(function () {
         t.union();
-      }, '[tcomb] Invalid argument types = undefined supplied to union(types, name): expected an array of at least 2 types');
+      }, '[tcomb] Invalid argument types undefined supplied to union(types, [name]) combinator (expected an array of at least 2 types)');
 
       throwsWithMessage(function () {
         t.union([]);
-      }, '[tcomb] Invalid argument types = [] supplied to union(types, name): expected an array of at least 2 types');
+      }, '[tcomb] Invalid argument types [] supplied to union(types, [name]) combinator (expected an array of at least 2 types)');
 
       throwsWithMessage(function () {
         t.union([1]);
-      }, '[tcomb] Invalid argument types = [\n  1\n] supplied to union(types, name): expected an array of at least 2 types');
+      }, '[tcomb] Invalid argument types [\n  1\n] supplied to union(types, [name]) combinator (expected an array of at least 2 types)');
 
       throwsWithMessage(function () {
         t.union([Circle, Point], 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to union(types, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to union(types, [name]) combinator (expected a string)');
 
     });
 
   });
 
   describe('constructor', function () {
-
-    it('should throw when dispatch() is not implemented', function () {
-      throwsWithMessage(function () {
-        var T = t.union([t.String, t.Number], 'T');
-        T.dispatch = null;
-        T(1);
-      }, '[tcomb] Unimplemented dispatch() function for union T');
-    });
 
     it('should have a default dispatch() implementation', function () {
       var T = t.union([t.String, t.Number], 'T');
@@ -1085,7 +1080,7 @@ describe('t.union(types, [name])', function () {
       throwsWithMessage(function () {
         var T = t.union([t.String, t.Number], 'T');
         T(true);
-      }, '[tcomb] The dispatch() function of union T returns no type');
+      }, '[tcomb] Invalid value true supplied to T');
     });
 
     it('should build instances when dispatch() is implemented', function () {
@@ -1098,7 +1093,7 @@ describe('t.union(types, [name])', function () {
         var T = t.union([t.String, t.Number], 'T');
         T.dispatch = function () { return t.String; };
         var x = new T('a'); // eslint-disable-line
-      }, '[tcomb] Cannot use the new operator to instantiate a type T');
+      }, '[tcomb] Cannot use the new operator to instantiate the type T');
     });
 
     it('should not throw if used with new and union types are instantiables with new', function () {
@@ -1144,20 +1139,30 @@ describe('t.intersection(types, [name])', function () {
 
       throwsWithMessage(function () {
         t.intersection();
-      }, '[tcomb] Invalid argument types = undefined supplied to intersection(types, name): expected an array of at least 2 types');
+      }, '[tcomb] Invalid argument types undefined supplied to intersection(types, [name]) combinator (expected an array of at least 2 types)');
 
       throwsWithMessage(function () {
         t.intersection([]);
-      }, '[tcomb] Invalid argument types = [] supplied to intersection(types, name): expected an array of at least 2 types');
+      }, '[tcomb] Invalid argument types [] supplied to intersection(types, [name]) combinator (expected an array of at least 2 types)');
 
       throwsWithMessage(function () {
         t.intersection([1]);
-      }, '[tcomb] Invalid argument types = [\n  1\n] supplied to intersection(types, name): expected an array of at least 2 types');
+      }, '[tcomb] Invalid argument types [\n  1\n] supplied to intersection(types, [name]) combinator (expected an array of at least 2 types)');
 
       throwsWithMessage(function () {
         t.intersection([Min, Max], 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to intersection(types, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to intersection(types, [name]) combinator (expected a string)');
 
+    });
+
+  });
+
+  describe('constructor', function () {
+
+    it('should throw if used with wrong arguments', function () {
+      throwsWithMessage(function () {
+        MinMax('a')
+      }, '[tcomb] Invalid value "a" supplied to MinMax');
     });
 
   });
@@ -1186,11 +1191,11 @@ describe('t.maybe(type, [name])', function () {
 
       throwsWithMessage(function () {
         t.maybe();
-      }, '[tcomb] Invalid argument type = undefined supplied to maybe(type, name): expected a type');
+      }, '[tcomb] Invalid argument type undefined supplied to maybe(type, [name]) combinator (expected a type)');
 
       throwsWithMessage(function () {
         t.maybe(Point, 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to maybe(type, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to maybe(type, [name]) combinator (expected a string)');
 
     });
 
@@ -1215,7 +1220,7 @@ describe('t.maybe(type, [name])', function () {
       throwsWithMessage(function () {
         var T = t.maybe(t.String, 'T');
         var x = new T(); // eslint-disable-line
-      }, '[tcomb] Cannot use the new operator to instantiate a type T');
+      }, '[tcomb] Cannot use the new operator to instantiate the type T');
     });
 
     it('should coerce values', function () {
@@ -1263,15 +1268,15 @@ describe('t.tuple(types, [name])', function () {
 
       throwsWithMessage(function () {
         t.tuple();
-      }, '[tcomb] Invalid argument types = undefined supplied to tuple(types, name): expected an array of types');
+      }, '[tcomb] Invalid argument types undefined supplied to tuple(types, [name]) combinator (expected an array of types)');
 
       throwsWithMessage(function () {
         t.tuple([1]);
-      }, '[tcomb] Invalid argument types = [\n  1\n] supplied to tuple(types, name): expected an array of types');
+      }, '[tcomb] Invalid argument types [\n  1\n] supplied to tuple(types, [name]) combinator (expected an array of types)');
 
       throwsWithMessage(function () {
         t.tuple([Point, Point], 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to tuple(types, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to tuple(types, [name]) combinator (expected a string)');
 
     });
 
@@ -1292,11 +1297,11 @@ describe('t.tuple(types, [name])', function () {
 
       throwsWithMessage(function () {
         T(1);
-      }, '[tcomb] Invalid argument value = 1 supplied to tuple T: expected an array of length 2');
+      }, '[tcomb] Invalid value 1 supplied to T (expected an array of length 2)');
 
       throwsWithMessage(function () {
         T([1, 1]);
-      }, '[tcomb] Invalid argument value = 1 supplied to struct S: expected an object');
+      }, '[tcomb] Invalid value 1 supplied to T/0: S (expected an object)');
 
     });
 
@@ -1357,11 +1362,11 @@ describe('t.list(type, [name])', function () {
 
       throwsWithMessage(function () {
         t.list();
-      }, '[tcomb] Invalid argument type = undefined supplied to list(type, name): expected a type');
+      }, '[tcomb] Invalid argument type undefined supplied to list(type, [name]) combinator (expected a type)');
 
       throwsWithMessage(function () {
         t.list(Point, 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to list(type, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to list(type, [name]) combinator (expected a string)');
 
     });
 
@@ -1381,11 +1386,11 @@ describe('t.list(type, [name])', function () {
 
       throwsWithMessage(function () {
         T(1);
-      }, '[tcomb] Invalid argument value = 1 supplied to list T');
+      }, '[tcomb] Invalid value 1 supplied to T (expected an array of S)');
 
       throwsWithMessage(function () {
         T([1]);
-      }, '[tcomb] Invalid argument value = 1 supplied to struct S: expected an object');
+      }, '[tcomb] Invalid value 1 supplied to T/0: S (expected an object)');
 
     });
 
@@ -1446,15 +1451,15 @@ describe('t.subtype(type, predicate, [name])', function () {
 
       throwsWithMessage(function () {
         t.subtype();
-      }, '[tcomb] Invalid argument type = undefined supplied to subtype(type, predicate, name): expected a type');
+      }, '[tcomb] Invalid argument type undefined supplied to subtype(type, predicate, [name]) combinator (expected a type)');
 
       throwsWithMessage(function () {
         t.subtype(Point, null);
-      }, '[tcomb] Invalid argument predicate supplied to subtype(type, predicate, name): expected a function');
+      }, '[tcomb] Invalid argument predicate supplied to subtype(type, predicate, [name]) combinator (expected a function)');
 
       throwsWithMessage(function () {
         t.subtype(Point, True, 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to subtype(type, predicate, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to subtype(type, predicate, [name]) combinator (expected a string)');
 
     });
 
@@ -1466,7 +1471,7 @@ describe('t.subtype(type, predicate, [name])', function () {
       throwsWithMessage(function () {
         var T = t.subtype(t.String, function () { return true; }, 'T');
         var x = new T(); // eslint-disable-line
-      }, '[tcomb] Cannot use the new operator to instantiate a type T');
+      }, '[tcomb] Cannot use the new operator to instantiate the type T');
     });
 
     it('should coerce values', function () {
@@ -1480,7 +1485,7 @@ describe('t.subtype(type, predicate, [name])', function () {
       var T = t.subtype(Point, predicate, 'T');
       throwsWithMessage(function () {
         T({x: 0, y: 0});
-      }, '[tcomb] Invalid argument value = {\n  "x": 0,\n  "y": 0\n} supplied to subtype T');
+      }, '[tcomb] Invalid value {\n  "x": 0,\n  "y": 0\n} supplied to T');
     });
 
   });
@@ -1528,15 +1533,15 @@ describe('t.dict(domain, codomain, [name])', function () {
 
       throwsWithMessage(function () {
         t.dict();
-      }, '[tcomb] Invalid argument domain = undefined supplied to dict(domain, codomain, name): expected a type');
+      }, '[tcomb] Invalid argument domain undefined supplied to dict(domain, codomain, [name]) combinator (expected a type)');
 
       throwsWithMessage(function () {
         t.dict(t.String);
-      }, '[tcomb] Invalid argument codomain = undefined supplied to dict(domain, codomain, name): expected a type');
+      }, '[tcomb] Invalid argument codomain undefined supplied to dict(domain, codomain, [name]) combinator (expected a type)');
 
       throwsWithMessage(function () {
         t.dict(t.String, Point, 1);
-      }, '[tcomb] Invalid argument name = 1 supplied to dict(domain, codomain, name): expected a string');
+      }, '[tcomb] Invalid argument name 1 supplied to dict(domain, codomain, [name]) combinator (expected a string)');
 
     });
 
@@ -1559,15 +1564,15 @@ describe('t.dict(domain, codomain, [name])', function () {
 
       throwsWithMessage(function () {
         T(1);
-      }, '[tcomb] Invalid argument value = 1 supplied to dict T');
+      }, '[tcomb] Invalid value 1 supplied to T');
 
       throwsWithMessage(function () {
         T({a: 1});
-      }, '[tcomb] Invalid argument value = 1 supplied to struct S: expected an object');
+      }, '[tcomb] Invalid value 1 supplied to T/a: S (expected an object)');
 
       throwsWithMessage(function () {
         T({forbidden: {}});
-      }, '[tcomb] Invalid argument value = "forbidden" supplied to subtype Domain');
+      }, '[tcomb] Invalid value "forbidden" supplied to T/Domain');
 
     });
 
@@ -1651,11 +1656,11 @@ describe('t.func(domain, codomain, [name])', function () {
 
       throwsWithMessage(function () {
         sum(1, 2, 3);
-      }, '[tcomb] Invalid argument value = [\n  1,\n  2,\n  3\n] supplied to tuple [Number, Number]: expected an array of length 2');
+      }, '[tcomb] Invalid value [\n  1,\n  2,\n  3\n] supplied to [Number, Number] (expected an array of length 2)');
 
       throwsWithMessage(function () {
         sum('a', 2);
-      }, '[tcomb] Invalid argument value = "a" supplied to irreducible type Number');
+      }, '[tcomb] Invalid value "a" supplied to [Number, Number]/0: Number');
 
     });
 
@@ -1668,7 +1673,7 @@ describe('t.func(domain, codomain, [name])', function () {
 
       throwsWithMessage(function () {
         sum(1, 2);
-      }, '[tcomb] Invalid argument value = "a" supplied to irreducible type Number');
+      }, '[tcomb] Invalid value "a" supplied to Number');
 
     });
 
@@ -1732,12 +1737,12 @@ describe('t.func(domain, codomain, [name])', function () {
 
       throwsWithMessage(function () {
         sum('a');
-      }, '[tcomb] Invalid argument value = "a" supplied to irreducible type Number');
+      }, '[tcomb] Invalid value "a" supplied to [Number]/0: Number');
 
       throwsWithMessage(function () {
         var sum1 = sum(1);
         sum1('a');
-      }, '[tcomb] Invalid argument value = "a" supplied to irreducible type Number');
+      }, '[tcomb] Invalid value "a" supplied to [Number]/0: Number');
 
     });
 
@@ -1753,7 +1758,7 @@ describe('t.func(domain, codomain, [name])', function () {
       eq(sum(1, 2, 3), 6);
       throwsWithMessage(function () {
         sum(1, 2);
-      }, '[tcomb] Invalid argument value = [\n  1,\n  2\n] supplied to tuple [Number, Number, Number]: expected an array of length 3');
+      }, '[tcomb] Invalid value [\n  1,\n  2\n] supplied to [Number, Number, Number] (expected an array of length 3)');
     });
 
   });
@@ -1775,17 +1780,17 @@ describe('ES6 classes', function () {
     eq(T.is(c), true);
     throwsWithMessage(function () {
       T(new Class('b'));
-    }, '[tcomb] Invalid argument value = {\n  "a": "b"\n} supplied to subtype {Class | isA}');
+    }, '[tcomb] Invalid value {\n  "a": "b"\n} supplied to {Class | isA}');
   });
 
   it('should be handled by struct', function () {
     var T = t.struct({
       c: Class
-    });
+    }, 'T');
     eq(T.is(new T({c: c})), true);
     throwsWithMessage(function () {
       T({c: 1});
-    }, '[tcomb] The value 1 is not an instance of Class');
+    }, '[tcomb] Invalid value 1 supplied to T/c: Class');
   });
 
   it('should be handled by maybe', function () {
@@ -1794,7 +1799,7 @@ describe('ES6 classes', function () {
     eq(T.is(c), true);
     throwsWithMessage(function () {
       T(1);
-    }, '[tcomb] The value 1 is not an instance of Class');
+    }, '[tcomb] Invalid value 1 supplied to Class');
   });
 
   it('should be handled by tuple', function () {
@@ -1802,7 +1807,7 @@ describe('ES6 classes', function () {
     eq(T.is([c]), true);
     throwsWithMessage(function () {
       T([1]);
-    }, '[tcomb] The value 1 is not an instance of Class');
+    }, '[tcomb] Invalid value 1 supplied to [Class]/0: Class');
   });
 
   it('should be handled by list', function () {
@@ -1810,7 +1815,7 @@ describe('ES6 classes', function () {
     eq(T.is([c]), true);
     throwsWithMessage(function () {
       T([1]);
-    }, '[tcomb] The value 1 is not an instance of Class');
+    }, '[tcomb] Invalid value 1 supplied to Array<Class>/0: Class');
   });
 
   it('should be handled by dict', function () {
@@ -1818,7 +1823,7 @@ describe('ES6 classes', function () {
     eq(T.is({a: c}), true);
     throwsWithMessage(function () {
       T({a: 1});
-    }, '[tcomb] The value 1 is not an instance of Class');
+    }, '[tcomb] Invalid value 1 supplied to {[key: String]: Class}/a: Class');
   });
 
   it('should be handled by union', function () {
@@ -1826,7 +1831,7 @@ describe('ES6 classes', function () {
     eq(T.is(c), true);
     throwsWithMessage(function () {
       T(1);
-    }, '[tcomb] The dispatch() function of union String | Class returns no type');
+    }, '[tcomb] Invalid value 1 supplied to String | Class');
   });
 
   it('should be handled by func', function () {
@@ -1837,7 +1842,7 @@ describe('ES6 classes', function () {
     eq(f(c), 'Class');
     throwsWithMessage(function () {
       f(1);
-    }, '[tcomb] The value 1 is not an instance of Class');
+    }, '[tcomb] Invalid value 1 supplied to [Class]/0: Class');
   });
 
 });
