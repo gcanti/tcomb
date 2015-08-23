@@ -143,6 +143,19 @@ Libraries exploiting tcomb's RTI:
 Encodes / decodes your domain models to / from JSON for free.
 - Blog post: [JSON Deserialization Into An Object Model](https://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
 
+## Pattern matching
+
+```js
+// this example uses ES6 syntax
+
+const result = t.match(1,
+  t.String, () => 'a string',
+  t.Number, () => 'a number'
+);
+
+console.log(result); // => 'a number'
+```
+
 # Docs
 
 [GUIDE.md](GUIDE.md)

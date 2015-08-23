@@ -1877,4 +1877,25 @@ describe('match', function () {
     }, '[tcomb] Invalid block in clause #2');
   });
 
+  it('should handle unions of unions', function () {
+    var A = t.subtype(t.String, function (s) { return s === 'A'; });
+    var B = t.subtype(t.String, function (s) { return s === 'B'; });
+    var C = t.subtype(t.String, function (s) { return s === 'C'; });
+    var D = t.subtype(t.String, function (s) { return s === 'D'; });
+    var E = t.subtype(t.String, function (s) { return s === 'E'; });
+    var F = t.subtype(t.String, function (s) { return s === 'F'; });
+    var G = t.subtype(t.String, function (s) { return s === 'G'; });
+    var H = t.subtype(t.String, function (s) { return s === 'H'; });
+    var U1 = t.union([A, B]);
+    var U2 = t.union([C, D]);
+    var U3 = t.union([E, F]);
+    var U4 = t.union([G, H]);
+    var UU1 = t.union([U1, U2]);
+    var UU2 = t.union([U3, U4]);
+    eq(t.match('F',
+      UU1, function () { return '1'; },
+      UU2, function () { return '2'; }
+    ), '2');
+  });
+
 });

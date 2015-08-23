@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+## v2.2.1
+
+- **Experimental**
+  - pattern matching #121
+
 ## v2.2.0
 
 - **New Feature**

@@ -656,12 +656,49 @@ var updated = MyType.update(instance, {'$swap': {from: 1, to: 2}}); // => [1, 3,
 
 You can add your custom commands updating the `t.update.commands` hash.
 
+# Pattern matching
+
+```js
+match(x: t.Any, cases...)
+```
+
+where each case has the following structure
+
+```
+type, [guard], result
+```
+
+- `type` a tcomb type
+- `guard` an optional predicate `(x) => t.Any`
+- `result` a function `(x) => t.Any` called when the match succeded
+
+Example:
+
+```js
+// this example uses ES6 syntax
+
+const A = t.struct({...});
+
+const result = t.match(1,
+  t.String, (s) => 'a string',
+  t.Number, (n) => n > 2, (n) => 'a number gt 2', // case with a guard (optional)
+  t.Number, (n) => 'a number lte 2',
+  A, (a) => 'an instance of A',
+  t.Any, (x) => 'other...' // catch all
+);
+
+console.log(result); // => 'a number lte 2'
+```
+
+**Note**. If a match is not found it will fail with a `Match error`.
+
 # Utils
 
 There is a bunch of functions used internally by tcomb which are exported for convenience:
 
 ## fail(message: string): void
 
+Called when an assert fails.
 The default behaviour when failures occur is to throw a TypeError:
 
 ```js
@@ -680,6 +717,7 @@ t.fail = function (message) {
 
 ## update(instance: Object, spec: Object): Object
 
+Immutability helper.
 You can override the default behaviour re-defining the `t.update` function:
 
 ```js
@@ -690,13 +728,13 @@ t.update = function (instance, spec) {
 
 ## getTypeName(type: Type): string
 
-Returns a type's name:
+Returns the name of a tcomb type:
 
 ```js
 t.getTypeName(String); // => 'String'
 ```
 
-If name is not specified, fallbacks according to [http://flowtype.org](http://flowtype.org)
+If a name is not specified when defining the type, a default name will be provided according to [http://flowtype.org](http://flowtype.org).
 
 ## mixin(target: Object, source: Object, override?: boolean): Object
 
