@@ -15,6 +15,7 @@
 ## v2.3.0
 
 - **New Feature**
+  - Add support for lazy messages in asserts, fix #124
   - Better error messages for assert failures, fix #120
 
   The messages now have the following general form:
