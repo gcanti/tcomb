@@ -1,6 +1,6 @@
 {
   "name": "tcomb",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
   "scripts": {
@@ -26,19 +26,25 @@
     "combinators",
     "checking",
     "safety",
-    "models",
+    "model",
     "domain",
     "debugging",
-    "immutable"
+    "immutable",
+    "DDD",
+    "JSON",
+    "store"
   ],
   "keywords": [
     "type",
     "combinators",
     "checking",
     "safety",
-    "models",
+    "model",
     "domain",
     "debugging",
-    "immutable"
+    "immutable",
+    "DDD",
+    "JSON",
+    "store"
   ]
 }
