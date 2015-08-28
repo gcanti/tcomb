@@ -60,6 +60,13 @@ describe('t.union(types, [name])', function () {
       assert.deepEqual(T(1), 1);
     });
 
+    it('should have a default dispatch() implementation handling union of unions', function () {
+      var T1 = t.union([t.String, t.Number], 'T1');
+      var T2 = t.union([t.Boolean, t.Object], 'T2');
+      var T = t.union([T1, T2], 'T');
+      assert.deepEqual(T({foo: "bar"}), {foo: "bar"});
+    });
+
     it('should throw when dispatch() does not return a type', function () {
       throwsWithMessage(function () {
         var T = t.union([t.String, t.Number], 'T');
