@@ -13,7 +13,7 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 var t = require('tcomb');
 
 // a user defined type
-var Integer = t.subtype(t.Number, function (n) => { return n % 1 === 0; });
+var Integer = t.subtype(t.Number, function (n) => { return n % 1 === 0; }, 'Integer');  // <= give a name for better debug messages
 
 // a struct
 var Person = t.struct({
@@ -21,7 +21,7 @@ var Person = t.struct({
   surname: t.maybe(t.String),  // optional string
   age: Integer,                // required integer
   tags: t.list(t.String)       // a list of strings
-});
+}, 'Person'); // <= give a name for better debug messages
 
 // methods are defined as usual
 Person.prototype.getFullName = function () {
@@ -81,7 +81,7 @@ var person = new Person({
 Output to console:
 
 ```js
-[tcomb] Invalid argument value = undefined supplied to irreducible type Number
+[tcomb] Invalid value undefined supplied to Person/age: Number
 ```
 
 See "Debugging with Chrome DevTools" section for details.
