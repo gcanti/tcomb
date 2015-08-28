@@ -419,7 +419,10 @@ function union(types, name) {
     for (var i = 0, len = types.length; i < len; i++ ) {
       var type = types[i];
       if (isUnion(type)) {
-        return type.dispatch(x);
+        var t = type.dispatch(x);
+        if (!isNil(t)) {
+          return t;
+        }
       }
       if (is(x, type)) {
         return type;
