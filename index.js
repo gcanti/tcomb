@@ -53,6 +53,10 @@ function isMaybe(x) {
   return isType(x) && (x.meta.kind === 'maybe');
 }
 
+function isUnion(x) {
+  return isType(x) && (x.meta.kind === 'union');
+}
+
 function isTypeName(name) {
   return isNil(name) || isString(name);
 }
@@ -413,8 +417,12 @@ function union(types, name) {
 
   Union.dispatch = function (x) { // default dispatch implementation
     for (var i = 0, len = types.length; i < len; i++ ) {
-      if (is(x, types[i])) {
-        return types[i];
+      var type = types[i];
+      if (isUnion(type)) {
+        return type.dispatch(x);
+      }
+      if (is(x, type)) {
+        return type;
       }
     }
   };
