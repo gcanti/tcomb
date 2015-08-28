@@ -420,9 +420,10 @@ function union(types, name) {
   };
 
   Union.update = function (instance, spec) {
-    for (var i = 0, len = this.meta.types.length; i < len; i++ ) {
-      if (is(instance, types[i])) {
-        return types[i].update(instance, spec);
+    for (var i = 0, len = types.length; i < len; i++ ) {
+      var type = types[i];
+      if (is(instance, type)) {
+        return type.update(instance, spec);
       }
     }
   };
