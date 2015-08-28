@@ -419,6 +419,10 @@ function union(types, name) {
     }
   };
 
+  Union.update = function (instance, spec) {
+    return Union(exports.update(instance, spec));
+  };
+
   return Union;
 }
 
