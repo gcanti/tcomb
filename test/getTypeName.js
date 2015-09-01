@@ -4,25 +4,25 @@ var t = require('../index');
 
 describe('t.getTypeName(type)', function () {
 
-  var UnnamedStruct = t.struct({});
+  var NamelessStruct = t.struct({});
   var NamedStruct = t.struct({}, 'NamedStruct');
-  var UnnamedUnion = t.union([t.String, t.Number]);
+  var NamelessUnion = t.union([t.String, t.Number]);
   var NamedUnion = t.union([t.String, t.Number], 'NamedUnion');
-  var UnnamedMaybe = t.maybe(t.String);
+  var NamelessMaybe = t.maybe(t.String);
   var NamedMaybe = t.maybe(t.String, 'NamedMaybe');
-  var UnnamedEnums = t.enums({a: 'A', b: 'B'});
+  var NamelessEnums = t.enums({a: 'A', b: 'B'});
   var NamedEnums = t.enums({}, 'NamedEnums');
-  var UnnamedTuple = t.tuple([t.String, t.Number]);
+  var NamelessTuple = t.tuple([t.String, t.Number]);
   var NamedTuple = t.tuple([t.String, t.Number], 'NamedTuple');
-  var UnnamedSubtype = t.subtype(t.String, function notEmpty(x) { return x !== ''; });
+  var NamelessSubtype = t.subtype(t.String, function notEmpty(x) { return x !== ''; });
   var NamedSubtype = t.subtype(t.String, function (x) { return x !== ''; }, 'NamedSubtype');
-  var UnnamedList = t.list(t.String);
+  var NamelessList = t.list(t.String);
   var NamedList = t.list(t.String, 'NamedList');
-  var UnnamedDict = t.dict(t.String, t.String);
+  var NamelessDict = t.dict(t.String, t.String);
   var NamedDict = t.dict(t.String, t.String, 'NamedDict');
-  var UnnamedFunc = t.func(t.String, t.String);
+  var NamelessFunc = t.func(t.String, t.String);
   var NamedFunc = t.func(t.String, t.String, 'NamedFunc');
-  var UnnamedIntersection = t.intersection([t.String, t.Number]);
+  var NamelessIntersection = t.intersection([t.String, t.Number]);
   var NamedIntersection = t.intersection([t.String, t.Number], 'NamedIntersection');
 
   it('should return the name of a function', function () {
@@ -42,17 +42,17 @@ describe('t.getTypeName(type)', function () {
     assert.deepEqual(t.getTypeName(NamedIntersection), 'NamedIntersection');
   });
 
-  it('should return a meaningful name of a unnamed type', function () {
-    assert.deepEqual(t.getTypeName(UnnamedStruct), '{}');
-    assert.deepEqual(t.getTypeName(UnnamedUnion), 'String | Number');
-    assert.deepEqual(t.getTypeName(UnnamedMaybe), '?String');
-    assert.deepEqual(t.getTypeName(UnnamedEnums), '"a" | "b"');
-    assert.deepEqual(t.getTypeName(UnnamedTuple), '[String, Number]');
-    assert.deepEqual(t.getTypeName(UnnamedSubtype), '{String | notEmpty}');
-    assert.deepEqual(t.getTypeName(UnnamedList), 'Array<String>');
-    assert.deepEqual(t.getTypeName(UnnamedDict), '{[key: String]: String}');
-    assert.deepEqual(t.getTypeName(UnnamedFunc), '(String) => String');
-    assert.deepEqual(t.getTypeName(UnnamedIntersection), 'String & Number');
+  it('should return a meaningful name of a Nameless type', function () {
+    assert.deepEqual(t.getTypeName(NamelessStruct), '{}');
+    assert.deepEqual(t.getTypeName(NamelessUnion), 'String | Number');
+    assert.deepEqual(t.getTypeName(NamelessMaybe), '?String');
+    assert.deepEqual(t.getTypeName(NamelessEnums), '"a" | "b"');
+    assert.deepEqual(t.getTypeName(NamelessTuple), '[String, Number]');
+    assert.deepEqual(t.getTypeName(NamelessSubtype), '{String | notEmpty}');
+    assert.deepEqual(t.getTypeName(NamelessList), 'Array<String>');
+    assert.deepEqual(t.getTypeName(NamelessDict), '{[key: String]: String}');
+    assert.deepEqual(t.getTypeName(NamelessFunc), '(String) => String');
+    assert.deepEqual(t.getTypeName(NamelessIntersection), 'String & Number');
   });
 
 });

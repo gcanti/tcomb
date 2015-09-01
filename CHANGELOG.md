@@ -12,6 +12,13 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+## v2.4.0
+
+- **New Feature**
+  - unions
+    - added `update` function, #127
+    - the default `dispatch` implementation now handles unions of unions, #126
+
 ## v2.3.0
 
 - **New Feature**
