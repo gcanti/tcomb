@@ -636,7 +636,7 @@ var p = new Point({x: 1, y: 2});
 p = Point.update(p, {x: {'$set': 3}}); // => {x: 3, y: 2}
 ```
 
-### Removing a value form a dict
+### Removing a value from a dict
 
 ```js
 var MyType = dict(t.String, t.Number);
