@@ -18,6 +18,7 @@
   - unions
     - added `update` function, #127
     - the default `dispatch` implementation now handles unions of unions, #126
+    - show the offended union type in error messages
 
 ## v2.3.0
 

@@ -68,6 +68,12 @@ describe('t.union(types, [name])', function () {
       }, '[tcomb] Cannot use the new operator to instantiate the type T');
     });
 
+    it('should show the offended union type in error messages', function () {
+      throwsWithMessage(function () {
+        Shape({center: {x: 0, y: 0}});
+      }, '[tcomb] Invalid value undefined supplied to Shape(Circle)/radius: Number');
+    });
+
     it('should not throw if used with new and union types are instantiables with new', function () {
       assert.doesNotThrow(function () {
         Shape({center: {x: 0, y: 0}, radius: 10});
