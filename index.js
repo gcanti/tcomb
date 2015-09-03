@@ -795,8 +795,8 @@ function dict(domain, codomain, name) {
   function Dict(value, path) {
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + displayName; });
       path = path || [displayName];
+      assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
     }
 
     if (isDict(value)) { // makes Dict idempotent
