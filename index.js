@@ -722,8 +722,8 @@ function list(type, name) {
   function List(value, path) {
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + displayName + ' (expected an array of ' + typeNameCache + ')'; });
       path = path || [displayName];
+      assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of ' + typeNameCache + ')'; });
     }
 
     if (isList(value)) { // makes List idempotent
