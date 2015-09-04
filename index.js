@@ -1,3 +1,11 @@
+/*! @preserve
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Giulio Canti
+ *
+ */
+
 'use strict';
 
 // configurable
@@ -396,6 +404,7 @@ function union(types, name) {
     if (process.env.NODE_ENV !== 'production') {
       path = path || [displayName];
       assert(isType(type), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
+      path[path.length - 1] += '(' + getTypeName(type) + ')';
     }
 
     return create(type, value, path);
@@ -424,19 +433,14 @@ function union(types, name) {
           return t;
         }
       }
-      if (is(x, type)) {
+      else if (is(x, type)) {
         return type;
       }
     }
   };
 
   Union.update = function (instance, spec) {
-    for (var i = 0, len = types.length; i < len; i++ ) {
-      var type = types[i];
-      if (is(instance, type)) {
-        return type.update(instance, spec);
-      }
-    }
+    return Union(exports.update(instance, spec));
   };
 
   return Union;
@@ -718,8 +722,8 @@ function list(type, name) {
   function List(value, path) {
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + displayName + ' (expected an array of ' + typeNameCache + ')'; });
       path = path || [displayName];
+      assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of ' + typeNameCache + ')'; });
     }
 
     if (isList(value)) { // makes List idempotent
@@ -791,8 +795,8 @@ function dict(domain, codomain, name) {
   function Dict(value, path) {
 
     if (process.env.NODE_ENV !== 'production') {
-      assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + displayName; });
       path = path || [displayName];
+      assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
     }
 
     if (isDict(value)) { // makes Dict idempotent
