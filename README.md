@@ -167,6 +167,7 @@ console.log(result); // => 'a number'
 
 # Similar projects
 
+* [typed-immutable](https://github.com/Gozala/typed-immutable)
 * [immu](https://github.com/scottcorgan/immu)
 * [immutable](https://github.com/facebook/immutable-js)
 * [mori](https://github.com/swannodette/mori)
