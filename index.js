@@ -713,7 +713,7 @@ function list(type, name) {
   var displayName = name || getDefaultListName(type);
   var typeNameCache = getTypeName(type);
 
-  function areElementsOk(x) {
+  function isList(x) {
     return x.every(function (e) {
       return is(e, type);
     });
@@ -726,20 +726,24 @@ function list(type, name) {
       assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of ' + typeNameCache + ')'; });
     }
 
-    var ret = value;
-    if (!areElementsOk(value)) {
-      ret = [];
-      for (var i = 0, len = value.length; i < len; i++ ) {
-        var actual = value[i];
-        ret.push(create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null )));
+    if (isList(value)) { // makes List idempotent
+      if (process.env.NODE_ENV !== 'production') {
+        Object.freeze(value);
       }
+      return value;
+    }
+
+    var arr = [];
+    for (var i = 0, len = value.length; i < len; i++ ) {
+      var actual = value[i];
+      arr.push(create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null )));
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(ret);
+      Object.freeze(arr);
     }
 
-    return ret;
+    return arr;
   }
 
   List.meta = {
@@ -751,7 +755,7 @@ function list(type, name) {
   List.displayName = displayName;
 
   List.is = function (x) {
-    return isArray(x) && areElementsOk(x);
+    return isArray(x) && isList(x);
   };
 
   List.update = function (instance, spec) {
