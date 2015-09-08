@@ -245,7 +245,7 @@ function irreducible(name, predicate) {
 
   if (process.env.NODE_ENV !== 'production') {
     assert(isString(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to irreducible(name, predicate) (expected a string)'; });
-    assert(isFunction(predicate), 'Invalid argument predicate supplied to irreducible(name, predicate)');
+    assert(isFunction(predicate), 'Invalid argument predicate ' + exports.stringify(predicate) + ' supplied to irreducible(name, predicate) (expected a function)');
   }
 
   function Irreducible(value, path) {
@@ -713,7 +713,7 @@ function list(type, name) {
   var displayName = name || getDefaultListName(type);
   var typeNameCache = getTypeName(type);
 
-  function isList(x) {
+  function areElementsOk(x) {
     return x.every(function (e) {
       return is(e, type);
     });
@@ -726,24 +726,20 @@ function list(type, name) {
       assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of ' + typeNameCache + ')'; });
     }
 
-    if (isList(value)) { // makes List idempotent
-      if (process.env.NODE_ENV !== 'production') {
-        Object.freeze(value);
+    var ret = value;
+    if (!areElementsOk(value)) {
+      ret = [];
+      for (var i = 0, len = value.length; i < len; i++ ) {
+        var actual = value[i];
+        ret.push(create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null )));
       }
-      return value;
-    }
-
-    var arr = [];
-    for (var i = 0, len = value.length; i < len; i++ ) {
-      var actual = value[i];
-      arr.push(create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null )));
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(arr);
+      Object.freeze(ret);
     }
 
-    return arr;
+    return ret;
   }
 
   List.meta = {
@@ -755,7 +751,7 @@ function list(type, name) {
   List.displayName = displayName;
 
   List.is = function (x) {
-    return isArray(x) && isList(x);
+    return isArray(x) && areElementsOk(x);
   };
 
   List.update = function (instance, spec) {

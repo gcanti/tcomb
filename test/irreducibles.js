@@ -12,7 +12,8 @@ describe('t.Any', function () {
   describe('constructor', function () {
 
     it('should behave like identity', function () {
-      assert.deepEqual(t.Any('a'), 'a');
+      var value = {};
+      assert.strictEqual(t.Any(value), value);
     });
 
     it('should throw if used with new', function () {
@@ -48,12 +49,6 @@ describe('t.Any', function () {
 //
 
 describe('irreducibles types', function () {
-
-  it('should throw if used with an invalid name argument', function () {
-    throwsWithMessage(function () {
-      t.irreducible(null, function () { return true; });
-    }, '[tcomb] Invalid argument name null supplied to irreducible(name, predicate) (expected a string)');
-  });
 
   [
     {T: t.Nil, x: null},

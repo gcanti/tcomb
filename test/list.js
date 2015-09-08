@@ -1,7 +1,7 @@
 /* globals describe, it */
 var assert = require('assert');
 var t = require('../index');
-var throwsWithMessage = require('./util').throwsWithMessage;
+var util = require('./util');
 
 var Point = t.struct({
   x: t.Number,
@@ -14,11 +14,11 @@ describe('t.list(type, [name])', function () {
 
     it('should throw if used with wrong arguments', function () {
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         t.list();
       }, '[tcomb] Invalid argument type undefined supplied to list(type, [name]) combinator (expected a type)');
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         t.list(Point, 1);
       }, '[tcomb] Invalid argument name 1 supplied to list(type, [name]) combinator (expected a string)');
 
@@ -28,63 +28,91 @@ describe('t.list(type, [name])', function () {
 
   describe('constructor', function () {
 
-    var S = t.struct({}, 'S');
-    var T = t.list(S, 'T');
+    var MyElement = t.struct({}, 'MyElement');
+    var MyList = t.list(MyElement, 'MyList');
+    var ListOfNumbers = t.list(t.Number, 'ListOfNumbers');
 
-    it('should coerce values', function () {
-      var t = T([{}]);
-      assert.ok(S.is(t[0]));
+    it('should hydrate the elements of the list', function () {
+      var instance = MyList([{}]);
+      assert.equal(MyElement.is(instance[0]), true);
     });
 
-    it('should accept only valid values', function () {
+    it('should hydrate the elements of the list in production', util.production(function () {
+      var instance = MyList([{}]);
+      assert.equal(MyElement.is(instance[0]), true);
+    }));
 
-      throwsWithMessage(function () {
-        T(1);
-      }, '[tcomb] Invalid value 1 supplied to T (expected an array of S)');
+    it('should throw with a contextual error message if used with wrong arguments', function () {
 
-      throwsWithMessage(function () {
-        T([1]);
-      }, '[tcomb] Invalid value 1 supplied to T/0: S (expected an object)');
+      util.throwsWithMessage(function () {
+        ListOfNumbers();
+      }, '[tcomb] Invalid value undefined supplied to ListOfNumbers (expected an array of Number)');
+
+      util.throwsWithMessage(function () {
+        ListOfNumbers(['a']);
+      }, '[tcomb] Invalid value "a" supplied to ListOfNumbers/0: Number');
+
+      util.throwsWithMessage(function () {
+        ListOfNumbers(1, ['root']);
+      }, '[tcomb] Invalid value 1 supplied to root (expected an array of Number)');
 
     });
 
     it('should be idempotent', function () {
-      var T = t.list(t.Number);
-      var p1 = T([1, 2]);
-      var p2 = T(p1);
-      assert.deepEqual(Object.isFrozen(p1), true);
-      assert.deepEqual(Object.isFrozen(p2), true);
-      assert.deepEqual(p2 === p1, true);
+      var p0 = [1, 2];
+      var p1 = ListOfNumbers(p0);
+      var p2 = ListOfNumbers(p1);
+      assert.equal(p0 === p1, true);
+      assert.equal(p1 === p2, true);
     });
+
+    it('should be idempotent in production', util.production(function () {
+      var p0 = [1, 2];
+      var p1 = ListOfNumbers(p0);
+      var p2 = ListOfNumbers(p1);
+      assert.equal(p0 === p1, true);
+      assert.equal(p1 === p2, true);
+    }));
+
+    it('should freeze the value', function () {
+      var instance = ListOfNumbers([1, 2]);
+      assert.equal(Object.isFrozen(instance), true);
+    });
+
+    it('should not freeze the value in production', util.production(function () {
+      var instance = ListOfNumbers([1, 2]);
+      assert.equal(Object.isFrozen(instance), false);
+    }));
 
   });
 
-  describe('#is(x)', function () {
+  describe('is(x)', function () {
 
     var Path = t.list(Point);
     var p1 = new Point({x: 0, y: 0});
     var p2 = new Point({x: 1, y: 1});
 
-    it('should return true when x is a list', function () {
-      assert.ok(Path.is([p1, p2]));
+    it('should return true when x is a list of type instances', function () {
+      assert.equal(Path.is([]), true);
+      assert.equal(Path.is([p1, p2]), true);
+      assert.equal(Path.is(1), false);
+      assert.equal(Path.is([1]), false);
     });
 
-    it('should not depend on `this`', function () {
-      assert.ok([[p1, p2]].every(Path.is));
+    it('should be used as a predicate', function () {
+      assert.equal([[p1, p2]].every(Path.is), true);
     });
 
   });
 
-  describe('#update()', function () {
-
-    var Type = t.list(t.String);
-    var instance = Type(['a', 'b']);
+  describe('update(instance, spec)', function () {
 
     it('should return a new instance', function () {
-      var newInstance = Type.update(instance, {'$push': ['c']});
-      assert(Type.is(newInstance));
-      assert(instance.length === 2);
-      assert(newInstance.length === 3);
+      var ListOfStrings = t.list(t.String);
+      var instance = ['a', 'b'];
+      var newInstance = ListOfStrings.update(instance, {'$push': ['c']});
+      assert.equal(newInstance !== instance, true);
+      assert.deepEqual(newInstance, ['a', 'b', 'c']);
     });
 
   });

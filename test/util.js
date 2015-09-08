@@ -8,6 +8,15 @@ function throwsWithMessage(f, message) {
   });
 }
 
+function production(f) {
+  return function () {
+    process.env.NODE_ENV = 'production';
+    f();
+    process.env.NODE_ENV = 'development';
+  };
+}
+
 module.exports = {
-  throwsWithMessage: throwsWithMessage
+  throwsWithMessage: throwsWithMessage,
+  production: production
 };
