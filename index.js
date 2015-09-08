@@ -509,7 +509,7 @@ function maybe(type, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to maybe(type, [name]) combinator (expected a string)'; });
   }
 
-  name = name || getDefaultMaybeName(type);
+  var displayName = name || getDefaultMaybeName(type);
 
   function Maybe(value, path) {
     if (process.env.NODE_ENV !== 'production') {
@@ -524,7 +524,7 @@ function maybe(type, name) {
     name: name
   };
 
-  Maybe.displayName = name;
+  Maybe.displayName = displayName;
 
   Maybe.is = function (x) {
     return isNil(x) || is(x, type);
