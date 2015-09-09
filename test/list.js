@@ -87,12 +87,12 @@ describe('t.list(type, [name])', function () {
       assert.equal(path1 === path2, true);
     }));
 
-    it('should freeze the value', function () {
+    it('should freeze the instance', function () {
       var instance = ListOfNumbers([1, 2]);
       assert.equal(Object.isFrozen(instance), true);
     });
 
-    it('should not freeze the value in production', util.production(function () {
+    it('should not freeze the instance in production', util.production(function () {
       var instance = ListOfNumbers([1, 2]);
       assert.equal(Object.isFrozen(instance), false);
     }));

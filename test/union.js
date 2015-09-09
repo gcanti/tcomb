@@ -21,7 +21,7 @@ var Rectangle = t.struct({
 var Shape = t.union([Circle, Rectangle], 'Shape');
 
 Shape.dispatch = function (values) {
-  assert(t.Object.is(values));
+  values = t.Object(values);
   return values.hasOwnProperty('center') ?
     Circle :
     Rectangle;
@@ -55,16 +55,37 @@ describe('t.union(types, [name])', function () {
 
   describe('constructor', function () {
 
-    it('should build instances when dispatch() is implemented', function () {
+    it('should hydrate the input', function () {
       var circle = Shape({center: {x: 0, y: 0}, radius: 10});
       assert.equal(Circle.is(circle), true);
     });
 
+    it('should hydrate the input in production', util.production(function () {
+      var circle = Shape({center: {x: 0, y: 0}, radius: 10});
+      assert.equal(Circle.is(circle), true);
+    }));
+
+    it('should freeze the instance', function () {
+      var circle = Shape({center: {x: 0, y: 0}, radius: 10});
+      assert.equal(Object.isFrozen(circle), true);
+    });
+
+    it('should not freeze the instance in production', util.production(function () {
+      var circle = Shape({center: {x: 0, y: 0}, radius: 10});
+      assert.equal(Object.isFrozen(circle), false);
+    }));
+
     it('should throw if used with new', function () {
+
+      assert.doesNotThrow(function () {
+        Shape({center: {x: 0, y: 0}, radius: 10});
+      });
+
       util.throwsWithMessage(function () {
         var T = t.union([t.String, t.Number], 'T');
         var x = new T('a'); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate the type T');
+
     });
 
     it('should show the offended union type in error messages', function () {
@@ -73,27 +94,30 @@ describe('t.union(types, [name])', function () {
       }, '[tcomb] Invalid value undefined supplied to Shape(Circle)/radius: Number');
     });
 
-    it('should not throw if used with new and union types are instantiables with new', function () {
-      assert.doesNotThrow(function () {
-        Shape({center: {x: 0, y: 0}, radius: 10});
-      });
+    it('should be idempotent', function () {
+      var s0 = {center: {x: 0, y: 0}, radius: 10};
+      var s1 = Shape(s0);
+      var s2 = Shape(s1);
+      assert.equal(s1 === s0, false);
+      assert.equal(s2 === s1, true);
     });
 
-    it('should be idempotent', function () {
-      var p1 = Shape({center: {x: 0, y: 0}, radius: 10});
-      var p2 = Shape(p1);
-      assert.equal(Object.isFrozen(p1), true);
-      assert.equal(Object.isFrozen(p2), true);
-      assert.equal(p2 === p1, true);
-    });
+    it('should be idempotent i production', util.production(function () {
+      var s0 = {center: {x: 0, y: 0}, radius: 10};
+      var s1 = Shape(s0);
+      var s2 = Shape(s1);
+      assert.equal(s1 === s0, false);
+      assert.equal(s2 === s1, true);
+    }));
 
   });
 
   describe('is(x)', function () {
 
     it('should return true when x is an instance of the union', function () {
-      var p = new Circle({center: { x: 0, y: 0 }, radius: 10});
+      var p = new Circle({center: {x: 0, y: 0}, radius: 10});
       assert.equal(Shape.is(p), true);
+      assert.equal(Shape.is(1), false);
     });
 
   });
@@ -101,32 +125,32 @@ describe('t.union(types, [name])', function () {
   describe('dispatch(x)', function () {
 
     it('should have a default implementation', function () {
-      var T = t.union([t.String, t.Number], 'T');
-      assert.equal(T(1), 1);
+      var U = t.union([t.String, t.Number], 'T');
+      assert.equal(U(1), 1);
     });
 
     it('should handle union of unions', function () {
-      var T1 = t.union([t.String, t.Number], 'T1');
-      var T2 = t.union([t.Boolean, t.Object], 'T2');
-      var T = t.union([T1, T2, t.Array], 'T');
-      assert.equal(T.dispatch(1), t.Number);
-      assert.equal(T.dispatch({foo: "bar"}), t.Object);
-      assert.equal(T.dispatch([]), t.Array);
+      var U1 = t.union([t.String, t.Number], 'U1');
+      var U2 = t.union([t.Boolean, t.Object], 'U2');
+      var U = t.union([U1, U2, t.Array], 'U');
+      assert.equal(U.dispatch(1), t.Number);
+      assert.equal(U.dispatch({foo: "bar"}), t.Object);
+      assert.equal(U.dispatch([]), t.Array);
     });
 
     it('should throw if does not return a valid type', function () {
 
       util.throwsWithMessage(function () {
-        var T = t.union([t.String, t.Number], 'T');
-        T(true);
+        var U = t.union([t.String, t.Number], 'T');
+        U(true);
       }, '[tcomb] Invalid value true supplied to T (no constructor found)');
 
       util.throwsWithMessage(function () {
-        var T = t.union([t.String, t.Number], 'T');
-        T.dispatch = function () {
+        var U = t.union([t.String, t.Number], 'T');
+        U.dispatch = function () {
           return t.Boolean;
         };
-        T(true);
+        U(true);
       }, '[tcomb] Invalid constructor Boolean returned by T.dispatch(x) function');
 
     });
