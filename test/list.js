@@ -31,16 +31,7 @@ describe('t.list(type, [name])', function () {
     var MyElement = t.struct({}, 'MyElement');
     var MyList = t.list(MyElement, 'MyList');
     var ListOfNumbers = t.list(t.Number, 'ListOfNumbers');
-
-    it('should hydrate the elements of the list', function () {
-      var instance = MyList([{}]);
-      assert.equal(MyElement.is(instance[0]), true);
-    });
-
-    it('should hydrate the elements of the list in production', util.production(function () {
-      var instance = MyList([{}]);
-      assert.equal(MyElement.is(instance[0]), true);
-    }));
+    var Path = t.list(Point, 'Path');
 
     it('should throw with a contextual error message if used with wrong arguments', function () {
 
@@ -58,20 +49,42 @@ describe('t.list(type, [name])', function () {
 
     });
 
+    it('should hydrate the elements of the list', function () {
+      var instance = MyList([{}]);
+      assert.equal(MyElement.is(instance[0]), true);
+    });
+
+    it('should hydrate the elements of the list in production', util.production(function () {
+      var instance = MyList([{}]);
+      assert.equal(MyElement.is(instance[0]), true);
+    }));
+
     it('should be idempotent', function () {
-      var p0 = [1, 2];
-      var p1 = ListOfNumbers(p0);
-      var p2 = ListOfNumbers(p1);
-      assert.equal(p0 === p1, true);
-      assert.equal(p1 === p2, true);
+      var numbers0 = [1, 2];
+      var numbers1 = ListOfNumbers(numbers0);
+      var numbers2 = ListOfNumbers(numbers1);
+      assert.equal(numbers0 === numbers1, true);
+      assert.equal(numbers1 === numbers2, true);
+
+      var path0 = [{x: 0, y: 0}, {x: 1, y: 1}];
+      var path1 = Path(path0);
+      var path2 = Path(path1);
+      assert.equal(path0 === path1, false);
+      assert.equal(path1 === path2, true);
     });
 
     it('should be idempotent in production', util.production(function () {
-      var p0 = [1, 2];
-      var p1 = ListOfNumbers(p0);
-      var p2 = ListOfNumbers(p1);
-      assert.equal(p0 === p1, true);
-      assert.equal(p1 === p2, true);
+      var numbers0 = [1, 2];
+      var numbers1 = ListOfNumbers(numbers0);
+      var numbers2 = ListOfNumbers(numbers1);
+      assert.equal(numbers0 === numbers1, true);
+      assert.equal(numbers1 === numbers2, true);
+
+      var path0 = [{x: 0, y: 0}, {x: 1, y: 1}];
+      var path1 = Path(path0);
+      var path2 = Path(path1);
+      assert.equal(path0 === path1, false);
+      assert.equal(path1 === path2, true);
     }));
 
     it('should freeze the value', function () {

@@ -74,6 +74,10 @@ function is(x, type) {
   return isType(type) ? type.is(x) : isInstanceOf(x, type); // type should be a class constructor
 }
 
+function isIdentity(type) {
+  return isType(type) ? type.meta.identity : true; // ES6 classes are identity for tcomb
+}
+
 function create(type, value, path) {
   if (isType(type)) {
     // for structs the new operator is allowed
@@ -261,7 +265,8 @@ function irreducible(name, predicate) {
 
   Irreducible.meta = {
     kind: 'irreducible',
-    name: name
+    name: name,
+    identity: true
   };
 
   Irreducible.displayName = name;
@@ -348,7 +353,8 @@ function struct(props, name) {
   Struct.meta = {
     kind: 'struct',
     props: props,
-    name: name
+    name: name,
+    identity: false
   };
 
   Struct.displayName = displayName;
@@ -396,6 +402,7 @@ function union(types, name) {
   }
 
   var displayName = name || getDefaultUnionName(types);
+  var identity = types.every(isIdentity);
 
   function Union(value, path) {
 
@@ -417,7 +424,8 @@ function union(types, name) {
   Union.meta = {
     kind: 'union',
     types: types,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Union.displayName = displayName;
@@ -462,6 +470,7 @@ function intersection(types, name) {
   }
 
   var displayName = name || getDefaultIntersectionName(types);
+  var identity = types.every(isIdentity);
 
   function Intersection(value, path) {
 
@@ -477,7 +486,8 @@ function intersection(types, name) {
   Intersection.meta = {
     kind: 'intersection',
     types: types,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Intersection.displayName = displayName;
@@ -514,6 +524,7 @@ function maybe(type, name) {
   }
 
   var displayName = name || getDefaultMaybeName(type);
+  var identity = isIdentity(type);
 
   function Maybe(value, path) {
     if (process.env.NODE_ENV !== 'production') {
@@ -525,7 +536,8 @@ function maybe(type, name) {
   Maybe.meta = {
     kind: 'maybe',
     type: type,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Maybe.displayName = displayName;
@@ -564,7 +576,8 @@ function enums(map, name) {
   Enums.meta = {
     kind: 'enums',
     map: map,
-    name: name
+    name: name,
+    identity: true
   };
 
   Enums.displayName = displayName;
@@ -597,6 +610,7 @@ function tuple(types, name) {
   }
 
   var displayName = name || getDefaultTupleName(types);
+  var identity = types.every(isIdentity);
 
   function isTuple(x) {
     return types.every(function (type, i) {
@@ -635,7 +649,8 @@ function tuple(types, name) {
   Tuple.meta = {
     kind: 'tuple',
     types: types,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Tuple.displayName = displayName;
@@ -666,6 +681,7 @@ function subtype(type, predicate, name) {
   }
 
   var displayName = name || getDefaultSubtypeName(type, predicate);
+  var identity = isIdentity(type);
 
   function Subtype(value, path) {
 
@@ -687,7 +703,8 @@ function subtype(type, predicate, name) {
     kind: 'subtype',
     type: type,
     predicate: predicate,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Subtype.displayName = displayName;
@@ -716,50 +733,54 @@ function list(type, name) {
 
   var displayName = name || getDefaultListName(type);
   var typeNameCache = getTypeName(type);
-
-  function isList(x) {
-    return x.every(function (e) {
-      return is(e, type);
-    });
-  }
+  var identity = isIdentity(type); // the list is identity iif type is identity
 
   function List(value, path) {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (identity) {
+        return value; // just trust the input if elements must not be hydrated
+      }
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       path = path || [displayName];
       assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of ' + typeNameCache + ')'; });
     }
 
-    if (isList(value)) { // makes List idempotent
-      if (process.env.NODE_ENV !== 'production') {
-        Object.freeze(value);
-      }
-      return value;
-    }
-
-    var arr = [];
+    var idempotent = true; // will remain true if I can reutilise the input
+    var ret = []; // make a temporary copy, will be discarded if idempotent remains true
     for (var i = 0, len = value.length; i < len; i++ ) {
       var actual = value[i];
-      arr.push(create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null )));
+      var instance = create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null ));
+      idempotent = idempotent && ( actual === instance );
+      ret.push(instance);
+    }
+
+    if (idempotent) {
+      ret = value;
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(arr);
+      Object.freeze(ret);
     }
 
-    return arr;
+    return ret;
   }
 
   List.meta = {
     kind: 'list',
     type: type,
-    name: name
+    name: name,
+    identity: identity
   };
 
   List.displayName = displayName;
 
   List.is = function (x) {
-    return isArray(x) && isList(x);
+    return isArray(x) && x.every(function (e) {
+      return is(e, type);
+    });
   };
 
   List.update = function (instance, spec) {
@@ -784,6 +805,7 @@ function dict(domain, codomain, name) {
   var displayName = name || getDefaultDictName(domain, codomain);
   var domainNameCache = getTypeName(domain);
   var codomainNameCache = getTypeName(codomain);
+  var identity = isIdentity(domain) && isIdentity(codomain);
 
   function isDict(x) {
     for (var k in x) {
@@ -830,7 +852,8 @@ function dict(domain, codomain, name) {
     kind: 'dict',
     domain: domain,
     codomain: codomain,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Dict.displayName = displayName;
