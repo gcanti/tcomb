@@ -414,7 +414,8 @@ function union(types, name) {
 
     if (process.env.NODE_ENV !== 'production') {
       path = path || [displayName];
-      assert(isType(type), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
+      assert(isType(type), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (no constructor found)'; });
+      assert(types.some(function (t) { return t === type; }), function () { return 'Invalid constructor ' + getTypeName(type) + ' returned by ' + path.join('/') + '.dispatch(x) function'; });
       path[path.length - 1] += '(' + getTypeName(type) + ')';
     }
 
