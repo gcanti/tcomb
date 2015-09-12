@@ -2,7 +2,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Giulio Canti
+ * Copyright (c) 2014-2015 Giulio Canti
  *
  */
 
@@ -616,38 +616,38 @@ function tuple(types, name) {
   var displayName = name || getDefaultTupleName(types);
   var identity = types.every(isIdentity);
 
-  function isTuple(x) {
-    return types.every(function (type, i) {
-      return is(x[i], type);
-    });
-  }
-
   function Tuple(value, path) {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (identity) {
+        return value;
+      }
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       path = path || [displayName];
       assert(isArray(value) && value.length === types.length, function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of length ' + types.length + ')'; });
     }
 
-    if (isTuple(value)) { // makes Tuple idempotent
-      if (process.env.NODE_ENV !== 'production') {
-        Object.freeze(value);
-      }
-      return value;
+    var idempotent = true;
+    var ret = [];
+    for (var i = 0, len = types.length; i < len; i++) {
+      var expected = types[i];
+      var actual = value[i];
+      var instance = create(expected, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + getTypeName(expected)) : null ));
+      idempotent = idempotent && ( actual === instance );
+      ret.push(instance);
     }
 
-    var arr = [], expected, actual;
-    for (var i = 0, len = types.length; i < len; i++) {
-      expected = types[i];
-      actual = value[i];
-      arr.push(create(expected, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + getTypeName(expected)) : null )));
+    if (idempotent) {
+      ret = value;
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(arr);
+      Object.freeze(ret);
     }
 
-    return arr;
+    return ret;
   }
 
   Tuple.meta = {
@@ -662,7 +662,9 @@ function tuple(types, name) {
   Tuple.is = function (x) {
     return isArray(x) &&
       x.length === types.length &&
-      isTuple(x);
+      types.every(function (type, i) {
+        return is(x[i], type);
+      });
   };
 
   Tuple.update = function (instance, spec) {

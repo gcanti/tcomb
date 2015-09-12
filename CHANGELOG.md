@@ -20,6 +20,11 @@
 ## v2.4.0
 
 - **New Feature**
+  - check if the type returned by a union dispatch function is correct, fix #136 (thanks @fcracker79)
+
+## v2.4.0
+
+- **New Feature**
   - unions
     - added `update` function, #127
     - the default `dispatch` implementation now handles unions of unions, #126
