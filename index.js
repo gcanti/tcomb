@@ -12,14 +12,11 @@
 exports.stringify = function stringify(x) {
   try { // handle "Converting circular structure to JSON" error
     return JSON.stringify(x, null, 2);
-  } catch (e) {
+  }
+  catch (e) {
     return String(x);
   }
 };
-
-function isInstanceOf(x, constructor) {
-  return x instanceof constructor;
-}
 
 function isNil(x) {
   return x === null || x === void 0;
@@ -42,7 +39,7 @@ function isFunction(x) {
 }
 
 function isArray(x) {
-  return isInstanceOf(x, Array);
+  return x instanceof Array;
 }
 
 function isObject(x) {
@@ -71,7 +68,7 @@ function isTypeName(name) {
 
 // Returns true if x is of type `type`
 function is(x, type) {
-  return isType(type) ? type.is(x) : isInstanceOf(x, type); // type should be a class constructor
+  return isType(type) ? type.is(x) : x instanceof type; // type should be a class constructor
 }
 
 function isIdentity(type) {
@@ -87,7 +84,7 @@ function create(type, value, path) {
   if (process.env.NODE_ENV !== 'production') {
     // type should be a class constructor and value some instance, just check membership and return the value
     path = path || [getFunctionName(type)];
-    assert(isInstanceOf(value, type), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
+    assert(value instanceof type, function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
   }
 
   return value;
@@ -136,7 +133,7 @@ function mixin(target, source, overwrite) {
 }
 
 function forbidNewOperator(x, type) {
-  assert(!isInstanceOf(x, type), function () { return 'Cannot use the new operator to instantiate the type ' + getTypeName(type); });
+  assert(!(x instanceof type), function () { return 'Cannot use the new operator to instantiate the type ' + getTypeName(type); });
 }
 
 function getShallowCopy(x) {
@@ -295,15 +292,15 @@ var Obj = irreducible('Object', isObject);
 var Func = irreducible('Function', isFunction);
 
 var Err = irreducible('Error', function (x) {
-  return isInstanceOf(x, Error);
+  return x instanceof Error;
 });
 
 var Re = irreducible('RegExp', function (x) {
-  return isInstanceOf(x, RegExp);
+  return x instanceof RegExp;
 });
 
 var Dat = irreducible('Date', function (x) {
-  return isInstanceOf(x, Date);
+  return x instanceof Date;
 });
 
 function getDefaultStructName(props) {
@@ -332,7 +329,7 @@ function struct(props, name) {
       assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an object)'; });
     }
 
-    if (!isInstanceOf(this, Struct)) { // makes `new` optional
+    if (!(this instanceof Struct)) { // makes `new` optional
       return new Struct(value);
     }
 
@@ -360,7 +357,7 @@ function struct(props, name) {
   Struct.displayName = displayName;
 
   Struct.is = function (x) {
-    return isInstanceOf(x, Struct);
+    return x instanceof Struct;
   };
 
   Struct.update = function (instance, spec) {
@@ -443,7 +440,7 @@ function union(types, name) {
   Union.dispatch = function (x) { // default dispatch implementation
     for (var i = 0, len = types.length; i < len; i++ ) {
       var type = types[i];
-      if (isUnion(type)) {
+      if (isUnion(type)) { // handle union of unions
         var t = type.dispatch(x);
         if (!isNil(t)) {
           return t;
