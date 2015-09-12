@@ -21,6 +21,7 @@
 
 - **New Feature**
   - check if the type returned by a union dispatch function is correct, fix #136 (thanks @fcracker79)
+  - added `refinement` alias to `subtype` (which is deprecated), fix #140
 
 ## v2.4.0
 

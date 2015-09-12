@@ -8,7 +8,7 @@
 
 'use strict';
 
-// configurable
+// overrideable by the user
 exports.stringify = function stringify(x) {
   try { // handle "Converting circular structure to JSON" error
     return JSON.stringify(x, null, 2);
@@ -51,30 +51,32 @@ function isType(x) {
 }
 
 function isStruct(x) {
-  return isType(x) && (x.meta.kind === 'struct');
+  return isType(x) && ( x.meta.kind === 'struct' );
 }
 
 function isMaybe(x) {
-  return isType(x) && (x.meta.kind === 'maybe');
+  return isType(x) && ( x.meta.kind === 'maybe' );
 }
 
 function isUnion(x) {
-  return isType(x) && (x.meta.kind === 'union');
+  return isType(x) && ( x.meta.kind === 'union' );
 }
 
 function isTypeName(name) {
   return isNil(name) || isString(name);
 }
 
-// Returns true if x is of type `type`
+// returns true if x is an instance of type
 function is(x, type) {
   return isType(type) ? type.is(x) : x instanceof type; // type should be a class constructor
 }
 
+// return true if the type constructor behaves like the identity function (exceptions are the structs)
 function isIdentity(type) {
   return isType(type) ? type.meta.identity : true; // ES6 classes are identity for tcomb
 }
 
+// creates an instance of a type, handling the optional new operator
 function create(type, value, path) {
   if (isType(type)) {
     // for structs the new operator is allowed
@@ -82,7 +84,7 @@ function create(type, value, path) {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    // type should be a class constructor and value some instance, just check membership and return the value
+    // here type should be a class constructor and value some instance, just check membership and return the value
     path = path || [getFunctionName(type)];
     assert(value instanceof type, function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
   }
@@ -95,28 +97,30 @@ function getFunctionName(f) {
 }
 
 function getTypeName(constructor) {
-  if (isType(constructor)) { return constructor.displayName; }
+  if (isType(constructor)) {
+    return constructor.displayName;
+  }
   return getFunctionName(constructor);
 }
 
-// configurable
+// overrideable by the user
 exports.fail = function fail(message) {
   throw new TypeError('[tcomb] ' + message);
 };
 
 function assert(guard, message) {
   if (guard !== true) {
-    if (isFunction(message)) {
+    if (isFunction(message)) { // handle lazy messages
       message = message();
     }
-    else if (isNil(message)) {
+    else if (isNil(message)) { // use a default message
       message = 'Assert failed (turn on "Pause on exceptions" in your Source panel)';
     }
     exports.fail(message);
   }
 }
 
-// safe mixin: cannot override props unless specified
+// safe mixin, cannot override props unless specified
 function mixin(target, source, overwrite) {
   if (isNil(source)) { return target; }
   for (var k in source) {
@@ -137,8 +141,12 @@ function forbidNewOperator(x, type) {
 }
 
 function getShallowCopy(x) {
-  if (isArray(x)) { return x.concat(); }
-  if (isObject(x)) { return mixin({}, x); }
+  if (isArray(x)) {
+    return x.concat();
+  }
+  if (isObject(x)) {
+    return mixin({}, x);
+  }
   return x;
 }
 
@@ -671,25 +679,25 @@ function tuple(types, name) {
   return Tuple;
 }
 
-function getDefaultSubtypeName(type, predicate) {
+function getDefaultRefinementName(type, predicate) {
   return '{' + getTypeName(type) + ' | ' + getFunctionName(predicate) + '}';
 }
 
-function subtype(type, predicate, name) {
+function refinement(type, predicate, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to subtype(type, predicate, [name]) combinator (expected a type)'; });
-    assert(isFunction(predicate), function () { return 'Invalid argument predicate supplied to subtype(type, predicate, [name]) combinator (expected a function)'; });
-    assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to subtype(type, predicate, [name]) combinator (expected a string)'; });
+    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to refinement(type, predicate, [name]) combinator (expected a type)'; });
+    assert(isFunction(predicate), function () { return 'Invalid argument predicate supplied to refinement(type, predicate, [name]) combinator (expected a function)'; });
+    assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to refinement(type, predicate, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultSubtypeName(type, predicate);
+  var displayName = name || getDefaultRefinementName(type, predicate);
   var identity = isIdentity(type);
 
-  function Subtype(value, path) {
+  function Refinement(value, path) {
 
     if (process.env.NODE_ENV !== 'production') {
-      forbidNewOperator(this, Subtype);
+      forbidNewOperator(this, Refinement);
       path = path || [displayName];
     }
 
@@ -702,7 +710,7 @@ function subtype(type, predicate, name) {
     return x;
   }
 
-  Subtype.meta = {
+  Refinement.meta = {
     kind: 'subtype',
     type: type,
     predicate: predicate,
@@ -710,17 +718,17 @@ function subtype(type, predicate, name) {
     identity: identity
   };
 
-  Subtype.displayName = displayName;
+  Refinement.displayName = displayName;
 
-  Subtype.is = function (x) {
+  Refinement.is = function (x) {
     return is(x, type) && predicate(x);
   };
 
-  Subtype.update = function (instance, spec) {
-    return Subtype(exports.update(instance, spec));
+  Refinement.update = function (instance, spec) {
+    return Refinement(exports.update(instance, spec));
   };
 
-  return Subtype;
+  return Refinement;
 }
 
 function getDefaultListName(type) {
@@ -1008,23 +1016,23 @@ mixin(exports, {
   assert: assert,
   Any: Any,
   Nil: Nil,
-  Str: Str,
+  Str: Str, // deprecated
   String: Str,
-  Num: Num,
+  Num: Num, // deprecated
   Number: Num,
-  Bool: Bool,
+  Bool: Bool, // deprecated
   Boolean: Bool,
-  Arr: Arr,
+  Arr: Arr, // deprecated
   Array: Arr,
-  Obj: Obj,
+  Obj: Obj, // deprecated
   Object: Obj,
-  Func: Func,
+  Func: Func, // deprecated
   Function: Func,
-  Err: Err,
+  Err: Err, // deprecated
   Error: Err,
-  Re: Re,
+  Re: Re, // deprecated
   RegExp: Re,
-  Dat: Dat,
+  Dat: Dat, // deprecated
   Date: Dat,
   irreducible: irreducible,
   struct: struct,
@@ -1032,7 +1040,8 @@ mixin(exports, {
   union: union,
   maybe: maybe,
   tuple: tuple,
-  subtype: subtype,
+  subtype: refinement, // deprecated
+  refinement: refinement,
   list: list,
   dict: dict,
   func: func,
