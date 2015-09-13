@@ -820,45 +820,40 @@ function dict(domain, codomain, name) {
   var codomainNameCache = getTypeName(codomain);
   var identity = isIdentity(domain) && isIdentity(codomain);
 
-  function isDict(x) {
-    for (var k in x) {
-      if (x.hasOwnProperty(k)) {
-        if (!is(k, domain) || !is(x[k], codomain)) {
-          return false;
-        }
+  function Dict(value, path) {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (identity) {
+        return value; // just trust the input if elements must not be hydrated
       }
     }
-    return true;
-  }
-
-  function Dict(value, path) {
 
     if (process.env.NODE_ENV !== 'production') {
       path = path || [displayName];
       assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
     }
 
-    if (isDict(value)) { // makes Dict idempotent
-      if (process.env.NODE_ENV !== 'production') {
-        Object.freeze(value);
-      }
-      return value;
-    }
-
-    var obj = {};
+    var idempotent = true; // will remain true if I can reutilise the input
+    var ret = {}; // make a temporary copy, will be discarded if idempotent remains true
     for (var k in value) {
       if (value.hasOwnProperty(k)) {
         k = create(domain, k, ( process.env.NODE_ENV !== 'production' ? path.concat(domainNameCache) : null ));
         var actual = value[k];
-        obj[k] = create(codomain, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + codomainNameCache) : null ));
+        var instance = create(codomain, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + codomainNameCache) : null ));
+        idempotent = idempotent && ( actual === instance );
+        ret[k] = instance;
       }
     }
 
-    if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(obj);
+    if (idempotent) { // implements idempotency
+      ret = value;
     }
 
-    return obj;
+    if (process.env.NODE_ENV !== 'production') {
+      Object.freeze(ret);
+    }
+
+    return ret;
   }
 
   Dict.meta = {
@@ -872,7 +867,17 @@ function dict(domain, codomain, name) {
   Dict.displayName = displayName;
 
   Dict.is = function (x) {
-    return isObject(x) && isDict(x);
+    if (!isObject(x)) {
+      return false;
+    }
+    for (var k in x) {
+      if (x.hasOwnProperty(k)) {
+        if (!is(k, domain) || !is(x[k], codomain)) {
+          return false;
+        }
+      }
+    }
+    return true;
   };
 
   Dict.update = function (instance, spec) {
