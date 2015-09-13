@@ -481,7 +481,6 @@ function intersection(types, name) {
   }
 
   var displayName = name || intersection.getDefaultName(types);
-  var identity = types.every(isIdentity);
 
   function Intersection(value, path) {
 
@@ -498,7 +497,7 @@ function intersection(types, name) {
     kind: 'intersection',
     types: types,
     name: name,
-    identity: identity
+    identity: true
   };
 
   Intersection.displayName = displayName;
