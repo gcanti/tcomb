@@ -907,10 +907,10 @@ function func(domain, codomain, name) {
 
   var displayName = name || func.getDefaultName(domain, codomain);
 
-  function FuncType(value, uncurried) {
+  function FuncType(value, curried) {
 
     if (!isInstrumented(value)) { // automatically instrument the function
-      return FuncType.of(value, uncurried);
+      return FuncType.of(value, curried);
     }
 
     if (process.env.NODE_ENV !== 'production') {

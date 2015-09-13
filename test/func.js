@@ -1,18 +1,18 @@
 /* globals describe, it */
 var assert = require('assert');
 var t = require('../index');
-var throwsWithMessage = require('./util').throwsWithMessage;
+var util = require('./util');
 
 describe('t.func(domain, codomain, [name])', function () {
 
-  it('should handle a no types', function () {
+  it('should handle an empty domain', function () {
     var T = t.func([], t.String);
     assert.deepEqual(T.meta.domain.length, 0);
     var getGreeting = T.of(function () { return 'Hi'; });
     assert.deepEqual(getGreeting(), 'Hi');
   });
 
-  it('should handle a single type', function () {
+  it('should handle a domain with single type', function () {
     var T = t.func(t.Number, t.Number);
     assert.deepEqual(T.meta.domain.length, 1);
     assert.ok(T.meta.domain[0] === t.Number);
@@ -34,11 +34,11 @@ describe('t.func(domain, codomain, [name])', function () {
       });
       assert.deepEqual(sum(1, 2), 3);
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         sum(1, 2, 3);
       }, '[tcomb] Invalid value [\n  1,\n  2,\n  3\n] supplied to [Number, Number] (expected an array of length 2)');
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         sum('a', 2);
       }, '[tcomb] Invalid value "a" supplied to [Number, Number]/0: Number');
 
@@ -51,7 +51,7 @@ describe('t.func(domain, codomain, [name])', function () {
         return 'a';
       });
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         sum(1, 2);
       }, '[tcomb] Invalid value "a" supplied to Number');
 
@@ -92,7 +92,7 @@ describe('t.func(domain, codomain, [name])', function () {
 
     it('should curry functions', function () {
       var Type = t.func([t.Number, t.Number, t.Number], t.Number);
-      var sum = Type.of(function (a, b, c) {
+      var sum = Type(function (a, b, c) {
         return a + b + c;
       }, true);
       assert.deepEqual(sum(1, 2, 3), 6);
@@ -115,11 +115,11 @@ describe('t.func(domain, codomain, [name])', function () {
         return a + b;
       }, true);
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         sum('a');
       }, '[tcomb] Invalid value "a" supplied to [Number]/0: Number');
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         var sum1 = sum(1);
         sum1('a');
       }, '[tcomb] Invalid value "a" supplied to [Number]/0: Number');
@@ -136,7 +136,7 @@ describe('t.func(domain, codomain, [name])', function () {
         return a + b + c;
       });
       assert.deepEqual(sum(1, 2, 3), 6);
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         sum(1, 2);
       }, '[tcomb] Invalid value [\n  1,\n  2\n] supplied to [Number, Number, Number] (expected an array of length 3)');
     });
