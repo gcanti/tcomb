@@ -68,12 +68,18 @@ function isTypeName(name) {
 
 // returns true if x is an instance of type
 function is(x, type) {
-  return isType(type) ? type.is(x) : x instanceof type; // type should be a class constructor
+  if (isType(type)) {
+    return type.is(x);
+  }
+  return x instanceof type; // type should be a class constructor
 }
 
 // return true if the type constructor behaves like the identity function (exceptions are the structs)
 function isIdentity(type) {
-  return isType(type) ? type.meta.identity : true; // ES6 classes are identity for tcomb
+  if (isType(type)) {
+    return type.meta.identity;
+  }
+  return true; // ES6 classes are identity for tcomb
 }
 
 // creates an instance of a type, handling the optional new operator
@@ -311,12 +317,6 @@ var Dat = irreducible('Date', function (x) {
   return x instanceof Date;
 });
 
-function getDefaultStructName(props) {
-  return '{' + Object.keys(props).map(function (prop) {
-    return prop + ': ' + getTypeName(props[prop]);
-  }).join(', ') + '}';
-}
-
 function struct(props, name) {
 
   if (process.env.NODE_ENV !== 'production') {
@@ -324,11 +324,11 @@ function struct(props, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to struct(props, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultStructName(props);
+  var displayName = name || struct.getDefaultName(props);
 
   function Struct(value, path) {
 
-    if (Struct.is(value)) { // makes Struct idempotent
+    if (Struct.is(value)) { // implements idempotency
       return value;
     }
 
@@ -337,7 +337,7 @@ function struct(props, name) {
       assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an object)'; });
     }
 
-    if (!(this instanceof Struct)) { // makes `new` optional
+    if (!(this instanceof Struct)) { // `new` is optional
       return new Struct(value);
     }
 
@@ -395,9 +395,11 @@ function struct(props, name) {
   return Struct;
 }
 
-function getDefaultUnionName(types) {
-  return types.map(getTypeName).join(' | ');
-}
+struct.getDefaultName = function (props) {
+  return '{' + Object.keys(props).map(function (prop) {
+    return prop + ': ' + getTypeName(props[prop]);
+  }).join(', ') + '}';
+};
 
 function union(types, name) {
 
@@ -406,7 +408,7 @@ function union(types, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to union(types, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultUnionName(types);
+  var displayName = name || union.getDefaultName(types);
   var identity = types.every(isIdentity);
 
   function Union(value, path) {
@@ -467,9 +469,9 @@ function union(types, name) {
   return Union;
 }
 
-function getDefaultIntersectionName(types) {
-  return types.map(getTypeName).join(' & ');
-}
+union.getDefaultName = function (types) {
+  return types.map(getTypeName).join(' | ');
+};
 
 function intersection(types, name) {
 
@@ -478,7 +480,7 @@ function intersection(types, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to intersection(types, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultIntersectionName(types);
+  var displayName = name || intersection.getDefaultName(types);
   var identity = types.every(isIdentity);
 
   function Intersection(value, path) {
@@ -514,9 +516,9 @@ function intersection(types, name) {
   return Intersection;
 }
 
-function getDefaultMaybeName(type) {
-  return '?' + getTypeName(type);
-}
+intersection.getDefaultName = function (types) {
+  return types.map(getTypeName).join(' & ');
+};
 
 function maybe(type, name) {
 
@@ -532,7 +534,7 @@ function maybe(type, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to maybe(type, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultMaybeName(type);
+  var displayName = name || maybe.getDefaultName(type);
   var identity = isIdentity(type);
 
   function Maybe(value, path) {
@@ -558,9 +560,9 @@ function maybe(type, name) {
   return Maybe;
 }
 
-function getDefaultEnumsName(map) {
-  return Object.keys(map).map(function (k) { return exports.stringify(k); }).join(' | ');
-}
+maybe.getDefaultName = function (type) {
+  return '?' + getTypeName(type);
+};
 
 function enums(map, name) {
 
@@ -569,7 +571,7 @@ function enums(map, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to enums(map, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultEnumsName(map);
+  var displayName = name || enums.getDefaultName(map);
 
   function Enums(value, path) {
 
@@ -598,6 +600,10 @@ function enums(map, name) {
   return Enums;
 }
 
+enums.getDefaultName = function (map) {
+  return Object.keys(map).map(function (k) { return exports.stringify(k); }).join(' | ');
+};
+
 enums.of = function (keys, name) {
   keys = isString(keys) ? keys.split(' ') : keys;
   var value = {};
@@ -607,10 +613,6 @@ enums.of = function (keys, name) {
   return enums(value, name);
 };
 
-function getDefaultTupleName(types) {
-  return '[' + types.map(getTypeName).join(', ') + ']';
-}
-
 function tuple(types, name) {
 
   if (process.env.NODE_ENV !== 'production') {
@@ -618,7 +620,7 @@ function tuple(types, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to tuple(types, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultTupleName(types);
+  var displayName = name || tuple.getDefaultName(types);
   var identity = types.every(isIdentity);
 
   function Tuple(value, path) {
@@ -644,7 +646,7 @@ function tuple(types, name) {
       ret.push(instance);
     }
 
-    if (idempotent) {
+    if (idempotent) { // implements idempotency
       ret = value;
     }
 
@@ -679,9 +681,9 @@ function tuple(types, name) {
   return Tuple;
 }
 
-function getDefaultRefinementName(type, predicate) {
-  return '{' + getTypeName(type) + ' | ' + getFunctionName(predicate) + '}';
-}
+tuple.getDefaultName = function (types) {
+  return '[' + types.map(getTypeName).join(', ') + ']';
+};
 
 function refinement(type, predicate, name) {
 
@@ -691,7 +693,7 @@ function refinement(type, predicate, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to refinement(type, predicate, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultRefinementName(type, predicate);
+  var displayName = name || refinement.getDefaultName(type, predicate);
   var identity = isIdentity(type);
 
   function Refinement(value, path) {
@@ -731,9 +733,9 @@ function refinement(type, predicate, name) {
   return Refinement;
 }
 
-function getDefaultListName(type) {
-  return 'Array<' + getTypeName(type) + '>';
-}
+refinement.getDefaultName = function (type, predicate) {
+  return '{' + getTypeName(type) + ' | ' + getFunctionName(predicate) + '}';
+};
 
 function list(type, name) {
 
@@ -742,7 +744,7 @@ function list(type, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to list(type, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultListName(type);
+  var displayName = name || list.getDefaultName(type);
   var typeNameCache = getTypeName(type);
   var identity = isIdentity(type); // the list is identity iif type is identity
 
@@ -768,7 +770,7 @@ function list(type, name) {
       ret.push(instance);
     }
 
-    if (idempotent) {
+    if (idempotent) { // implements idempotency
       ret = value;
     }
 
@@ -801,9 +803,9 @@ function list(type, name) {
   return List;
 }
 
-function getDefaultDictName(domain, codomain) {
-  return '{[key: ' + getTypeName(domain) + ']: ' + getTypeName(codomain) + '}';
-}
+list.getDefaultName = function (type) {
+  return 'Array<' + getTypeName(type) + '>';
+};
 
 function dict(domain, codomain, name) {
 
@@ -813,7 +815,7 @@ function dict(domain, codomain, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to dict(domain, codomain, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultDictName(domain, codomain);
+  var displayName = name || dict.getDefaultName(domain, codomain);
   var domainNameCache = getTypeName(domain);
   var codomainNameCache = getTypeName(codomain);
   var identity = isIdentity(domain) && isIdentity(codomain);
@@ -880,12 +882,12 @@ function dict(domain, codomain, name) {
   return Dict;
 }
 
+dict.getDefaultName = function (domain, codomain) {
+  return '{[key: ' + getTypeName(domain) + ']: ' + getTypeName(codomain) + '}';
+};
+
 function isInstrumented(f) {
   return isFunction(f) && isObject(f.instrumentation);
-}
-
-function getDefaultFuncName(domain, codomain) {
-  return '(' + domain.map(getTypeName).join(', ') + ') => ' + getTypeName(codomain);
 }
 
 function func(domain, codomain, name) {
@@ -898,7 +900,7 @@ function func(domain, codomain, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to func(domain, codomain, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultFuncName(domain, codomain);
+  var displayName = name || func.getDefaultName(domain, codomain);
 
   function FuncType(value, uncurried) {
 
@@ -976,6 +978,10 @@ function func(domain, codomain, name) {
   return FuncType;
 
 }
+
+func.getDefaultName = function (domain, codomain) {
+  return '(' + domain.map(getTypeName).join(', ') + ') => ' + getTypeName(codomain);
+};
 
 function match(x) {
   var type, guard, f, count;
