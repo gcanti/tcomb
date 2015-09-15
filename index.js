@@ -362,18 +362,22 @@ function struct(props, name) {
   };
 
   Struct.extend = function (structs, name) {
-    structs = [].concat(structs).map(function (x, i) {
-      if (isObject(x)) {
-        return x;
+    var props = {};
+    var prototype = {};
+    [Struct].concat(structs).forEach(function (struct, i) {
+      if (isObject(struct)) {
+        mixin(props, struct);
       }
-      if (process.env.NODE_ENV !== 'production') {
-        assert(isStruct(x), function () { return 'Invalid argument structs[' + i + '] ' + exports.stringify(structs[i]) + ' supplied to ' + displayName + '.extend(structs, name)'; });
+      else {
+        if (process.env.NODE_ENV !== 'production') {
+          assert(isStruct(struct), function () { return 'Invalid argument structs[' + i + '] ' + exports.stringify(struct) + ' supplied to ' + displayName + '.extend(structs, name)'; });
+        }
+        mixin(props, struct.meta.props);
+        mixin(prototype, struct.prototype);
       }
-      return x.meta.props;
     });
-    structs.unshift(props);
-    var ret = struct(structs.reduce(mixin, {}), name);
-    mixin(ret.prototype, Struct.prototype); // prototypal inheritance
+    var ret = struct(props, name);
+    mixin(ret.prototype, prototype);
     return ret;
   };
 

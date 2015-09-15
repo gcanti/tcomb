@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+## v2.4.1
+
+- **New Feature**
+  - added struct multiple inheritance, fix #143
+
 ## v2.4.0
 
 - **New Feature**

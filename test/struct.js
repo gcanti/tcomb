@@ -83,10 +83,10 @@ describe('t.struct(props, [name])', function () {
         y: t.Number
       }, 'Point');
       var Point3D = Point.extend({z: t.Number}, 'Point3D');
-      assert.deepEqual(t.getTypeName(Point3D), 'Point3D');
-      assert.deepEqual(Point3D.meta.props.x, t.Number);
-      assert.deepEqual(Point3D.meta.props.y, t.Number);
-      assert.deepEqual(Point3D.meta.props.z, t.Number);
+      assert.deepEqual(Point3D.meta.name, 'Point3D', 'name');
+      assert.deepEqual(Point3D.meta.props.x, t.Number, 'x');
+      assert.deepEqual(Point3D.meta.props.y, t.Number, 'y');
+      assert.deepEqual(Point3D.meta.props.z, t.Number, 'z');
     });
 
     it('should handle an array as argument', function () {
@@ -136,6 +136,21 @@ describe('t.struct(props, [name])', function () {
 
       var c = new Cube({w: 2, h: 2, l: 2});
       assert.deepEqual(c.volume(), 8);
+    });
+
+    it('should support multiple prototypal inheritance', function () {
+      var A = t.struct({ a: t.Str }, 'A');
+      A.prototype.amethod = function () {};
+      var B = t.struct({ b: t.Str }, 'B');
+      B.prototype.bmethod = function () {};
+      var C = t.struct({ c: t.Str }, 'C');
+      C.prototype.cmethod = function () {};
+      var Z = C.extend([A, B], 'Z');
+      var z = new Z({ a: 'a', b: 'b', c: 'c' });
+      assert.strictEqual(Z.meta.name, 'Z');
+      assert.strictEqual(t.Function.is(z.cmethod), true);
+      assert.strictEqual(t.Function.is(z.bmethod), true);
+      assert.strictEqual(t.Function.is(z.amethod), true);
     });
 
   });
