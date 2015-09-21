@@ -521,20 +521,16 @@ intersection.getDefaultName = function (types) {
 
 function maybe(type, name) {
 
-  if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to maybe(type, [name]) combinator (expected a type)'; });
-  }
-
   if (isMaybe(type) || type === Any || type === Nil) { // makes the combinator idempotent and handle Any, Nil
     return type;
   }
 
   if (process.env.NODE_ENV !== 'production') {
+    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to maybe(type, [name]) combinator (expected a type)'; });
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to maybe(type, [name]) combinator (expected a string)'; });
   }
 
   var displayName = name || maybe.getDefaultName(type);
-  var identity = isIdentity(type);
 
   function Maybe(value, path) {
     if (process.env.NODE_ENV !== 'production') {
@@ -547,7 +543,7 @@ function maybe(type, name) {
     kind: 'maybe',
     type: type,
     name: name,
-    identity: identity
+    identity: isIdentity(type)
   };
 
   Maybe.displayName = displayName;

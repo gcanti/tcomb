@@ -1,7 +1,7 @@
 /* globals describe, it */
 var assert = require('assert');
 var t = require('../index');
-var throwsWithMessage = require('./util').throwsWithMessage;
+var util = require('./util');
 
 var Point = t.struct({
   x: t.Number,
@@ -16,15 +16,15 @@ describe('t.refinement(type, predicate, [name])', function () {
 
     it('should throw if used with wrong arguments', function () {
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         t.refinement();
       }, '[tcomb] Invalid argument type undefined supplied to refinement(type, predicate, [name]) combinator (expected a type)');
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         t.refinement(Point, null);
       }, '[tcomb] Invalid argument predicate supplied to refinement(type, predicate, [name]) combinator (expected a function)');
 
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         t.refinement(Point, True, 1);
       }, '[tcomb] Invalid argument name 1 supplied to refinement(type, predicate, [name]) combinator (expected a string)');
 
@@ -35,29 +35,55 @@ describe('t.refinement(type, predicate, [name])', function () {
   describe('constructor', function () {
 
     it('should throw if used with new and a type that is not instantiable with new', function () {
-      throwsWithMessage(function () {
+      util.throwsWithMessage(function () {
         var T = t.refinement(t.String, function () { return true; }, 'T');
         var x = new T(); // eslint-disable-line
       }, '[tcomb] Cannot use the new operator to instantiate the type T');
     });
 
-    it('should coerce values', function () {
+    it('should throw with a contextual error message if used with wrong arguments', function () {
+      var predicate = function (p) { return p.x > 0; };
+      var T = t.refinement(Point, predicate, 'T');
+      util.throwsWithMessage(function () {
+        T({x: 0, y: 0});
+      }, '[tcomb] Invalid value {\n  "x": 0,\n  "y": 0\n} supplied to T');
+    });
+
+    it('should hydrate the elements of the refinement', function () {
       var T = t.refinement(Point, function () { return true; });
       var p = T({x: 0, y: 0});
       assert.ok(Point.is(p));
     });
 
-    it('should accept only valid values', function () {
-      var predicate = function (p) { return p.x > 0; };
-      var T = t.refinement(Point, predicate, 'T');
-      throwsWithMessage(function () {
-        T({x: 0, y: 0});
-      }, '[tcomb] Invalid value {\n  "x": 0,\n  "y": 0\n} supplied to T');
+    it('should hydrate the elements of the refinement in production', util.production(function () {
+      var T = t.refinement(Point, function () { return true; });
+      var p = T({x: 0, y: 0});
+      assert.ok(Point.is(p));
+    }));
+
+    it('should be idempotent', function () {
+      var Supertype = t.dict(t.String, t.Number);
+      var Refinement = t.refinement(Supertype, function () { return true; });
+      var t0 = {};
+      var t1 = Refinement(t0);
+      var t2 = Refinement(t1);
+      assert.equal(t0 === t1, true);
+      assert.equal(t1 === t2, true);
     });
+
+    it('should be idempotent in production', util.production(function () {
+      var Supertype = t.dict(t.String, t.Number);
+      var Refinement = t.refinement(Supertype, function () { return true; });
+      var t0 = {};
+      var t1 = Refinement(t0);
+      var t2 = Refinement(t1);
+      assert.equal(t0 === t1, true);
+      assert.equal(t1 === t2, true);
+    }));
 
   });
 
-  describe('#is(x)', function () {
+  describe('is(x)', function () {
 
     var Positive = t.refinement(t.Number, function (n) {
       return n >= 0;
@@ -73,7 +99,7 @@ describe('t.refinement(type, predicate, [name])', function () {
 
   });
 
-  describe('#update()', function () {
+  describe('update(instance, spec)', function () {
 
     var Type = t.refinement(t.String, function (s) { return s.length > 2; });
     var instance = Type('abc');

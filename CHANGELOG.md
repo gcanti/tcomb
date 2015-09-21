@@ -12,18 +12,19 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
-## v2.4.1
-
-- **New Feature**
-  - added struct multiple inheritance, fix #143
-
-## v2.4.0
+## v2.5.0
 
 - **New Feature**
   - check if the type returned by a union dispatch function is correct, fix #136 (thanks @fcracker79)
   - added `refinement` alias to `subtype` (which is deprecated), fix #140
 - **Internal**
+  - optimisations: for identity types return early in production, fix #135 (thanks @fcracker79)
   - exposed `getDefaultName` on combinator constructors
+
+## v2.4.1
+
+- **New Feature**
+  - added struct multiple inheritance, fix #143
 
 ## v2.4.0
 
