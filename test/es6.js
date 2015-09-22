@@ -69,7 +69,7 @@ describe('ES6 classes', function () {
     assert.deepEqual(T.is(c), true);
     throwsWithMessage(function () {
       T(1);
-    }, '[tcomb] Invalid value 1 supplied to String | Class');
+    }, '[tcomb] Invalid value 1 supplied to String | Class (no constructor found)');
   });
 
   it('should be handled by func', function () {

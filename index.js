@@ -2,24 +2,21 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Giulio Canti
+ * Copyright (c) 2014-2015 Giulio Canti
  *
  */
 
 'use strict';
 
-// configurable
+// overrideable by the user
 exports.stringify = function stringify(x) {
   try { // handle "Converting circular structure to JSON" error
     return JSON.stringify(x, null, 2);
-  } catch (e) {
+  }
+  catch (e) {
     return String(x);
   }
 };
-
-function isInstanceOf(x, constructor) {
-  return x instanceof constructor;
-}
 
 function isNil(x) {
   return x === null || x === void 0;
@@ -42,7 +39,7 @@ function isFunction(x) {
 }
 
 function isArray(x) {
-  return isInstanceOf(x, Array);
+  return x instanceof Array;
 }
 
 function isObject(x) {
@@ -54,26 +51,38 @@ function isType(x) {
 }
 
 function isStruct(x) {
-  return isType(x) && (x.meta.kind === 'struct');
+  return isType(x) && ( x.meta.kind === 'struct' );
 }
 
 function isMaybe(x) {
-  return isType(x) && (x.meta.kind === 'maybe');
+  return isType(x) && ( x.meta.kind === 'maybe' );
 }
 
 function isUnion(x) {
-  return isType(x) && (x.meta.kind === 'union');
+  return isType(x) && ( x.meta.kind === 'union' );
 }
 
 function isTypeName(name) {
   return isNil(name) || isString(name);
 }
 
-// Returns true if x is of type `type`
+// returns true if x is an instance of type
 function is(x, type) {
-  return isType(type) ? type.is(x) : isInstanceOf(x, type); // type should be a class constructor
+  if (isType(type)) {
+    return type.is(x);
+  }
+  return x instanceof type; // type should be a class constructor
 }
 
+// return true if the type constructor behaves like the identity function (exceptions are the structs)
+function isIdentity(type) {
+  if (isType(type)) {
+    return type.meta.identity;
+  }
+  return true; // ES6 classes are identity for tcomb
+}
+
+// creates an instance of a type, handling the optional new operator
 function create(type, value, path) {
   if (isType(type)) {
     // for structs the new operator is allowed
@@ -81,9 +90,9 @@ function create(type, value, path) {
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    // type should be a class constructor and value some instance, just check membership and return the value
+    // here type should be a class constructor and value some instance, just check membership and return the value
     path = path || [getFunctionName(type)];
-    assert(isInstanceOf(value, type), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
+    assert(value instanceof type, function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
   }
 
   return value;
@@ -94,28 +103,30 @@ function getFunctionName(f) {
 }
 
 function getTypeName(constructor) {
-  if (isType(constructor)) { return constructor.displayName; }
+  if (isType(constructor)) {
+    return constructor.displayName;
+  }
   return getFunctionName(constructor);
 }
 
-// configurable
+// overrideable by the user
 exports.fail = function fail(message) {
   throw new TypeError('[tcomb] ' + message);
 };
 
 function assert(guard, message) {
   if (guard !== true) {
-    if (isFunction(message)) {
+    if (isFunction(message)) { // handle lazy messages
       message = message();
     }
-    else if (isNil(message)) {
+    else if (isNil(message)) { // use a default message
       message = 'Assert failed (turn on "Pause on exceptions" in your Source panel)';
     }
     exports.fail(message);
   }
 }
 
-// safe mixin: cannot override props unless specified
+// safe mixin, cannot override props unless specified
 function mixin(target, source, overwrite) {
   if (isNil(source)) { return target; }
   for (var k in source) {
@@ -132,12 +143,16 @@ function mixin(target, source, overwrite) {
 }
 
 function forbidNewOperator(x, type) {
-  assert(!isInstanceOf(x, type), function () { return 'Cannot use the new operator to instantiate the type ' + getTypeName(type); });
+  assert(!(x instanceof type), function () { return 'Cannot use the new operator to instantiate the type ' + getTypeName(type); });
 }
 
 function getShallowCopy(x) {
-  if (isArray(x)) { return x.concat(); }
-  if (isObject(x)) { return mixin({}, x); }
+  if (isArray(x)) {
+    return x.concat();
+  }
+  if (isObject(x)) {
+    return mixin({}, x);
+  }
   return x;
 }
 
@@ -261,7 +276,8 @@ function irreducible(name, predicate) {
 
   Irreducible.meta = {
     kind: 'irreducible',
-    name: name
+    name: name,
+    identity: true
   };
 
   Irreducible.displayName = name;
@@ -290,22 +306,16 @@ var Obj = irreducible('Object', isObject);
 var Func = irreducible('Function', isFunction);
 
 var Err = irreducible('Error', function (x) {
-  return isInstanceOf(x, Error);
+  return x instanceof Error;
 });
 
 var Re = irreducible('RegExp', function (x) {
-  return isInstanceOf(x, RegExp);
+  return x instanceof RegExp;
 });
 
 var Dat = irreducible('Date', function (x) {
-  return isInstanceOf(x, Date);
+  return x instanceof Date;
 });
-
-function getDefaultStructName(props) {
-  return '{' + Object.keys(props).map(function (prop) {
-    return prop + ': ' + getTypeName(props[prop]);
-  }).join(', ') + '}';
-}
 
 function struct(props, name) {
 
@@ -314,11 +324,11 @@ function struct(props, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to struct(props, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultStructName(props);
+  var displayName = name || struct.getDefaultName(props);
 
   function Struct(value, path) {
 
-    if (Struct.is(value)) { // makes Struct idempotent
+    if (Struct.is(value)) { // implements idempotency
       return value;
     }
 
@@ -327,7 +337,7 @@ function struct(props, name) {
       assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an object)'; });
     }
 
-    if (!isInstanceOf(this, Struct)) { // makes `new` optional
+    if (!(this instanceof Struct)) { // `new` is optional
       return new Struct(value);
     }
 
@@ -348,13 +358,14 @@ function struct(props, name) {
   Struct.meta = {
     kind: 'struct',
     props: props,
-    name: name
+    name: name,
+    identity: false
   };
 
   Struct.displayName = displayName;
 
   Struct.is = function (x) {
-    return isInstanceOf(x, Struct);
+    return x instanceof Struct;
   };
 
   Struct.update = function (instance, spec) {
@@ -384,9 +395,11 @@ function struct(props, name) {
   return Struct;
 }
 
-function getDefaultUnionName(types) {
-  return types.map(getTypeName).join(' | ');
-}
+struct.getDefaultName = function (props) {
+  return '{' + Object.keys(props).map(function (prop) {
+    return prop + ': ' + getTypeName(props[prop]);
+  }).join(', ') + '}';
+};
 
 function union(types, name) {
 
@@ -395,19 +408,24 @@ function union(types, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to union(types, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultUnionName(types);
+  var displayName = name || union.getDefaultName(types);
+  var identity = types.every(isIdentity);
 
   function Union(value, path) {
 
-    if (process.env.NODE_ENV !== 'production') {
-      forbidNewOperator(this, Union);
+    if (process.env.NODE_ENV === 'production') {
+      if (identity) {
+        return value;
+      }
     }
 
     var type = Union.dispatch(value);
 
     if (process.env.NODE_ENV !== 'production') {
+      forbidNewOperator(this, Union);
       path = path || [displayName];
-      assert(isType(type), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
+      assert(isType(type), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (no constructor found)'; });
+      assert(types.some(function (t) { return t === type; }), function () { return 'Invalid constructor ' + getTypeName(type) + ' returned by ' + path.join('/') + '.dispatch(x) function'; });
       path[path.length - 1] += '(' + getTypeName(type) + ')';
     }
 
@@ -417,7 +435,8 @@ function union(types, name) {
   Union.meta = {
     kind: 'union',
     types: types,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Union.displayName = displayName;
@@ -431,7 +450,7 @@ function union(types, name) {
   Union.dispatch = function (x) { // default dispatch implementation
     for (var i = 0, len = types.length; i < len; i++ ) {
       var type = types[i];
-      if (isUnion(type)) {
+      if (isUnion(type)) { // handle union of unions
         var t = type.dispatch(x);
         if (!isNil(t)) {
           return t;
@@ -450,9 +469,9 @@ function union(types, name) {
   return Union;
 }
 
-function getDefaultIntersectionName(types) {
-  return types.map(getTypeName).join(' & ');
-}
+union.getDefaultName = function (types) {
+  return types.map(getTypeName).join(' | ');
+};
 
 function intersection(types, name) {
 
@@ -461,7 +480,7 @@ function intersection(types, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to intersection(types, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultIntersectionName(types);
+  var displayName = name || intersection.getDefaultName(types);
 
   function Intersection(value, path) {
 
@@ -477,7 +496,8 @@ function intersection(types, name) {
   Intersection.meta = {
     kind: 'intersection',
     types: types,
-    name: name
+    name: name,
+    identity: true
   };
 
   Intersection.displayName = displayName;
@@ -495,25 +515,22 @@ function intersection(types, name) {
   return Intersection;
 }
 
-function getDefaultMaybeName(type) {
-  return '?' + getTypeName(type);
-}
+intersection.getDefaultName = function (types) {
+  return types.map(getTypeName).join(' & ');
+};
 
 function maybe(type, name) {
-
-  if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to maybe(type, [name]) combinator (expected a type)'; });
-  }
 
   if (isMaybe(type) || type === Any || type === Nil) { // makes the combinator idempotent and handle Any, Nil
     return type;
   }
 
   if (process.env.NODE_ENV !== 'production') {
+    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to maybe(type, [name]) combinator (expected a type)'; });
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to maybe(type, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultMaybeName(type);
+  var displayName = name || maybe.getDefaultName(type);
 
   function Maybe(value, path) {
     if (process.env.NODE_ENV !== 'production') {
@@ -525,7 +542,8 @@ function maybe(type, name) {
   Maybe.meta = {
     kind: 'maybe',
     type: type,
-    name: name
+    name: name,
+    identity: isIdentity(type)
   };
 
   Maybe.displayName = displayName;
@@ -537,9 +555,9 @@ function maybe(type, name) {
   return Maybe;
 }
 
-function getDefaultEnumsName(map) {
-  return Object.keys(map).map(function (k) { return exports.stringify(k); }).join(' | ');
-}
+maybe.getDefaultName = function (type) {
+  return '?' + getTypeName(type);
+};
 
 function enums(map, name) {
 
@@ -548,7 +566,7 @@ function enums(map, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to enums(map, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultEnumsName(map);
+  var displayName = name || enums.getDefaultName(map);
 
   function Enums(value, path) {
 
@@ -564,7 +582,8 @@ function enums(map, name) {
   Enums.meta = {
     kind: 'enums',
     map: map,
-    name: name
+    name: name,
+    identity: true
   };
 
   Enums.displayName = displayName;
@@ -576,6 +595,10 @@ function enums(map, name) {
   return Enums;
 }
 
+enums.getDefaultName = function (map) {
+  return Object.keys(map).map(function (k) { return exports.stringify(k); }).join(' | ');
+};
+
 enums.of = function (keys, name) {
   keys = isString(keys) ? keys.split(' ') : keys;
   var value = {};
@@ -585,10 +608,6 @@ enums.of = function (keys, name) {
   return enums(value, name);
 };
 
-function getDefaultTupleName(types) {
-  return '[' + types.map(getTypeName).join(', ') + ']';
-}
-
 function tuple(types, name) {
 
   if (process.env.NODE_ENV !== 'production') {
@@ -596,46 +615,48 @@ function tuple(types, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to tuple(types, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultTupleName(types);
-
-  function isTuple(x) {
-    return types.every(function (type, i) {
-      return is(x[i], type);
-    });
-  }
+  var displayName = name || tuple.getDefaultName(types);
+  var identity = types.every(isIdentity);
 
   function Tuple(value, path) {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (identity) {
+        return value;
+      }
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       path = path || [displayName];
       assert(isArray(value) && value.length === types.length, function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of length ' + types.length + ')'; });
     }
 
-    if (isTuple(value)) { // makes Tuple idempotent
-      if (process.env.NODE_ENV !== 'production') {
-        Object.freeze(value);
-      }
-      return value;
+    var idempotent = true;
+    var ret = [];
+    for (var i = 0, len = types.length; i < len; i++) {
+      var expected = types[i];
+      var actual = value[i];
+      var instance = create(expected, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + getTypeName(expected)) : null ));
+      idempotent = idempotent && ( actual === instance );
+      ret.push(instance);
     }
 
-    var arr = [], expected, actual;
-    for (var i = 0, len = types.length; i < len; i++) {
-      expected = types[i];
-      actual = value[i];
-      arr.push(create(expected, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + getTypeName(expected)) : null )));
+    if (idempotent) { // implements idempotency
+      ret = value;
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(arr);
+      Object.freeze(ret);
     }
 
-    return arr;
+    return ret;
   }
 
   Tuple.meta = {
     kind: 'tuple',
     types: types,
-    name: name
+    name: name,
+    identity: identity
   };
 
   Tuple.displayName = displayName;
@@ -643,7 +664,9 @@ function tuple(types, name) {
   Tuple.is = function (x) {
     return isArray(x) &&
       x.length === types.length &&
-      isTuple(x);
+      types.every(function (type, i) {
+        return is(x[i], type);
+      });
   };
 
   Tuple.update = function (instance, spec) {
@@ -653,24 +676,25 @@ function tuple(types, name) {
   return Tuple;
 }
 
-function getDefaultSubtypeName(type, predicate) {
-  return '{' + getTypeName(type) + ' | ' + getFunctionName(predicate) + '}';
-}
+tuple.getDefaultName = function (types) {
+  return '[' + types.map(getTypeName).join(', ') + ']';
+};
 
-function subtype(type, predicate, name) {
+function refinement(type, predicate, name) {
 
   if (process.env.NODE_ENV !== 'production') {
-    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to subtype(type, predicate, [name]) combinator (expected a type)'; });
-    assert(isFunction(predicate), function () { return 'Invalid argument predicate supplied to subtype(type, predicate, [name]) combinator (expected a function)'; });
-    assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to subtype(type, predicate, [name]) combinator (expected a string)'; });
+    assert(isFunction(type), function () { return 'Invalid argument type ' + exports.stringify(type) + ' supplied to refinement(type, predicate, [name]) combinator (expected a type)'; });
+    assert(isFunction(predicate), function () { return 'Invalid argument predicate supplied to refinement(type, predicate, [name]) combinator (expected a function)'; });
+    assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to refinement(type, predicate, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultSubtypeName(type, predicate);
+  var displayName = name || refinement.getDefaultName(type, predicate);
+  var identity = isIdentity(type);
 
-  function Subtype(value, path) {
+  function Refinement(value, path) {
 
     if (process.env.NODE_ENV !== 'production') {
-      forbidNewOperator(this, Subtype);
+      forbidNewOperator(this, Refinement);
       path = path || [displayName];
     }
 
@@ -683,29 +707,30 @@ function subtype(type, predicate, name) {
     return x;
   }
 
-  Subtype.meta = {
+  Refinement.meta = {
     kind: 'subtype',
     type: type,
     predicate: predicate,
-    name: name
+    name: name,
+    identity: identity
   };
 
-  Subtype.displayName = displayName;
+  Refinement.displayName = displayName;
 
-  Subtype.is = function (x) {
+  Refinement.is = function (x) {
     return is(x, type) && predicate(x);
   };
 
-  Subtype.update = function (instance, spec) {
-    return Subtype(exports.update(instance, spec));
+  Refinement.update = function (instance, spec) {
+    return Refinement(exports.update(instance, spec));
   };
 
-  return Subtype;
+  return Refinement;
 }
 
-function getDefaultListName(type) {
-  return 'Array<' + getTypeName(type) + '>';
-}
+refinement.getDefaultName = function (type, predicate) {
+  return '{' + getTypeName(type) + ' | ' + getFunctionName(predicate) + '}';
+};
 
 function list(type, name) {
 
@@ -714,52 +739,56 @@ function list(type, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to list(type, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultListName(type);
+  var displayName = name || list.getDefaultName(type);
   var typeNameCache = getTypeName(type);
-
-  function isList(x) {
-    return x.every(function (e) {
-      return is(e, type);
-    });
-  }
+  var identity = isIdentity(type); // the list is identity iif type is identity
 
   function List(value, path) {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (identity) {
+        return value; // just trust the input if elements must not be hydrated
+      }
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       path = path || [displayName];
       assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of ' + typeNameCache + ')'; });
     }
 
-    if (isList(value)) { // makes List idempotent
-      if (process.env.NODE_ENV !== 'production') {
-        Object.freeze(value);
-      }
-      return value;
-    }
-
-    var arr = [];
+    var idempotent = true; // will remain true if I can reutilise the input
+    var ret = []; // make a temporary copy, will be discarded if idempotent remains true
     for (var i = 0, len = value.length; i < len; i++ ) {
       var actual = value[i];
-      arr.push(create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null )));
+      var instance = create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null ));
+      idempotent = idempotent && ( actual === instance );
+      ret.push(instance);
+    }
+
+    if (idempotent) { // implements idempotency
+      ret = value;
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(arr);
+      Object.freeze(ret);
     }
 
-    return arr;
+    return ret;
   }
 
   List.meta = {
     kind: 'list',
     type: type,
-    name: name
+    name: name,
+    identity: identity
   };
 
   List.displayName = displayName;
 
   List.is = function (x) {
-    return isArray(x) && isList(x);
+    return isArray(x) && x.every(function (e) {
+      return is(e, type);
+    });
   };
 
   List.update = function (instance, spec) {
@@ -769,9 +798,9 @@ function list(type, name) {
   return List;
 }
 
-function getDefaultDictName(domain, codomain) {
-  return '{[key: ' + getTypeName(domain) + ']: ' + getTypeName(codomain) + '}';
-}
+list.getDefaultName = function (type) {
+  return 'Array<' + getTypeName(type) + '>';
+};
 
 function dict(domain, codomain, name) {
 
@@ -781,11 +810,61 @@ function dict(domain, codomain, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to dict(domain, codomain, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultDictName(domain, codomain);
+  var displayName = name || dict.getDefaultName(domain, codomain);
   var domainNameCache = getTypeName(domain);
   var codomainNameCache = getTypeName(codomain);
+  var identity = isIdentity(domain) && isIdentity(codomain);
 
-  function isDict(x) {
+  function Dict(value, path) {
+
+    if (process.env.NODE_ENV === 'production') {
+      if (identity) {
+        return value; // just trust the input if elements must not be hydrated
+      }
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      path = path || [displayName];
+      assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
+    }
+
+    var idempotent = true; // will remain true if I can reutilise the input
+    var ret = {}; // make a temporary copy, will be discarded if idempotent remains true
+    for (var k in value) {
+      if (value.hasOwnProperty(k)) {
+        k = create(domain, k, ( process.env.NODE_ENV !== 'production' ? path.concat(domainNameCache) : null ));
+        var actual = value[k];
+        var instance = create(codomain, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + codomainNameCache) : null ));
+        idempotent = idempotent && ( actual === instance );
+        ret[k] = instance;
+      }
+    }
+
+    if (idempotent) { // implements idempotency
+      ret = value;
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      Object.freeze(ret);
+    }
+
+    return ret;
+  }
+
+  Dict.meta = {
+    kind: 'dict',
+    domain: domain,
+    codomain: codomain,
+    name: name,
+    identity: identity
+  };
+
+  Dict.displayName = displayName;
+
+  Dict.is = function (x) {
+    if (!isObject(x)) {
+      return false;
+    }
     for (var k in x) {
       if (x.hasOwnProperty(k)) {
         if (!is(k, domain) || !is(x[k], codomain)) {
@@ -794,49 +873,6 @@ function dict(domain, codomain, name) {
       }
     }
     return true;
-  }
-
-  function Dict(value, path) {
-
-    if (process.env.NODE_ENV !== 'production') {
-      path = path || [displayName];
-      assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
-    }
-
-    if (isDict(value)) { // makes Dict idempotent
-      if (process.env.NODE_ENV !== 'production') {
-        Object.freeze(value);
-      }
-      return value;
-    }
-
-    var obj = {};
-    for (var k in value) {
-      if (value.hasOwnProperty(k)) {
-        k = create(domain, k, ( process.env.NODE_ENV !== 'production' ? path.concat(domainNameCache) : null ));
-        var actual = value[k];
-        obj[k] = create(codomain, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + codomainNameCache) : null ));
-      }
-    }
-
-    if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(obj);
-    }
-
-    return obj;
-  }
-
-  Dict.meta = {
-    kind: 'dict',
-    domain: domain,
-    codomain: codomain,
-    name: name
-  };
-
-  Dict.displayName = displayName;
-
-  Dict.is = function (x) {
-    return isObject(x) && isDict(x);
   };
 
   Dict.update = function (instance, spec) {
@@ -846,12 +882,12 @@ function dict(domain, codomain, name) {
   return Dict;
 }
 
+dict.getDefaultName = function (domain, codomain) {
+  return '{[key: ' + getTypeName(domain) + ']: ' + getTypeName(codomain) + '}';
+};
+
 function isInstrumented(f) {
   return isFunction(f) && isObject(f.instrumentation);
-}
-
-function getDefaultFuncName(domain, codomain) {
-  return '(' + domain.map(getTypeName).join(', ') + ') => ' + getTypeName(codomain);
 }
 
 function func(domain, codomain, name) {
@@ -864,12 +900,12 @@ function func(domain, codomain, name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + exports.stringify(name) + ' supplied to func(domain, codomain, [name]) combinator (expected a string)'; });
   }
 
-  var displayName = name || getDefaultFuncName(domain, codomain);
+  var displayName = name || func.getDefaultName(domain, codomain);
 
-  function FuncType(value, uncurried) {
+  function FuncType(value, curried) {
 
     if (!isInstrumented(value)) { // automatically instrument the function
-      return FuncType.of(value, uncurried);
+      return FuncType.of(value, curried);
     }
 
     if (process.env.NODE_ENV !== 'production') {
@@ -943,6 +979,10 @@ function func(domain, codomain, name) {
 
 }
 
+func.getDefaultName = function (domain, codomain) {
+  return '(' + domain.map(getTypeName).join(', ') + ') => ' + getTypeName(codomain);
+};
+
 function match(x) {
   var type, guard, f, count;
   for (var i = 1, len = arguments.length; i < len; ) {
@@ -982,23 +1022,23 @@ mixin(exports, {
   assert: assert,
   Any: Any,
   Nil: Nil,
-  Str: Str,
+  Str: Str, // deprecated
   String: Str,
-  Num: Num,
+  Num: Num, // deprecated
   Number: Num,
-  Bool: Bool,
+  Bool: Bool, // deprecated
   Boolean: Bool,
-  Arr: Arr,
+  Arr: Arr, // deprecated
   Array: Arr,
-  Obj: Obj,
+  Obj: Obj, // deprecated
   Object: Obj,
-  Func: Func,
+  Func: Func, // deprecated
   Function: Func,
-  Err: Err,
+  Err: Err, // deprecated
   Error: Err,
-  Re: Re,
+  Re: Re, // deprecated
   RegExp: Re,
-  Dat: Dat,
+  Dat: Dat, // deprecated
   Date: Dat,
   irreducible: irreducible,
   struct: struct,
@@ -1006,7 +1046,8 @@ mixin(exports, {
   union: union,
   maybe: maybe,
   tuple: tuple,
-  subtype: subtype,
+  subtype: refinement, // deprecated
+  refinement: refinement,
   list: list,
   dict: dict,
   func: func,

@@ -11,8 +11,14 @@ function throwsWithMessage(f, message) {
 function production(f) {
   return function () {
     process.env.NODE_ENV = 'production';
-    f();
-    process.env.NODE_ENV = 'development';
+    try {
+      f();
+    } catch (e) {
+      assert.fail(e.message);
+    }
+    finally {
+      process.env.NODE_ENV = 'development';
+    }
   };
 }
 

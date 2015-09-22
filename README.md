@@ -13,7 +13,7 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 var t = require('tcomb');
 
 // a user defined type
-var Integer = t.subtype(t.Number, function (n) { return n % 1 === 0; }, 'Integer');  // <= give a name for better debug messages
+var Integer = t.refinement(t.Number, function (n) { return n % 1 === 0; }, 'Integer');  // <= give a name for better debug messages
 
 // a struct
 var Person = t.struct({
@@ -51,7 +51,7 @@ Write complex domain models in a breeze and with a small code footprint. Support
 * structs
 * lists
 * enums
-* subtypes
+* refinements
 * unions
 * intersections
 * the option type

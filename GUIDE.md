@@ -24,22 +24,22 @@ An *irreducible* type is a type that can't be built with other types. Examples o
 
 **JavaScript native types**
 
-* `t.String`: strings (short alias `t.Str`)
-* `t.Number`: numbers (short alias `t.Num`)
-* `t.Boolean`: booleans (short alias `t.Bool`)
-* `t.Array`: arrays (short alias `t.Arr`)
-* `t.Object`: plain objects (short alias `t.Obj`)
-* `t.Function`: functions (short alias `t.Func`)
-* `t.Error`: errors (short alias `t.Err`)
-* `t.RegExp`: regular expressions (short alias `t.Re`)
-* `t.Date`: dates (short alias `t.Dat`)
+* `t.String`: strings (deprecated alias `t.Str`)
+* `t.Number`: numbers (deprecated alias `t.Num`)
+* `t.Boolean`: booleans (deprecated alias `t.Bool`)
+* `t.Array`: arrays (deprecated alias `t.Arr`)
+* `t.Object`: plain objects (deprecated alias `t.Obj`)
+* `t.Function`: functions (deprecated alias `t.Func`)
+* `t.Error`: errors (deprecated alias `t.Err`)
+* `t.RegExp`: regular expressions (deprecated alias `t.Re`)
+* `t.Date`: dates (deprecated alias `t.Dat`)
 
 There are 2 additional irriducible types defined in tcomb:
 
 **Additional types**
 
 * `t.Nil`: `null` or `undefined`
-* `t.Any`: any type
+* `t.Any`: any value
 
 ## Type checking with the `is` function
 
@@ -145,9 +145,9 @@ Example: the `meta` object of `t.String`:
 
 *Type combinators* are the tcomb way to define new composite types from those already defined, that is they **combine** old types in a new one.
 
-## The subtype combinator
+## The refinement combinator (deprecated alias `subtype`)
 
-You can refine a type using the `subtype(type, predicate, name)` combinator where:
+You can refine a type using the `refinement(type, predicate, name)` combinator where:
 
 * `type` is a type already defined
 * `predicate` is a predicate
@@ -157,13 +157,13 @@ Example:
 
 ```js
 // defines a type representing positive numbers
-var Positive = t.subtype(t.Number, (n) => n >= 0, 'Positive');
+var Positive = t.refinement(t.Number, (n) => n >= 0, 'Positive');
 
 Positive.is(1);  // => true
 Positive.is(-1); // => false
 ```
 
-Subtypes have the following `meta` object:
+Refinements have the following `meta` object:
 
 ```js
 {
@@ -438,8 +438,8 @@ You can define an intersection of types using the `intersection(types, name)` co
 * `name` is an optional string useful for debugging purposes
 
 ```js
-var Min = t.subtype(t.String, function (s) { return s.length > 2; }, 'Min');
-var Max = t.subtype(t.String, function (s) { return s.length < 5; }, 'Max');
+var Min = t.refinement(t.String, function (s) { return s.length > 2; }, 'Min');
+var Max = t.refinement(t.String, function (s) { return s.length < 5; }, 'Max');
 var MinMax = t.intersection([Min, Max], 'MinMax');
 
 MinMax.is('abc'); // => true
@@ -525,7 +525,7 @@ The domain and codomain can also be specified using types from any combinator in
 var B = t.func(t.func(t.String, t.Number), t.String);
 
 // An `ExcitedString` is a `t.String` containing an exclamation mark
-var ExcitedString = t.subtype(t.String, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedString');
+var ExcitedString = t.refinement(t.String, function (s) { return s.indexOf('!') !== -1; }, 'ExcitedString');
 
 // An `Exciter` takes a `t.String` and returns an `ExcitedString`
 var Exciter = t.func(t.String, ExcitedString);
@@ -563,7 +563,7 @@ var simpleQuestionator = Exciter.of(function (s) { return s + '?'; });
 var simpleExciter      = Exciter.of(function (s) { return s + '!'; });
 
 // Raises error:
-// Invalid `Hello?` supplied to `ExcitedString`, insert a valid value for the subtype
+// Invalid `Hello?` supplied to `ExcitedString`, insert a valid value for the refinement
 simpleQuestionator('Hello');
 
 // Raises error: Invalid `1` supplied to `String`
