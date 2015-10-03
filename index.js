@@ -164,17 +164,20 @@ function update(instance, spec) {
   }
 
   var value = getShallowCopy(instance);
+  var isChanged = false;
   for (var k in spec) {
     if (spec.hasOwnProperty(k)) {
       if (update.commands.hasOwnProperty(k)) {
         return update.commands[k](spec[k], value);
       }
       else {
-        value[k] = update(value[k], spec[k]);
+        var newValue = update(value[k], spec[k]);
+        isChanged = ( newValue !== value[k] );
+        value[k] = newValue;
       }
     }
   }
-  return value;
+  return isChanged ? value : instance;
 }
 
 // built-in commands

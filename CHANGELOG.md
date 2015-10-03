@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+## v2.5.1
+
+- **Internal**
+  - `t.update` should not change the reference when no changes occurs, fix #153
+
 ## v2.5.0
 
 - **New Feature**

@@ -9,6 +9,10 @@ describe('t.update(instance, spec)', function () {
   var Tuple = t.tuple([t.String, t.Number]);
   var List = t.list(t.Number);
   var Dict = t.dict(t.String, t.Number);
+  var Point = t.struct({
+    x: t.Number,
+    y: t.Number
+  });
 
   it('should throw if spec is invalid', function () {
     throwsWithMessage(function () {
@@ -84,12 +88,20 @@ describe('t.update(instance, spec)', function () {
     assert.deepEqual(actual, [1, 3, 2, 4]);
   });
 
+  it('should not change the reference when no changes occurs', function () {
+    var p1 = {x: 0, y: 1};
+    var p2 = update(p1, {});
+    assert.strictEqual(p1, p2);
+    var p3 = update(p1, {x: {$set: 0}});
+    assert.strictEqual(p1, p3);
+
+    var n1 = {a: {b: {c: 1}}};
+    var n2 = t.update(n1, {a: {b: {c: {$set: 1}}}})
+    assert.strictEqual(n1, n2);
+  });
+
   describe('structs', function () {
 
-    var Point = t.struct({
-      x: t.Number,
-      y: t.Number
-    });
     var instance = new Point({x: 0, y: 1});
 
     it('should handle $set command', function () {
@@ -122,6 +134,14 @@ describe('t.update(instance, spec)', function () {
       updated = update(instance, {b: {'$merge': {c: 5, e: 6}}});
       assert.deepEqual(instance, {a: 1, b: {c: 2, d: 3, e: 4}});
       assert.deepEqual(updated, {a: 1, b: {c: 5, d: 3, e: 6}});
+    });
+
+    it('should not change the reference when no changes occurs', function () {
+      var p1 = new Point({x: 0, y: 1});
+      var p2 = Point.update(p1, {});
+      assert.strictEqual(p1, p2);
+      var p3 = Point.update(p1, {x: {$set: 0}});
+      assert.strictEqual(p1, p3);
     });
 
   });
