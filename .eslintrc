@@ -8,5 +8,6 @@
     "modules": true
   },
   "rules": {
+    "semi": 1
   }
 }
