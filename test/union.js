@@ -102,13 +102,29 @@ describe('t.union(types, [name])', function () {
       assert.equal(s2 === s1, true);
     });
 
-    it('should be idempotent i production', util.production(function () {
+    it('should be idempotent in production', util.production(function () {
       var s0 = {center: {x: 0, y: 0}, radius: 10};
       var s1 = Shape(s0);
       var s2 = Shape(s1);
       assert.equal(s1 === s0, false);
       assert.equal(s2 === s1, true);
     }));
+
+    it('should handle incomplete dispatch functions', function () {
+      var T1 = t.struct({});
+      var T2 = t.struct({});
+      var U = t.union([T1, T2]);
+      U.dispatch = function (x) {
+        switch (x.type) {
+          case '1': return T1;
+          case '2': return T2;
+        }
+      };
+      var x = U({type: '2'});
+      assert.strictEqual(x instanceof T2, true);
+      x = U(x);
+      assert.strictEqual(x instanceof T2, true);
+    });
 
   });
 

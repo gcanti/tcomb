@@ -423,6 +423,9 @@ function union(types, name) {
     }
 
     var type = Union.dispatch(value);
+    if (!type && Union.is(value)) {
+      return value;
+    }
 
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Union);
