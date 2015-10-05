@@ -172,7 +172,7 @@ function update(instance, spec) {
       }
       else {
         var newValue = update(value[k], spec[k]);
-        isChanged = ( newValue !== value[k] );
+        isChanged = isChanged || ( newValue !== value[k] );
         value[k] = newValue;
       }
     }

@@ -96,8 +96,12 @@ describe('t.update(instance, spec)', function () {
     assert.strictEqual(p1, p3);
 
     var n1 = {a: {b: {c: 1}}};
-    var n2 = t.update(n1, {a: {b: {c: {$set: 1}}}})
+    var n2 = t.update(n1, {a: {b: {c: {$set: 1}}}});
     assert.strictEqual(n1, n2);
+
+    var m1 = {a: 1, b: 2};
+    var m2 = t.update(m1, {a: {$set: 2}, b: {$set: 2}});
+    assert.equal(m1 === m2, false);
   });
 
   describe('structs', function () {
