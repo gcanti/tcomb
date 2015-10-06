@@ -88,7 +88,7 @@ See "Debugging with Chrome DevTools" section for details.
 
 ## Immutability and immutability helpers
 
-Instances are immutables using `Object.freeze`. This means you can use standard JavaScript objects and arrays. You don't have to change how you normally code. You can update an immutable instance with the provided `update(instance, spec)` function:
+Instances are immutable using `Object.freeze`. This means you can use standard JavaScript objects and arrays. You don't have to change how you normally code. You can update an immutable instance with the provided `update(instance, spec)` function:
 
 ```js
 var person2 = Person.update(person, {

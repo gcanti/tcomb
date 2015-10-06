@@ -15,7 +15,7 @@
 ## v2.5.1
 
 - **Internal**
-  - `t.update` should not change the reference when no changes occurs, fix #153
+  - `t.update` should not change the reference when no changes occur, fix #153
 
 ## v2.5.0
 
