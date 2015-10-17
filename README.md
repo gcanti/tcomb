@@ -7,7 +7,7 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 
 > "Si vis pacem, para bellum" - (Vegetius 5th century)
 
-# Code example
+# Usage
 
 ```js
 var t = require('tcomb');
@@ -36,6 +36,10 @@ var person = new Person({
   tags: ['js developer', 'rock climber']
 });
 ```
+
+# Babel plugin
+
+[babel-plugin-tcomb](https://github.com/gcanti/babel-plugin-tcomb)
 
 # Features
 
