@@ -180,6 +180,7 @@ console.log(result); // => 'a number'
 * [freezer](https://github.com/arqex/freezer)
 * [icedam](https://github.com/winkler1/icedam)
 * [immutable-store](https://github.com/christianalfoni/immutable-store)
+* [ObjectModel](https://github.com/sylvainpolletvillard/ObjectModel)
 
 # License
 
