@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v2.5.2
+
+- **Bug Fix**
+  - remove the assert checking if the type returned by a union dispatch function is correct (was causing issues with unions of unions or unions of intersections)
+
 ## v2.5.1
 
 - **Internal**

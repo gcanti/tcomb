@@ -159,16 +159,17 @@ describe('t.union(types, [name])', function () {
       util.throwsWithMessage(function () {
         var U = t.union([t.String, t.Number], 'T');
         U(true);
-      }, '[tcomb] Invalid value true supplied to T (no constructor found)');
+      }, '[tcomb] Invalid value true supplied to T (no constructor returned by dispatch)');
 
-      util.throwsWithMessage(function () {
-        var U = t.union([t.String, t.Number], 'T');
-        U.dispatch = function () {
-          return t.Boolean;
-        };
-        U(true);
-      }, '[tcomb] Invalid constructor Boolean returned by T.dispatch(x) function');
+    });
 
+    it('should not throw if does not return a valid type', function () {
+      var U1 = t.union([t.String, t.Number], 'U1');
+      var U2 = t.union([t.Boolean, t.Object], 'U2');
+      var U = t.union([U1, U2, t.Array], 'U');
+      assert.doesNotThrow(function () {
+        U(1);
+      });
     });
 
   });
