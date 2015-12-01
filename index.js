@@ -1018,6 +1018,40 @@ function match(x) {
   exports.fail('Match error');
 }
 
+function declare(name) {
+  if (process.env.NODE_ENV !== 'production') {
+      assert(isTypeName(name), function () { return 'Invalid argument name ' + name + ' supplied to declare([name]) (expected a string)'; });
+  }
+
+  var refcell = {
+    type: null
+  };
+
+  var ret = function Declare(v, path) {
+    if (process.env.NODE_ENV !== 'production') {
+      assert(!!refcell.type, function () { return 'Type declared but not defined, don\'t forget to call .define on every declared type'; });
+    }
+    return refcell.type(v, path);
+  };
+
+  ret.define = function(type) {
+    if (process.env.NODE_ENV !== 'production') {
+      assert(isType(type), function () { return 'Invalid type ' + exports.stringify(type) + ' supplied to define(type) (expected a type)'; });
+      assert(!refcell.type, function () { return 'Declare.define(type) can only be invoked once'; });
+    }
+
+    refcell.type = type;
+    for (var prop in type) {
+      if (type.hasOwnProperty(prop)) {
+        ret[prop] = type[prop];
+      }
+    }
+  };
+
+  ret.displayName = name;
+  return ret;
+}
+
 mixin(exports, {
   is: is,
   isType: isType,
@@ -1057,5 +1091,6 @@ mixin(exports, {
   dict: dict,
   func: func,
   intersection: intersection,
-  match: match
+  match: match,
+  declare: declare
 });

@@ -611,6 +611,45 @@ t.func([t.Number, t.Number], t.Number).is(func(t.Number, t.Number).of(id));     
 2. Typed functions' codomains are checked when they return
 3. The domain and codomain of a typed function's type is checked when the typed function is passed to a function type (such as when used as an argument in another typed function)
 
+## Recursive types
+
+`t.declare([name])` declares a type name to be used in other combinators without requiring a definition right away. This enables the construction of recursive or mutually recursive types.
+
+```js
+var Tree = t.declare("Tree");
+
+Tree.define(t.struct({
+  value: t.Num,
+  left: t.maybe(Tree),
+  right: t.maybe(Tree)
+}));
+
+var bst = Tree({
+  value: 5,
+  left: Tree({
+    value: 2
+  }),
+  right: Tree({
+    left: Tree({
+      value: 6
+    }),
+    value: 7
+  })
+});
+```
+
+```js
+var A = t.declare("A");
+
+var B = t.struct({
+  a: t.maybe(A)
+});
+
+A.define(t.struct({
+  b: t.maybe(B)
+});
+```
+
 ## Updating immutable instances
 
 You can update an immutable instance with the provided `update` function:
