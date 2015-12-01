@@ -181,6 +181,7 @@ console.log(result); // => 'a number'
 * [icedam](https://github.com/winkler1/icedam)
 * [immutable-store](https://github.com/christianalfoni/immutable-store)
 * [ObjectModel](https://github.com/sylvainpolletvillard/ObjectModel)
+* [rfx](https://github.com/ericelliott/rfx)
 
 # License
 
