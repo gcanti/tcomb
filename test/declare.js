@@ -38,7 +38,7 @@ describe('t.declare([name])', function () {
       throwsWithMessage(function () {
         var D = t.declare("D");
         D.define("not a type");
-      }, '[tcomb] Invalid type "not a type" supplied to define(type) (expected a type)');
+      }, '[tcomb] Invalid argument type "not a type" supplied to define(type) (expected a type)');
 
     });
 
