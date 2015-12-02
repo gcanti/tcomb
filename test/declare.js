@@ -45,9 +45,54 @@ describe('t.declare([name])', function () {
     it('should throw if define-d multiple times', function () {
       throwsWithMessage(function () {
         var D = t.declare("D");
-        D.define(t.Num);
-        D.define(t.Num);
+        D.define(t.list(t.Any));
+        D.define(t.list(t.Any));
       }, '[tcomb] Declare.define(type) can only be invoked once');
+    });
+
+    it('should have a fresh name for different declares when not explicitly provided', function() {
+      var Thing1 = t.declare();
+      Thing1.define(t.struct({
+        thing: Thing1
+      }));
+      assert.throws(function() {
+        Thing1({});
+      }, function(err) {
+        assert.strictEqual(err instanceof Error, true);
+        assert.ok(/\[tcomb\] Invalid value .+ supplied to {thing: Declare\$[0-9]+}\/thing: {thing: Declare\$[0-9]+} \(expected an object\)/m.test(err.message));
+        return true;
+      });
+      var Thing2 = t.declare();
+      assert.ok(t.getTypeName(Thing1) != t.getTypeName(Thing2));
+    });
+
+    it('an instance of the declared type should satisfy instanceof, if the concrete type is a struct', function() {
+      assert.ok(aValue instanceof A);
+    });
+
+    it('should have the expected names', function() {
+      var ANum = t.declare('A');
+      ANum.define(t.list(t.Any));
+
+      assert.deepEqual('A', A.displayName);
+      assert.deepEqual('A', A.meta.name);
+    });
+
+    it('should support adding functions to the prototype, when allowd by the concrete type', function() {
+      var ANum = t.declare('A');
+      ANum.define(t.struct({
+        a: t.Num
+      }));
+      function afun() { return 42 }
+      ANum.prototype.afun = afun;
+      assert.equal(42, ANum({a: 13}).afun());
+    });
+
+    it('should throw when defined with a non-fresh type', function() {
+      throwsWithMessage(function () {
+        var ANum = t.declare();
+        ANum.define(t.Num);
+      }, '[tcomb] Invalid argument type undefined supplied to define(type) (expected a fresh, unnamed type)');
     });
 
   });
