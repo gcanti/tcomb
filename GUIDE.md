@@ -616,10 +616,10 @@ t.func([t.Number, t.Number], t.Number).is(func(t.Number, t.Number).of(id));     
 `t.declare([name])` declares a type name to be used in other combinators without requiring a definition right away. This enables the construction of recursive or mutually recursive types.
 
 ```js
-var Tree = t.declare("Tree");
+var Tree = t.declare('Tree');
 
 Tree.define(t.struct({
-  value: t.Num,
+  value: t.Number,
   left: t.maybe(Tree),
   right: t.maybe(Tree)
 }));
@@ -639,7 +639,7 @@ var bst = Tree({
 ```
 
 ```js
-var A = t.declare("A");
+var A = t.declare('A');
 
 var B = t.struct({
   a: t.maybe(A)
@@ -647,7 +647,7 @@ var B = t.struct({
 
 A.define(t.struct({
   b: t.maybe(B)
-});
+}));
 ```
 
 ## Updating immutable instances
