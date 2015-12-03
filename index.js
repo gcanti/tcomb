@@ -1050,9 +1050,8 @@ function declare(name) {
     Declare.prototype = type.prototype;
   };
 
-  Declare.displayName = name || (getTypeName(Declare) + "$" + nextDeclareUniqueId);
+  Declare.displayName = name || ( getTypeName(Declare) + "$" + nextDeclareUniqueId++ );
   Declare.prototype = null;
-  nextDeclareUniqueId += 1;
   return Declare;
 }
 

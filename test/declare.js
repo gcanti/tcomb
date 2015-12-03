@@ -3,7 +3,7 @@ var assert = require('assert');
 var t = require('../index');
 var throwsWithMessage = require('./util').throwsWithMessage;
 
-var A = t.declare("A");
+var A = t.declare('A');
 
 var B = t.struct({
   a: t.maybe(A)
@@ -28,7 +28,7 @@ describe('t.declare([name])', function () {
     it('should throw if used with wrong arguments', function () {
 
       assert.throws(function () {
-        t.declare(t.Num);
+        t.declare(t.Number);
       }, function(err) {
         assert.strictEqual(err instanceof Error, true);
         assert.ok(/\[tcomb\] Invalid argument name function (.|\n)* supplied to declare\(\[name\]\) \(expected a string\)/m.test(err.message));
@@ -36,15 +36,15 @@ describe('t.declare([name])', function () {
       });
 
       throwsWithMessage(function () {
-        var D = t.declare("D");
-        D.define("not a type");
+        var D = t.declare('D');
+        D.define('not a type');
       }, '[tcomb] Invalid argument type "not a type" supplied to define(type) (expected a type)');
 
     });
 
     it('should throw if define-d multiple times', function () {
       throwsWithMessage(function () {
-        var D = t.declare("D");
+        var D = t.declare('D');
         D.define(t.list(t.Any));
         D.define(t.list(t.Any));
       }, '[tcomb] Declare.define(type) can only be invoked once');
@@ -74,16 +74,22 @@ describe('t.declare([name])', function () {
       var ANum = t.declare('A');
       ANum.define(t.list(t.Any));
 
-      assert.deepEqual('A', A.displayName);
-      assert.deepEqual('A', A.meta.name);
+      assert.strictEqual('A', A.displayName);
+      assert.strictEqual('A', A.meta.name);
+
+      var Nameless = t.declare();
+      assert.strictEqual('Declare$3', Nameless.displayName);
+      Nameless.define(t.list(t.Any));
+      assert.strictEqual('Array<Any>', Nameless.displayName);
+      assert.strictEqual(undefined, Nameless.meta.name);
     });
 
     it('should support adding functions to the prototype, when allowd by the concrete type', function() {
       var ANum = t.declare('A');
       ANum.define(t.struct({
-        a: t.Num
+        a: t.Number
       }));
-      function afun() { return 42 }
+      function afun() { return 42; }
       ANum.prototype.afun = afun;
       assert.equal(42, ANum({a: 13}).afun());
     });
@@ -91,7 +97,7 @@ describe('t.declare([name])', function () {
     it('should throw when defined with a non-fresh type', function() {
       throwsWithMessage(function () {
         var ANum = t.declare();
-        ANum.define(t.Num);
+        ANum.define(t.Number);
       }, '[tcomb] Invalid argument type undefined supplied to define(type) (expected a fresh, unnamed type)');
     });
 
@@ -116,7 +122,7 @@ describe('t.declare([name])', function () {
 
     it('should throw if the type was not defined', function () {
       throwsWithMessage(function () {
-        var D = t.declare("D");
+        var D = t.declare('D');
         D({a: A({}) });
       }, '[tcomb] Type declared but not defined, don\'t forget to call .define on every declared type');
     });
