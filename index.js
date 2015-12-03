@@ -1018,6 +1018,44 @@ function match(x) {
   exports.fail('Match error');
 }
 
+// All the .declare-d types should be clearly different from each other thus they should have
+// different names when a name was not explicitly provided.
+var nextDeclareUniqueId = 1;
+
+function declare(name) {
+  if (process.env.NODE_ENV !== 'production') {
+    assert(isTypeName(name), function () { return 'Invalid argument name ' + name + ' supplied to declare([name]) (expected a string)'; });
+  }
+
+  var type;
+
+  function Declare(value, path) {
+    if (process.env.NODE_ENV !== 'production') {
+      assert(!isNil(type), function () { return 'Type declared but not defined, don\'t forget to call .define on every declared type'; });
+    }
+    return type(value, path);
+  }
+
+  Declare.define = function (spec) {
+    if (process.env.NODE_ENV !== 'production') {
+      assert(isType(spec), function () { return 'Invalid argument type ' + exports.stringify(spec) +  ' supplied to define(type) (expected a type)'; });
+      assert(isNil(type), function () { return 'Declare.define(type) can only be invoked once'; });
+      assert(isNil(spec.meta.name) && Object.keys(spec.prototype).length === 0, function () { return 'Invalid argument type ' + exports.stringify(spec) + ' supplied to define(type) (expected a fresh, unnamed type)'; });
+    }
+
+    type = spec;
+    mixin(Declare, type, true); // true because it overwrites Declare.displayName
+    Declare.displayName = name || type.displayName;
+    Declare.meta.name = name || Declare.meta.name;
+    Declare.prototype = type.prototype;
+  };
+
+  Declare.displayName = name || (getTypeName(Declare) + "$" + nextDeclareUniqueId);
+  Declare.prototype = null;
+  nextDeclareUniqueId += 1;
+  return Declare;
+}
+
 mixin(exports, {
   is: is,
   isType: isType,
@@ -1057,5 +1095,6 @@ mixin(exports, {
   dict: dict,
   func: func,
   intersection: intersection,
-  match: match
+  match: match,
+  declare: declare
 });
