@@ -5,7 +5,7 @@ always be given.
 
 ## Setting up your environment
 
-After forking reagent to your own github org, do the following steps to get started:
+After forking tcomb to your own github org, do the following steps to get started:
 
 ```sh
 # clone your fork to your local machine
