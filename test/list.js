@@ -26,7 +26,7 @@ describe('t.list(type, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     var MyElement = t.struct({}, 'MyElement');
     var MyList = t.list(MyElement, 'MyList');

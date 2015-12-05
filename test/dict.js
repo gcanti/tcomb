@@ -25,7 +25,7 @@ describe('t.dict(domain, codomain, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     var Domain = t.subtype(t.String, function (x) {
       return x !== 'forbidden';

@@ -103,7 +103,7 @@ describe('t.declare([name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     it('should be idempotent', function () {
       var p1 = A(aValue);

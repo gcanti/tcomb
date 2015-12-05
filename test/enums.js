@@ -21,7 +21,7 @@ describe('t.enums(map, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     var T = t.enums({a: 0}, 'T');
 

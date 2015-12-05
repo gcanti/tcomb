@@ -9,7 +9,7 @@ describe('t.Any', function () {
 
   var T = t.Any;
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     it('should behave like identity', function () {
       var value = {};

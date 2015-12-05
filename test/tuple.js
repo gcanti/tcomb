@@ -32,7 +32,7 @@ describe('t.tuple(types, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     var S = t.struct({}, 'S');
     var T = t.tuple([S, S], 'T');

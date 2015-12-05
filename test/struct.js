@@ -30,7 +30,7 @@ describe('t.struct(props, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     it('should be idempotent', function () {
       var T = Point;
