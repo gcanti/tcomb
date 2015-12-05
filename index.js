@@ -18,6 +18,36 @@ exports.stringify = function stringify(x) {
   }
 };
 
+function IdentityMap() {
+  if (!(this instanceof IdentityMap)) { // `new` is optional
+    return new IdentityMap();
+  }
+
+  this.keys = [];
+  this.values = [];
+}
+
+IdentityMap.prototype.put = function(key, value) {
+  assert(!isNil(key), '`key` must not be nil');
+
+  var index = this.keys.indexOf(key);
+
+  if (index === -1) {
+    this.keys.push(key);
+    this.values.push(value);
+    return null;
+  }
+
+  var previousValue = this.values[index];
+  this.values[index] = value;
+  return previousValue;
+};
+
+IdentityMap.prototype.get = function(key) {
+  var index = this.keys.indexOf(key);
+  return index === -1 ? null : this.values[index];
+};
+
 function isNil(x) {
   return x === null || x === void 0;
 }
@@ -83,10 +113,10 @@ function isIdentity(type) {
 }
 
 // creates an instance of a type, handling the optional new operator
-function create(type, value, path) {
+function create(type, value, path, identityMap) {
   if (isType(type)) {
     // for structs the new operator is allowed
-    return isStruct(type) ? new type(value, path) : type(value, path);
+    return isStruct(type) ? new type(value, path, identityMap) : type(value, path, identityMap);
   }
 
   if (process.env.NODE_ENV !== 'production') {
@@ -329,8 +359,7 @@ function struct(props, name) {
 
   var displayName = name || struct.getDefaultName(props);
 
-  function Struct(value, path) {
-
+  function Struct(value, path, identityMap) {
     if (Struct.is(value)) { // implements idempotency
       return value;
     }
@@ -341,14 +370,25 @@ function struct(props, name) {
     }
 
     if (!(this instanceof Struct)) { // `new` is optional
-      return new Struct(value);
+      return new Struct(value, path, identityMap);
     }
+
+    identityMap = identityMap || new IdentityMap();
+
+    var alreadyCreatedStruct = identityMap.get(value);
+
+    if (alreadyCreatedStruct) {
+      return alreadyCreatedStruct;
+    }
+
+    identityMap.put(value, this);
 
     for (var k in props) {
       if (props.hasOwnProperty(k)) {
         var expected = props[k];
         var actual = value[k];
-        this[k] = create(expected, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + getTypeName(expected)) : null ));
+        var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + getTypeName(expected)) : null );
+        this[k] = create(expected, actual, _path, identityMap);
       }
     }
 
@@ -414,7 +454,7 @@ function union(types, name) {
   var displayName = name || union.getDefaultName(types);
   var identity = types.every(isIdentity);
 
-  function Union(value, path) {
+  function Union(value, path, identityMap) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -434,7 +474,7 @@ function union(types, name) {
       path[path.length - 1] += '(' + getTypeName(type) + ')';
     }
 
-    return create(type, value, path);
+    return create(type, value, path, identityMap);
   }
 
   Union.meta = {
@@ -537,11 +577,12 @@ function maybe(type, name) {
 
   var displayName = name || maybe.getDefaultName(type);
 
-  function Maybe(value, path) {
+  function Maybe(value, path, identityMap) {
+    identityMap = identityMap || new IdentityMap();
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Maybe);
     }
-    return isNil(value) ? null : create(type, value, path);
+    return isNil(value) ? null : create(type, value, path, identityMap);
   }
 
   Maybe.meta = {
@@ -623,7 +664,7 @@ function tuple(types, name) {
   var displayName = name || tuple.getDefaultName(types);
   var identity = types.every(isIdentity);
 
-  function Tuple(value, path) {
+  function Tuple(value, path, identityMap) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -641,7 +682,8 @@ function tuple(types, name) {
     for (var i = 0, len = types.length; i < len; i++) {
       var expected = types[i];
       var actual = value[i];
-      var instance = create(expected, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + getTypeName(expected)) : null ));
+      var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + getTypeName(expected)) : null );
+      var instance = create(expected, actual, _path, identityMap);
       idempotent = idempotent && ( actual === instance );
       ret.push(instance);
     }
@@ -696,14 +738,14 @@ function refinement(type, predicate, name) {
   var displayName = name || refinement.getDefaultName(type, predicate);
   var identity = isIdentity(type);
 
-  function Refinement(value, path) {
+  function Refinement(value, path, identityMap) {
 
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Refinement);
       path = path || [displayName];
     }
 
-    var x = create(type, value, path);
+    var x = create(type, value, path, identityMap);
 
     if (process.env.NODE_ENV !== 'production') {
       assert(predicate(x), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
@@ -748,7 +790,7 @@ function list(type, name) {
   var typeNameCache = getTypeName(type);
   var identity = isIdentity(type); // the list is identity iif type is identity
 
-  function List(value, path) {
+  function List(value, path, identityMap) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -765,7 +807,8 @@ function list(type, name) {
     var ret = []; // make a temporary copy, will be discarded if idempotent remains true
     for (var i = 0, len = value.length; i < len; i++ ) {
       var actual = value[i];
-      var instance = create(type, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null ));
+      var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null );
+      var instance = create(type, actual, _path, identityMap);
       idempotent = idempotent && ( actual === instance );
       ret.push(instance);
     }
@@ -820,7 +863,7 @@ function dict(domain, codomain, name) {
   var codomainNameCache = getTypeName(codomain);
   var identity = isIdentity(domain) && isIdentity(codomain);
 
-  function Dict(value, path) {
+  function Dict(value, path, identityMap) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -837,9 +880,12 @@ function dict(domain, codomain, name) {
     var ret = {}; // make a temporary copy, will be discarded if idempotent remains true
     for (var k in value) {
       if (value.hasOwnProperty(k)) {
-        k = create(domain, k, ( process.env.NODE_ENV !== 'production' ? path.concat(domainNameCache) : null ));
+        var kPath = ( process.env.NODE_ENV !== 'production' ? path.concat(domainNameCache) : null );
+        k = create(domain, k, kPath, identityMap);
+
         var actual = value[k];
-        var instance = create(codomain, actual, ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + codomainNameCache) : null ));
+        var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + codomainNameCache) : null );
+        var instance = create(codomain, actual, _path, identityMap);
         idempotent = idempotent && ( actual === instance );
         ret[k] = instance;
       }
@@ -1029,11 +1075,11 @@ function declare(name) {
 
   var type;
 
-  function Declare(value, path) {
+  function Declare(value, path, identityMap) {
     if (process.env.NODE_ENV !== 'production') {
       assert(!isNil(type), function () { return 'Type declared but not defined, don\'t forget to call .define on every declared type'; });
     }
-    return type(value, path);
+    return type(value, path, identityMap);
   }
 
   Declare.define = function (spec) {
