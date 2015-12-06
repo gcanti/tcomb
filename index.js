@@ -341,7 +341,7 @@ function struct(props, name) {
     }
 
     if (!(this instanceof Struct)) { // `new` is optional
-      return new Struct(value);
+      return new Struct(value, path);
     }
 
     for (var k in props) {
