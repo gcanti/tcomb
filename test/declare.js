@@ -145,7 +145,7 @@ describe('t.declare([name])', function () {
       id: t.Number,
       parent: t.maybe(TreeItem),
       children: t.list(TreeItem),
-      favoriteChild: t.maybe(TreeItem),
+      favoriteChild: t.maybe(TreeItem)
     }));
 
     it('should allow cyclic references in struct', function() {

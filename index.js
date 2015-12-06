@@ -1091,8 +1091,12 @@ function declare(name) {
 
     type = spec;
     mixin(Declare, type, true); // true because it overwrites Declare.displayName
-    Declare.displayName = name || type.displayName;
-    Declare.meta.name = name || Declare.meta.name;
+    if (name) {
+      type.displayName = Declare.displayName = name;
+      Declare.meta.name = name;
+    } else {
+      Declare.displayName = type.displayName;
+    }
     Declare.prototype = type.prototype;
   };
 

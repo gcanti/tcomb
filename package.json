@@ -4,7 +4,7 @@
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint index.js",
+    "lint": "eslint index.js test",
     "test": "npm run lint && karma start"
   },
   "repository": {
