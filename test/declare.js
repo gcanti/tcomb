@@ -1,4 +1,4 @@
-/* globals describe, it */
+/* globals describe, it, xit */
 var assert = require('assert');
 var t = require('../index');
 var throwsWithMessage = require('./util').throwsWithMessage;
@@ -166,6 +166,97 @@ describe('t.declare([name])', function () {
       var treeItemIdempotent = TreeItem(treeItem);
 
       assert(treeItemIdempotent === treeItem);
+    });
+
+    xit('should allow cyclic references in tuples', function() {
+      var Tuple = t.declare('Tuple');
+      Tuple.define(t.tuple([t.Number, t.maybe(Tuple)]));
+
+      var tuple = [1, null];
+      tuple[1] = tuple;
+
+      var result = Tuple(tuple);
+
+      assert(Tuple.is(result)); // would fail: endless loop
+      assert(result[1] === result);
+
+      var resultIdempotent = Tuple(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    xit('should allow indirect cyclic references in tuples', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.struct({tuple: TupleWithContainer});
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = {tuple: tupleWithContainer};
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1].tuple === result); // would fail: not the same
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    xit('should return cyclic referenes with the appropriate type', function() {
+      var A = t.declare('A');
+      var B = t.declare('B');
+
+      A.define(t.struct({
+        value: t.Number,
+        b: B
+      }));
+
+      B.define(t.struct({
+        value: t.Number,
+        b: A
+      }));
+
+      var monster = {value: 1};
+      monster.b = monster;
+
+      var result = A(monster);
+
+      assert(A.is(result));
+      assert(B.is(result.b)); // would fail: not B
+    });
+
+    it('should return same instances when the same instance is used multiple times in a struct', function() {
+      var A = t.struct({
+        value: t.Number
+      });
+
+      var B = t.struct({
+        a1: A,
+        a2: A
+      });
+
+      var a = { value: 3 };
+      var b = B({
+        a1: a,
+        a2: a
+      });
+
+      assert(b.a1 === b.a2);
+    });
+
+    it('should return same instances when the same instance is used multiple times in a tuple', function() {
+      var A = t.struct({
+        value: t.Number
+      });
+
+      var B = t.tuple([A, A]);
+
+      var a = { value: 3 };
+      var b = B([a, a]);
+
+      assert(b[0] === b[1]);
     });
 
   });

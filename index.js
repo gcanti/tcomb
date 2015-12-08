@@ -679,6 +679,16 @@ function tuple(types, name) {
       assert(isArray(value) && value.length === types.length, function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of length ' + types.length + ')'; });
     }
 
+    identityMap = identityMap || new IdentityMap();
+
+    var alreadyCreatedTuple = identityMap.get(value);
+
+    if (alreadyCreatedTuple) {
+      return alreadyCreatedTuple;
+    }
+
+    identityMap.set(value, value);
+
     var idempotent = true;
     var ret = [];
     for (var i = 0, len = types.length; i < len; i++) {
