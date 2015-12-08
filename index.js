@@ -1027,13 +1027,39 @@ function declare(name) {
     assert(isTypeName(name), function () { return 'Invalid argument name ' + name + ' supplied to declare([name]) (expected a string)'; });
   }
 
+  // namespaced by type
+  var identityMap = [];
+  var recursionDepth = 0;
   var type;
+  var useThis;
 
   function Declare(value, path) {
     if (process.env.NODE_ENV !== 'production') {
       assert(!isNil(type), function () { return 'Type declared but not defined, don\'t forget to call .define on every declared type'; });
     }
-    return type(value, path);
+
+    // if type is a struct ensure a `this` reference for identityMap
+    if (useThis && !(this instanceof Declare)) {
+      return new Declare(value, path);
+    }
+
+    // reutilise created references
+    var i = identityMap.length;
+    var ref;
+    while ((ref = identityMap[--i])) {
+      if (ref.value === value) { return ref.that; }
+    }
+
+    // save the reference and start recursion
+    identityMap.push({ value: value, that: useThis ? this : value });
+    recursionDepth += 1;
+    var ret = type.call(this, value, path); // here's the trick: Declare and type are alias
+    recursionDepth -= 1;
+    if (recursionDepth === 0) {
+      identityMap.length = 0; // avoid memory leaks
+    }
+
+    return ret;
   }
 
   Declare.define = function (spec) {
@@ -1044,14 +1070,14 @@ function declare(name) {
     }
 
     type = spec;
+    useThis = isStruct(spec);
     mixin(Declare, type, true); // true because it overwrites Declare.displayName
     if (name) {
       type.displayName = Declare.displayName = name;
       Declare.meta.name = name;
-    } else {
-      Declare.displayName = type.displayName;
     }
     Declare.prototype = type.prototype;
+    return Declare;
   };
 
   Declare.displayName = name || ( getTypeName(Declare) + "$" + nextDeclareUniqueId++ );

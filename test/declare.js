@@ -13,14 +13,6 @@ A.define(t.struct({
   b: t.maybe(B)
 }));
 
-var aValue = A({
-  b: B({
-    a: A({
-      b: null
-    })
-  })
-});
-
 describe('t.declare([name])', function () {
 
   describe('combinator', function () {
@@ -36,62 +28,64 @@ describe('t.declare([name])', function () {
       });
 
       throwsWithMessage(function () {
-        var D = t.declare('D');
-        D.define('not a type');
+        t.declare('D')
+          .define('not a type');
       }, '[tcomb] Invalid argument type "not a type" supplied to define(type) (expected a type)');
 
     });
 
     it('should throw if define-d multiple times', function () {
       throwsWithMessage(function () {
-        var D = t.declare('D');
-        D.define(t.list(t.Any));
-        D.define(t.list(t.Any));
+        t.declare('D')
+          .define(t.list(t.Any))
+          .define(t.list(t.Any));
       }, '[tcomb] Declare.define(type) can only be invoked once');
     });
 
     it('should have a fresh name for different declares when not explicitly provided', function() {
-      var Thing1 = t.declare();
-      Thing1.define(t.struct({
-        thing: Thing1
+      var Nameless1 = t.declare();
+      Nameless1.define(t.struct({
+        thing: Nameless1
       }));
       assert.throws(function() {
-        Thing1({});
+        Nameless1({});
       }, function(err) {
         assert.strictEqual(err instanceof Error, true);
         assert.ok(/\[tcomb\] Invalid value .+ supplied to {thing: Declare\$[0-9]+}\/thing: {thing: Declare\$[0-9]+} \(expected an object\)/m.test(err.message));
         return true;
       });
-      var Thing2 = t.declare();
-      assert.ok(t.getTypeName(Thing1) != t.getTypeName(Thing2));
+      var Nameless2 = t.declare();
+      assert.ok(t.getTypeName(Nameless1) !== t.getTypeName(Nameless2));
     });
 
     it('an instance of the declared type should satisfy instanceof, if the concrete type is a struct', function() {
-      assert.ok(aValue instanceof A);
+      var Struct = t.declare('Struct')
+        .define(t.struct({}));
+      var actual = new Struct({});
+      assert.ok(actual instanceof Struct);
     });
 
     it('should have the expected names', function() {
-      var ANum = t.declare('A');
-      ANum.define(t.list(t.Any));
-
-      assert.strictEqual('A', A.displayName);
-      assert.strictEqual('A', A.meta.name);
+      var Named = t.declare('Named');
+      Named.define(t.list(t.Any));
+      assert.strictEqual(Named.displayName, 'Named');
+      assert.strictEqual(Named.meta.name, 'Named');
 
       var Nameless = t.declare();
-      assert.strictEqual('Declare$3', Nameless.displayName);
+      assert.strictEqual(Nameless.displayName, 'Declare$3');
       Nameless.define(t.list(t.Any));
-      assert.strictEqual('Array<Any>', Nameless.displayName);
-      assert.strictEqual(undefined, Nameless.meta.name);
+      assert.strictEqual(Nameless.displayName, 'Array<Any>');
+      assert.strictEqual(Nameless.meta.name, undefined);
     });
 
-    it('should support adding functions to the prototype, when allowd by the concrete type', function() {
-      var ANum = t.declare('A');
-      ANum.define(t.struct({
-        a: t.Number
-      }));
-      function afun() { return 42; }
-      ANum.prototype.afun = afun;
-      assert.equal(42, ANum({a: 13}).afun());
+    it('should support adding functions to the prototype, when allowed by the concrete type', function() {
+      function getValue() { return this.value; }
+      var Struct = t.declare('Struct')
+        .define(t.struct({
+          value: t.Number
+        }));
+      Struct.prototype.getValue = getValue;
+      assert.equal(42, Struct({value: 42}).getValue());
     });
 
     it('should throw when defined with a non-fresh type', function() {
@@ -106,7 +100,13 @@ describe('t.declare([name])', function () {
   describe('constructor', function () {
 
     it('should be idempotent', function () {
-      var p1 = A(aValue);
+      var p1 = A({
+        b: {
+          a: {
+            b: null
+          }
+        }
+      });
       var p2 = A(p1);
       assert.deepEqual(p2 === p1, true);
     });
@@ -131,9 +131,76 @@ describe('t.declare([name])', function () {
 
   describe('#is(x)', function () {
 
-    it('should return true when x is an instance of the struct', function () {
-      var a = new A(aValue);
+    it('should return true when x is an instance of the type', function () {
+      var a = new A({
+        b: {
+          a: {
+            b: null
+          }
+        }
+      });
       assert.ok(A.is(a));
+    });
+
+  });
+
+  describe('cyclic references', function() {
+    var TreeItem = t.declare('TreeItem');
+
+    TreeItem.define(t.struct({
+      id: t.Number,
+      parent: t.maybe(TreeItem),
+      children: t.list(TreeItem),
+      favoriteChild: t.maybe(TreeItem)
+    }));
+
+    it('should allow cyclic references in structs', function() {
+      var root = {id: 1, parent: null, children: []};
+      var child = {id: 2, parent: root, children: []};
+
+      root.children.push(child);
+      root.favoriteChild = child;
+
+      var treeItem = TreeItem(root);
+      var treeItemFavoriteChild = treeItem.favoriteChild;
+
+      assert(TreeItem.is(treeItem));
+      assert(TreeItem.is(treeItemFavoriteChild));
+      assert(treeItemFavoriteChild.parent === treeItem);
+      assert(treeItem.children[0] === treeItemFavoriteChild);
+    });
+
+    it('should have namespaces for sifferent types', function() {
+      var A = t.declare('A');
+      var B = t.declare('B');
+
+      A.define(t.struct({
+        value: t.Number,
+        b: B
+      }));
+
+      B.define(t.struct({
+        value: t.Number,
+        b: A
+      }));
+
+      var monster = {value: 1};
+      monster.b = monster;
+
+      assert.ok(B.is(A(monster).b));
+    });
+
+    it('should allow cyclic references in tuples', function() {
+
+      var List = t.declare('List');
+      List.define(t.tuple([t.Number, t.maybe(List)]));
+
+      var list = [42];
+      list[1] = list;
+
+      var actual = List(list);
+      assert.ok(actual[0] === 42);
+      assert.ok(actual[1] === actual);
     });
 
   });
