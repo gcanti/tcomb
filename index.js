@@ -1106,10 +1106,9 @@ function declare(name) {
     if (name) {
       type.displayName = Declare.displayName = name;
       Declare.meta.name = name;
-    } else {
-      Declare.displayName = type.displayName;
     }
     Declare.prototype = type.prototype;
+    return Declare;
   };
 
   Declare.displayName = name || ( getTypeName(Declare) + "$" + nextDeclareUniqueId++ );
