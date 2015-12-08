@@ -162,6 +162,10 @@ describe('t.declare([name])', function () {
       assert(TreeItem.is(treeItemFavoriteChild));
       assert(treeItemFavoriteChild.parent === treeItem);
       assert(treeItem.children[0] === treeItemFavoriteChild);
+
+      var treeItemIdempotent = TreeItem(treeItem);
+
+      assert(treeItemIdempotent === treeItem);
     });
 
   });
