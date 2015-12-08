@@ -74,6 +74,13 @@ describe('t.update(instance, spec)', function () {
     assert.deepEqual(actual, [1, 2, {a: [12, 13, 14, 15]}]);
   });
 
+  it('should handle bad $splice command', function () {
+    var instance = [1, 2, {a: [12, 17, 15]}];
+    throwsWithMessage(function () {
+      update(instance, {2: {a: {$splice: [1, 1, 13, 14]}}});
+    }, '[tcomb] Invalid argument splices supplied to immutability helper { $splice: splices } (expected an array of arrays)');
+  });
+
   it('should handle $remove command', function () {
     var instance = {a: 1, b: 2};
     var actual = update(instance, {'$remove': ['a']});

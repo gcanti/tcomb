@@ -3,6 +3,10 @@
   "version": "2.5.2",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "GUIDE.md"
+  ],
   "scripts": {
     "lint": "eslint index.js test",
     "test": "npm run lint && karma start"
