@@ -19,6 +19,9 @@ exports.stringify = function stringify(x) {
 };
 
 function IdentityMap() {
+  if (typeof WeakMap !== 'undefined') {
+    return new WeakMap();
+  }
   if (!(this instanceof IdentityMap)) { // `new` is optional
     return new IdentityMap();
   }
@@ -27,25 +30,24 @@ function IdentityMap() {
   this.values = [];
 }
 
-IdentityMap.prototype.put = function(key, value) {
-  assert(!isNil(key), '`key` must not be nil');
+IdentityMap.prototype.set = function(key, value) {
+  assert(isArray(key) || isObject(key), 'Invalid value used as map key');
 
   var index = this.keys.indexOf(key);
 
   if (index === -1) {
     this.keys.push(key);
     this.values.push(value);
-    return null;
+  } else {
+    this.values[index] = value;
   }
 
-  var previousValue = this.values[index];
-  this.values[index] = value;
-  return previousValue;
+  return this;
 };
 
 IdentityMap.prototype.get = function(key) {
   var index = this.keys.indexOf(key);
-  return index === -1 ? null : this.values[index];
+  return index === -1 ? undefined : this.values[index];
 };
 
 function isNil(x) {
@@ -381,7 +383,7 @@ function struct(props, name) {
       return alreadyCreatedStruct;
     }
 
-    identityMap.put(value, this);
+    identityMap.set(value, this);
 
     for (var k in props) {
       if (props.hasOwnProperty(k)) {
