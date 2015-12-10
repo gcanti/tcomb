@@ -429,14 +429,20 @@ function struct(props, name) {
     var existingState = treeState.valueStates.get(value);
     var state = existingState || {
       idempotent: false,
-      ret: this
+      ret: new IdentityMap()
     };
 
     if (existingState) {
-      return existingState.ret;
+      var ret = existingState.ret.get(Struct);
+
+      if (ret) {
+        return ret;
+      }
+    } else {
+      treeState.valueStates.set(value, state);
     }
 
-    treeState.valueStates.set(value, state);
+    state.ret.set(Struct, this);
 
     for (var k in props) {
       if (props.hasOwnProperty(k)) {
