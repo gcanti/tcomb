@@ -28,16 +28,18 @@ function IdentityMap() {
 
   this.keys = [];
   this.values = [];
+  this.size = 0;
 }
 
 IdentityMap.prototype.set = function(key, value) {
-  assert(isArray(key) || isObject(key), 'Invalid value used as map key');
+  assert(isArray(key) || isObject(key) || isFunction(key), 'Invalid value used as map key');
 
   var index = this.keys.indexOf(key);
 
   if (index === -1) {
     this.keys.push(key);
     this.values.push(value);
+    this.size++;
   } else {
     this.values[index] = value;
   }
@@ -48,6 +50,53 @@ IdentityMap.prototype.set = function(key, value) {
 IdentityMap.prototype.get = function(key) {
   var index = this.keys.indexOf(key);
   return index === -1 ? undefined : this.values[index];
+};
+
+function IdentitySet() {
+  if (typeof WeakSet !== 'undefined') {
+    return new WeakSet();
+  }
+  if (!(this instanceof IdentitySet)) { // `new` is optional
+    return new IdentitySet();
+  }
+
+  this.values = [];
+  this.size = 0;
+}
+
+IdentitySet.prototype.add = function(value) {
+  assert(isArray(value) || isObject(value) || isFunction(value), 'Invalid value used in set');
+
+  if (this.values.indexOf(value) === -1) {
+    this.values.push(value);
+    this.size++;
+  }
+};
+
+IdentitySet.prototype.delete = function(value) {
+  var index = this.values.indexOf(value);
+
+  if (index !== -1) {
+    this.values.splice(index, 1);
+    this.size--;
+  }
+};
+
+function TreeState() {
+  if (!(this instanceof TreeState)) { // `new` is optional
+    return new TreeState();
+  }
+
+  this.cycleEntries = new IdentitySet();
+  this.valueStates = new IdentityMap();
+}
+
+TreeState.prototype.isIdempotent = function(actual, instance) {
+  var valueState = this.valueStates.get(actual);
+  if (valueState) {
+    return valueState.idempotent;
+  }
+  return actual === instance;
 };
 
 function isNil(x) {
@@ -99,9 +148,9 @@ function isTypeName(name) {
 }
 
 // returns true if x is an instance of type
-function is(x, type) {
+function is(x, type, treeState) {
   if (isType(type)) {
-    return type.is(x);
+    return type.is(x, treeState);
   }
   return x instanceof type; // type should be a class constructor
 }
@@ -115,10 +164,10 @@ function isIdentity(type) {
 }
 
 // creates an instance of a type, handling the optional new operator
-function create(type, value, path, identityMap) {
+function create(type, value, path, treeState) {
   if (isType(type)) {
     // for structs the new operator is allowed
-    return isStruct(type) ? new type(value, path, identityMap) : type(value, path, identityMap);
+    return isStruct(type) ? new type(value, path, treeState) : type(value, path, treeState);
   }
 
   if (process.env.NODE_ENV !== 'production') {
@@ -361,7 +410,7 @@ function struct(props, name) {
 
   var displayName = name || struct.getDefaultName(props);
 
-  function Struct(value, path, identityMap) {
+  function Struct(value, path, treeState) {
     if (Struct.is(value)) { // implements idempotency
       return value;
     }
@@ -372,25 +421,29 @@ function struct(props, name) {
     }
 
     if (!(this instanceof Struct)) { // `new` is optional
-      return new Struct(value, path, identityMap);
+      return new Struct(value, path, treeState);
     }
 
-    identityMap = identityMap || new IdentityMap();
+    treeState = treeState || new TreeState();
 
-    var alreadyCreatedStruct = identityMap.get(value);
+    var existingState = treeState.valueStates.get(value);
+    var state = existingState || {
+      idempotent: false,
+      ret: this
+    };
 
-    if (alreadyCreatedStruct) {
-      return alreadyCreatedStruct;
+    if (existingState) {
+      return existingState.ret;
     }
 
-    identityMap.set(value, this);
+    treeState.valueStates.set(value, state);
 
     for (var k in props) {
       if (props.hasOwnProperty(k)) {
         var expected = props[k];
         var actual = value[k];
         var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + getTypeName(expected)) : null );
-        this[k] = create(expected, actual, _path, identityMap);
+        this[k] = create(expected, actual, _path, treeState);
       }
     }
 
@@ -456,7 +509,7 @@ function union(types, name) {
   var displayName = name || union.getDefaultName(types);
   var identity = types.every(isIdentity);
 
-  function Union(value, path, identityMap) {
+  function Union(value, path, treeState) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -476,7 +529,7 @@ function union(types, name) {
       path[path.length - 1] += '(' + getTypeName(type) + ')';
     }
 
-    return create(type, value, path, identityMap);
+    return create(type, value, path, treeState);
   }
 
   Union.meta = {
@@ -488,9 +541,9 @@ function union(types, name) {
 
   Union.displayName = displayName;
 
-  Union.is = function (x) {
+  Union.is = function (x, treeState) {
     return types.some(function (type) {
-      return is(x, type);
+      return is(x, type, treeState);
     });
   };
 
@@ -549,9 +602,9 @@ function intersection(types, name) {
 
   Intersection.displayName = displayName;
 
-  Intersection.is = function (x) {
+  Intersection.is = function (x, treeState) {
     return types.every(function (type) {
-      return is(x, type);
+      return is(x, type, treeState);
     });
   };
 
@@ -579,12 +632,11 @@ function maybe(type, name) {
 
   var displayName = name || maybe.getDefaultName(type);
 
-  function Maybe(value, path, identityMap) {
-    identityMap = identityMap || new IdentityMap();
+  function Maybe(value, path, treeState) {
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Maybe);
     }
-    return isNil(value) ? null : create(type, value, path, identityMap);
+    return isNil(value) ? null : create(type, value, path, treeState);
   }
 
   Maybe.meta = {
@@ -596,8 +648,8 @@ function maybe(type, name) {
 
   Maybe.displayName = displayName;
 
-  Maybe.is = function (x) {
-    return isNil(x) || is(x, type);
+  Maybe.is = function (x, treeState) {
+    return isNil(x) || is(x, type, treeState);
   };
 
   return Maybe;
@@ -666,7 +718,7 @@ function tuple(types, name) {
   var displayName = name || tuple.getDefaultName(types);
   var identity = types.every(isIdentity);
 
-  function Tuple(value, path, identityMap) {
+  function Tuple(value, path, treeState) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -679,36 +731,54 @@ function tuple(types, name) {
       assert(isArray(value) && value.length === types.length, function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of length ' + types.length + ')'; });
     }
 
-    identityMap = identityMap || new IdentityMap();
+    treeState = treeState || new TreeState();
 
-    var alreadyCreatedTuple = identityMap.get(value);
+    var existingState = treeState.valueStates.get(value);
+    var state = existingState || {
+      idempotent: true,
+      ret: [],
+      resolved: false,
+      i: 0,
+      len: types.length
+    };
 
-    if (alreadyCreatedTuple) {
-      return alreadyCreatedTuple;
+    if (existingState && existingState.resolved) {
+      return existingState.ret;
     }
 
-    identityMap.set(value, value);
+    if (existingState) {
+      state.i++;
+      treeState.cycleEntries.add(value);
+    } else {
+      treeState.valueStates.set(value, state);
+    }
 
-    var idempotent = true;
-    var ret = [];
-    for (var i = 0, len = types.length; i < len; i++) {
+    for (; state.i < state.len; state.i++) {
+      var i = state.i;
       var expected = types[i];
       var actual = value[i];
       var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + getTypeName(expected)) : null );
-      var instance = create(expected, actual, _path, identityMap);
-      idempotent = idempotent && ( actual === instance );
-      ret.push(instance);
+      var instance = create(expected, actual, _path, treeState);
+      state.idempotent = state.idempotent && treeState.isIdempotent(actual, instance);
+      state.ret[i] = instance;
     }
 
-    if (idempotent) { // implements idempotency
-      ret = value;
+    if (existingState) {
+      return state.ret;
+    } else {
+      state.resolved = true;
+      treeState.cycleEntries.delete(value);
+    }
+
+    if (state.idempotent && !treeState.cycleEntries.size) { // implements idempotency
+      state.ret = value;
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      Object.freeze(ret);
+      Object.freeze(state.ret);
     }
 
-    return ret;
+    return state.ret;
   }
 
   Tuple.meta = {
@@ -720,12 +790,24 @@ function tuple(types, name) {
 
   Tuple.displayName = displayName;
 
-  Tuple.is = function (x) {
-    return isArray(x) &&
-      x.length === types.length &&
-      types.every(function (type, i) {
-        return is(x[i], type);
+  Tuple.is = function (x, treeState) {
+    if (isArray(x) && x.length === types.length) {
+      treeState = treeState || new TreeState();
+
+      var existingState = treeState.valueStates.get(x);
+      var state = existingState || true;
+
+      if (existingState) {
+        return true;
+      }
+
+      treeState.valueStates.set(x, state);
+
+      return types.every(function (type, i) {
+        return is(x[i], type, treeState);
       });
+    }
+    return false;
   };
 
   Tuple.update = function (instance, spec) {
@@ -750,14 +832,14 @@ function refinement(type, predicate, name) {
   var displayName = name || refinement.getDefaultName(type, predicate);
   var identity = isIdentity(type);
 
-  function Refinement(value, path, identityMap) {
+  function Refinement(value, path, treeState) {
 
     if (process.env.NODE_ENV !== 'production') {
       forbidNewOperator(this, Refinement);
       path = path || [displayName];
     }
 
-    var x = create(type, value, path, identityMap);
+    var x = create(type, value, path, treeState);
 
     if (process.env.NODE_ENV !== 'production') {
       assert(predicate(x), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
@@ -776,8 +858,8 @@ function refinement(type, predicate, name) {
 
   Refinement.displayName = displayName;
 
-  Refinement.is = function (x) {
-    return is(x, type) && predicate(x);
+  Refinement.is = function (x, treeState) {
+    return is(x, type, treeState) && predicate(x);
   };
 
   Refinement.update = function (instance, spec) {
@@ -802,7 +884,7 @@ function list(type, name) {
   var typeNameCache = getTypeName(type);
   var identity = isIdentity(type); // the list is identity iif type is identity
 
-  function List(value, path, identityMap) {
+  function List(value, path, treeState) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -815,13 +897,15 @@ function list(type, name) {
       assert(isArray(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/') + ' (expected an array of ' + typeNameCache + ')'; });
     }
 
+    treeState = treeState || new TreeState();
+
     var idempotent = true; // will remain true if I can reutilise the input
     var ret = []; // make a temporary copy, will be discarded if idempotent remains true
     for (var i = 0, len = value.length; i < len; i++ ) {
       var actual = value[i];
       var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(i + ': ' + typeNameCache) : null );
-      var instance = create(type, actual, _path, identityMap);
-      idempotent = idempotent && ( actual === instance );
+      var instance = create(type, actual, _path, treeState);
+      idempotent = idempotent && treeState.isIdempotent(actual, instance);
       ret.push(instance);
     }
 
@@ -845,9 +929,9 @@ function list(type, name) {
 
   List.displayName = displayName;
 
-  List.is = function (x) {
+  List.is = function (x, treeState) {
     return isArray(x) && x.every(function (e) {
-      return is(e, type);
+      return is(e, type, treeState);
     });
   };
 
@@ -875,7 +959,7 @@ function dict(domain, codomain, name) {
   var codomainNameCache = getTypeName(codomain);
   var identity = isIdentity(domain) && isIdentity(codomain);
 
-  function Dict(value, path, identityMap) {
+  function Dict(value, path, treeState) {
 
     if (process.env.NODE_ENV === 'production') {
       if (identity) {
@@ -888,17 +972,19 @@ function dict(domain, codomain, name) {
       assert(isObject(value), function () { return 'Invalid value ' + exports.stringify(value) + ' supplied to ' + path.join('/'); });
     }
 
+    treeState = treeState || new TreeState();
+
     var idempotent = true; // will remain true if I can reutilise the input
     var ret = {}; // make a temporary copy, will be discarded if idempotent remains true
     for (var k in value) {
       if (value.hasOwnProperty(k)) {
         var kPath = ( process.env.NODE_ENV !== 'production' ? path.concat(domainNameCache) : null );
-        k = create(domain, k, kPath, identityMap);
+        k = create(domain, k, kPath, treeState);
 
         var actual = value[k];
         var _path = ( process.env.NODE_ENV !== 'production' ? path.concat(k + ': ' + codomainNameCache) : null );
-        var instance = create(codomain, actual, _path, identityMap);
-        idempotent = idempotent && ( actual === instance );
+        var instance = create(codomain, actual, _path, treeState);
+        idempotent = idempotent && treeState.isIdempotent(actual, instance);
         ret[k] = instance;
       }
     }
@@ -924,13 +1010,13 @@ function dict(domain, codomain, name) {
 
   Dict.displayName = displayName;
 
-  Dict.is = function (x) {
+  Dict.is = function (x, treeState) {
     if (!isObject(x)) {
       return false;
     }
     for (var k in x) {
       if (x.hasOwnProperty(k)) {
-        if (!is(k, domain) || !is(x[k], codomain)) {
+        if (!is(k, domain, treeState) || !is(x[k], codomain, treeState)) {
           return false;
         }
       }
@@ -1087,11 +1173,11 @@ function declare(name) {
 
   var type;
 
-  function Declare(value, path, identityMap) {
+  function Declare(value, path, treeState) {
     if (process.env.NODE_ENV !== 'production') {
       assert(!isNil(type), function () { return 'Type declared but not defined, don\'t forget to call .define on every declared type'; });
     }
-    return type(value, path, identityMap);
+    return type(value, path, treeState);
   }
 
   Declare.define = function (spec) {

@@ -1,4 +1,4 @@
-/* globals describe, it, xit */
+/* globals describe, it */
 var assert = require('assert');
 var t = require('../index');
 var throwsWithMessage = require('./util').throwsWithMessage;
@@ -174,7 +174,7 @@ describe('t.declare([name])', function () {
       assert(treeItemIdempotent === treeItem);
     });
 
-    xit('should allow cyclic references in tuples', function() {
+    it('should allow cyclic references in tuples', function() {
       var Tuple = t.declare('Tuple');
       Tuple.define(t.tuple([t.Number, t.maybe(Tuple)]));
 
@@ -183,7 +183,7 @@ describe('t.declare([name])', function () {
 
       var result = Tuple(tuple);
 
-      assert(Tuple.is(result)); // would fail: endless loop
+      assert(Tuple.is(result));
       assert(result[1] === result);
 
       var resultIdempotent = Tuple(result);
@@ -191,7 +191,26 @@ describe('t.declare([name])', function () {
       assert(resultIdempotent === result);
     });
 
-    xit('should allow indirect cyclic references in tuples', function() {
+    it('should allow indirect cyclic references in tuples (via tuple)', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.tuple([TupleWithContainer]);
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = [tupleWithContainer];
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1][0] === result);
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow indirect cyclic references in tuples (via struct)', function() {
       var TupleWithContainer = t.declare('TupleWithContainer');
       var Container = t.struct({tuple: TupleWithContainer});
 
@@ -203,14 +222,83 @@ describe('t.declare([name])', function () {
       var result = TupleWithContainer(tupleWithContainer);
 
       assert(TupleWithContainer.is(result));
-      assert(result[1].tuple === result); // would fail: not the same
+      assert(result[1].tuple === result);
 
       var resultIdempotent = TupleWithContainer(result);
 
       assert(resultIdempotent === result);
     });
 
-    xit('should have namespaces for different types', function() {
+    it('should allow indirect cyclic references in tuples (via dict)', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.dict(t.String, TupleWithContainer);
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = {tuple: tupleWithContainer};
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1].tuple === result);
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow indirect cyclic references in tuples (via list)', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.list(TupleWithContainer);
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = [tupleWithContainer];
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1][0] === result);
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow multiple cyclic references in tuples', function() {
+      /*
+       *    /\
+       *  /\  /\
+       * a   b   c
+       */
+      var Tuple = t.declare('Tuple');
+      Tuple.define(t.tuple([t.Number, t.maybe(Tuple), t.maybe(Tuple)]));
+
+      var a = [1, null, null];
+      var b = [2, null, null];
+      var c = [3, null, null];
+
+      a[1] = b;
+      b[1] = a;
+      b[2] = c;
+      c[1] = a;
+      c[2] = b;
+
+      var result = Tuple(a);
+
+      assert(Tuple.is(result));
+      assert(result[1][1] === result);
+      assert(result[1][2][1] === result);
+      assert(result[1] === result[1][2][2]);
+
+      var resultIdempotent = Tuple(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should have namespaces for different types', function() {
       var A = t.declare('A');
       var B = t.declare('B');
 
@@ -230,7 +318,7 @@ describe('t.declare([name])', function () {
       var result = A(monster);
 
       assert(A.is(result));
-      assert(B.is(result.b)); // would fail: not B
+      assert(B.is(result.b));
     });
 
     it('should return same instances when the same instance is used multiple times in a struct', function() {
