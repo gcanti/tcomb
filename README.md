@@ -10,18 +10,18 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 # Usage
 
 ```js
-var t = require('tcomb');
+import t from 'tcomb';
 
 // a user defined type
-var Integer = t.refinement(t.Number, function (n) { return n % 1 === 0; }, 'Integer');  // <= give a name for better debug messages
+const Integer = t.refinement(t.Number, (n) => n % 1 === 0, 'Integer');
 
 // a struct
-var Person = t.struct({
+const Person = t.struct({
   name: t.String,              // required string
   surname: t.maybe(t.String),  // optional string
   age: Integer,                // required integer
   tags: t.list(t.String)       // a list of strings
-}, 'Person'); // <= give a name for better debug messages
+}, 'Person'); // <= give types a name for better debug messages
 
 // methods are defined as usual
 Person.prototype.getFullName = function () {
@@ -29,7 +29,7 @@ Person.prototype.getFullName = function () {
 };
 
 // an instance of Person (the keyword new is optional)
-var person = new Person({
+const person = Person({
   name: 'Giulio',
   surname: 'Canti',
   age: 41,
@@ -45,11 +45,11 @@ var person = new Person({
 
 ## Lightweight
 
-3KB gzipped.
+3KB gzipped, no dependencies.
 
 ## Domain Driven Design
 
-Write complex domain models in a breeze and with a small code footprint. Supported types:
+Write complex domain models in a breeze and with a small code footprint. Supported types / combinators:
 
 * user defined types
 * structs
@@ -62,6 +62,7 @@ Write complex domain models in a breeze and with a small code footprint. Support
 * tuples
 * dictionaries
 * functions
+* recursive and mutually recursive types
 
 ## Based on set theory
 
@@ -72,10 +73,10 @@ Blog posts:
 
 ## Type safety
 
-All models are type checked:
+All models are type-checked:
 
 ```js
-var person = new Person({
+const person = new Person({
   name: 'Giulio',
   // missing required field "age"
   tags: ['js developer', 'rock climber']
@@ -95,8 +96,8 @@ See "Debugging with Chrome DevTools" section for details.
 Instances are immutable using `Object.freeze`. This means you can use standard JavaScript objects and arrays. You don't have to change how you normally code. You can update an immutable instance with the provided `update(instance, spec)` function:
 
 ```js
-var person2 = Person.update(person, {
-  name: {$set: 'Guido'}
+const person2 = Person.update(person, {
+  name: { $set: 'Guido' }
 });
 ```
 
@@ -109,7 +110,7 @@ where `spec` is an object contaning *commands*. The following commands are compa
 * `$apply`
 * `$merge`
 
-See [Updating immutable instances](GUIDE.md#updating-immutable-instances) in the docs for details.
+See [Updating immutable instances](GUIDE.md#updating-immutable-instances) for details.
 
 ## Speed
 
@@ -150,8 +151,6 @@ Encodes / decodes your domain models to / from JSON for free.
 ## Pattern matching
 
 ```js
-// this example uses ES6 syntax
-
 const result = t.match(1,
   t.String, () => 'a string',
   t.Number, () => 'a number'
