@@ -280,6 +280,7 @@ function irreducible(name, predicate) {
   Irreducible.meta = {
     kind: 'irreducible',
     name: name,
+    predicate: predicate,
     identity: true
   };
 
