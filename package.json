@@ -1,14 +1,15 @@
 {
   "name": "tcomb",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
   "files": [
     "index.js",
+    "lib",
     "GUIDE.md"
   ],
   "scripts": {
-    "lint": "eslint index.js test",
+    "lint": "eslint index.js lib test",
     "test": "npm run lint && mocha"
   },
   "repository": {
@@ -22,8 +23,8 @@
   },
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
-    "eslint": "^1.2.0",
-    "mocha": "^2.2.5"
+    "eslint": "^1.10.3",
+    "mocha": "^2.3.4"
   },
   "tags": [
     "type",
