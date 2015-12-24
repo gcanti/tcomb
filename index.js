@@ -7,40 +7,26 @@
  */
 
 // core
-var t = require('./lib/assert');
+var t = require('./lib/core');
 
-// types (the short alias are deprecated)
-t.Any = require('./lib/Any');
-t.Nil = require('./lib/Nil');
-t.String = t.Str = require('./lib/String');
-t.Number = t.Num = require('./lib/Number');
-t.Boolean = t.Bool = require('./lib/Boolean');
-t.Array = t.Arr = require('./lib/Array');
-t.Object = t.Obj = require('./lib/Object');
-t.Function = t.Func = require('./lib/Function');
-t.Error = t.Err = require('./lib/Error');
-t.RegExp = t.Re = require('./lib/RegExp');
-t.Date = t.Dat = require('./lib/Date');
+// the short alias are deprecated
+t.Arr = t.Array;
+t.Bool = t.Boolean;
+t.Dat = t.Date;
+t.Err = t.Error;
+t.Func = t.Function;
+t.Num = t.Number;
+t.Obj = t.Object;
+t.Re = t.RegExp;
+t.Str = t.String;
 
 // combinators
-t.dict = require('./lib/dict');
-t.declare = require('./lib/declare');
-t.enums = require('./lib/enums');
 t.func = require('./lib/func');
 t.intersection = require('./lib/intersection');
-t.irreducible = require('./lib/irreducible');
-t.list = require('./lib/list');
-t.maybe = require('./lib/maybe');
-t.refinement = require('./lib/refinement');
-t.subtype = require('./lib/refinement');
-t.struct = require('./lib/struct');
-t.tuple = require('./lib/tuple');
-t.union = require('./lib/union');
+t.subtype = t.refinement;
 
 // functions
-t.assert = t;
 t.mixin = require('./lib/mixin');
-t.update = require('./lib/update');
 t.isType = require('./lib/isType');
 t.is = require('./lib/is');
 t.getTypeName = require('./lib/getTypeName');
