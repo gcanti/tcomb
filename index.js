@@ -5,16 +5,45 @@
  * Copyright (c) 2014-2015 Giulio Canti
  *
  */
-var assert = require('./lib/assert');
 
-assert.assert = assert;
-assert.mixin = require('./lib/mixin');
-assert.mixin(assert, require('./lib/types'));
-assert.mixin(assert, require('./lib/combinators'));
-assert.update = require('./lib/update');
-assert.isType = require('./lib/isType');
-assert.is = require('./lib/is');
-assert.getTypeName = require('./lib/getTypeName');
-assert.match = require('./lib/match');
+// core
+var t = require('./lib/assert');
 
-module.exports = assert;
+// types (the short alias are deprecated)
+t.Any = require('./lib/Any');
+t.Nil = require('./lib/Nil');
+t.String = t.Str = require('./lib/String');
+t.Number = t.Num = require('./lib/Number');
+t.Boolean = t.Bool = require('./lib/Boolean');
+t.Array = t.Arr = require('./lib/Array');
+t.Object = t.Obj = require('./lib/Object');
+t.Function = t.Func = require('./lib/Function');
+t.Error = t.Err = require('./lib/Error');
+t.RegExp = t.Re = require('./lib/RegExp');
+t.Date = t.Dat = require('./lib/Date');
+
+// combinators
+t.dict = require('./lib/dict');
+t.declare = require('./lib/declare');
+t.enums = require('./lib/enums');
+t.func = require('./lib/func');
+t.intersection = require('./lib/intersection');
+t.irreducible = require('./lib/irreducible');
+t.list = require('./lib/list');
+t.maybe = require('./lib/maybe');
+t.refinement = require('./lib/refinement');
+t.subtype = require('./lib/refinement');
+t.struct = require('./lib/struct');
+t.tuple = require('./lib/tuple');
+t.union = require('./lib/union');
+
+// functions
+t.assert = t;
+t.mixin = require('./lib/mixin');
+t.update = require('./lib/update');
+t.isType = require('./lib/isType');
+t.is = require('./lib/is');
+t.getTypeName = require('./lib/getTypeName');
+t.match = require('./lib/match');
+
+module.exports = t;
