@@ -8,7 +8,7 @@
     "GUIDE.md"
   ],
   "scripts": {
-    "lint": "eslint index.js test",
+    "lint": "eslint index.js lib test",
     "test": "npm run lint && mocha"
   },
   "repository": {
