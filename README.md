@@ -13,37 +13,43 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 npm install tcomb --save
 ```
 
-**Example**
+**Code example**
+
+A type-checked function:
 
 ```js
 import t from 'tcomb';
 
-// a type-checked function
 function sum(a, b) {
   t.Number(a);
   t.Number(b);
   return a + b;
 }
 
-sum(1, 's'); // => throws '[tcomb] Invalid value "s" supplied to Number'
+sum(1, 's'); // throws '[tcomb] Invalid value "s" supplied to Number'
+```
 
-// a user defined type
+A user defined type:
+
+```js
 const Integer = t.refinement(t.Number, (n) => n % 1 === 0, 'Integer');
+```
 
-// a type-checked class
+A type-checked class:
+
+```js
 const Person = t.struct({
   name: t.String,              // required string
   surname: t.maybe(t.String),  // optional string
   age: Integer,                // required integer
   tags: t.list(t.String)       // a list of strings
-}, 'Person'); // <= give types a name for better debug messages
+}, 'Person');
 
 // methods are defined as usual
 Person.prototype.getFullName = function () {
   return `${this.name} ${this.surname}`;
 };
 
-// person is immutable, the keyword new is optional
 const person = Person({
   surname: 'Canti'
 }); // throws '[tcomb] Invalid value undefined supplied to Person/name: String'
