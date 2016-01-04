@@ -7,9 +7,9 @@ declare module tcomb {
     is: Predicate;
     displayName: string;
     meta: {
-      kind: string,
-      name: string,
-      identity: boolean
+      kind: string;
+      name: string;
+      identity: boolean;
     };
     t: T;
   }
@@ -20,10 +20,10 @@ declare module tcomb {
 
   interface Irreducible<T> extends Type<T> {
     meta: {
-      kind: string,
-      name: string,
-      identity: boolean,
-      predicate: Predicate
+      kind: string;
+      name: string;
+      identity: boolean;
+      predicate: Predicate;
     };
   }
 
@@ -66,11 +66,11 @@ declare module tcomb {
 
   interface Refinement<T> extends Type<T> {
     meta: {
-      kind: string,
-      name: string,
-      identity: boolean,
-      type: Constructor<T>,
-      predicate: Predicate
+      kind: string;
+      name: string;
+      identity: boolean;
+      type: Constructor<T>;
+      predicate: Predicate;
     };
     update: Update<T>;
   }
@@ -87,10 +87,10 @@ declare module tcomb {
   interface Struct<T> extends Type<T> {
     new (value: T): T;
     meta: {
-      kind: string,
-      name: string,
-      identity: boolean,
-      props: Props
+      kind: string;
+      name: string;
+      identity: boolean;
+      props: Props;
     };
     update: Update<T>;
     extend<E extends T>(mixins: Mixin | Array<Mixin>, name?: string): Struct<E>;
@@ -104,10 +104,10 @@ declare module tcomb {
 
   interface List<T> extends Type<Array<T>> {
     meta: {
-      kind: string,
-      name: string,
-      identity: boolean,
-      type: Constructor<T>
+      kind: string;
+      name: string;
+      identity: boolean;
+      type: Constructor<T>;
     };
     update: Update<Array<T>>;
   }
@@ -118,58 +118,132 @@ declare module tcomb {
   // dict combinator
   //
 
-  interface Dict<D, C> extends Type<{[key: string]: C;}> {
+  interface Dict<T> extends Type<{[key: string]: T;}> {
     meta: {
-      kind: string,
-      name: string,
-      identity: boolean,
-      domain: Constructor<D>,
-      codomain: Constructor<C>
+      kind: string;
+      name: string;
+      identity: boolean;
+      domain: Constructor<string>;
+      codomain: T;
     };
-    update: Update<{[key: string]: C;}>;
+    update: Update<{[key: string]: T;}>;
   }
 
-  export function dict<D, C>(domain: Constructor<D>, codomain: Constructor<C>, name?: string): Dict<C, D>;
+  export function dict<T>(domain: Constructor<string>, codomain: Constructor<T>, name?: string): Dict<T>;
 
   //
   // enums combinator
   //
 
+  interface Enums extends Type<string> {
+    meta: {
+      kind: string;
+      name: string;
+      identity: boolean;
+      map: Object;
+    };
+  }
+
+  interface EnumsFunction {
+    (map: Object, name?: string): Enums;
+    of(enums: string, name?: string): Enums;
+    of(enums: Array<string>, name?: string): Enums;
+  }
+
+  export var enums: EnumsFunction;
+
   //
   // maybe combinator
   //
+
+  interface Maybe<T> extends Type<void | T> {
+    meta: {
+      kind: string;
+      name: string;
+      identity: boolean;
+      type: Constructor<T>;
+    };
+    update: Update<void | T>;
+  }
+
+  export function maybe<T>(type: Constructor<T>, name?: string): Maybe<T>;
 
   //
   // tuple combinator
   //
 
+  type Types<T> = Array<Constructor<T>>;
+
+  interface Tuple<T> extends Type<T> {
+    meta: {
+      kind: string;
+      name: string;
+      identity: boolean;
+      types: Array<Type<any>>;
+    };
+    update: Update<T>;
+  }
+
+  export function tuple<T>(types: Array<Type<any>>, name?: string): Tuple<T>;
+
   //
   // union combinator
   //
+
+  interface Union<T> extends Type<T> {
+    meta: {
+      kind: string;
+      name: string;
+      identity: boolean;
+      types: Array<Type<any>>;
+    };
+    update: Update<T>;
+    dispatch(x: T): Union<T>;
+  }
+
+  export function union<T>(types: Array<Type<any>>, name?: string): Union<T>;
 
   //
   // intersection combinator
   //
 
-  //
-  // func combinator
-  //
+  interface Intersection<T> extends Type<T> {
+    meta: {
+      kind: string;
+      name: string;
+      identity: boolean;
+      types: Array<Type<any>>;
+    };
+    update: Update<T>;
+  }
+
+  export function intersection<T>(types: Array<Type<any>>, name?: string): Intersection<T>;
 
   //
   // declare combinator
   //
+
+  interface Declare<T> extends Type<T> {
+    update: Update<T>;
+    define<T>(type: Type<T>): void;
+  }
+
+  export function declare<T>(name?: string): Declare<T>;
 
   //
   // other exports
   //
 
   export function is<T>(x: any, type: Constructor<T>): boolean;
-  export function assert(guard: boolean, message?: string): void;
+  type LazyMessage = () => string;
+  export function assert(guard: boolean, message?: string | LazyMessage): void;
   export function fail(message: string): void;
   export function isType<T>(x: Constructor<T>): boolean;
   export function getTypeName<T>(x: Constructor<T>): string;
-  export function mixin(target: Object, source: Object, overwrite?: boolean): Object;
-  export function match(...args: Array<any>): any; // FIXME
+  export function mixin<T, S>(target: T, source: S, overwrite?: boolean): T & S;
+  type Function1 = (x: any) => any;
+  type Clause = Constructor<any> | Function1;
+  export function match(x: any, ...clauses: Array<Clause>): any; // FIXME
   export var update: Update<Object>;
 }
 

@@ -109,13 +109,14 @@ interface Person {
   name: string;
   age: number;
 }
+
 const Person = t.struct<Person>({
   name: t.String,
   age: t.Number
-});
+}, 'Person');
 
-const p1 = new Person({ name: 'Giulio', age: 42 })
-const p2 = Person({ name: 'Giulio', age: 42 })
+const person1 = new Person({ name: 'Giulio', age: 42 })
+const personp2 = Person({ name: 'Giulio', age: 42 })
 
   // static members
   Person.displayName;
@@ -127,7 +128,7 @@ const p2 = Person({ name: 'Giulio', age: 42 })
   const Person2 = Person.extend<Person2>({ surname: t.String })
 
   // update function
-  const p3 = Person.update(p1, {
+  const person3 = Person.update(person1, {
     name: {$set: 'Guido'}
   });
 
@@ -136,4 +137,239 @@ const p2 = Person({ name: 'Giulio', age: 42 })
   Person.meta.name;
   Person.meta.identity;
   Person.meta.props;
+
+//
+// list combinator
+//
+
+const Tags = t.list(t.String, 'Tags');
+
+const list1 = Tags(['a', 'b']);
+
+  // static members
+  Tags.displayName;
+
+  // update function
+  const list2 = Tags.update(list1, {
+    0: {$set: 's'}
+  });
+
+  // meta object
+  Tags.meta.kind;
+  Tags.meta.name;
+  Tags.meta.identity;
+  Tags.meta.type;
+
+//
+// dict combinator
+//
+
+const Phones = t.dict(t.String, t.Number, 'Phones');
+
+const dict1 = Phones({a: 1, b: 2});
+
+  // static members
+  Phones.displayName;
+
+  // update function
+  const dict2 = Phones.update(dict1, {
+    $remove: ['a']
+  });
+
+  // meta object
+  Phones.meta.kind;
+  Phones.meta.name;
+  Phones.meta.identity;
+  Phones.meta.domain;
+  Phones.meta.codomain;
+
+//
+// enums combinator
+//
+
+const Country = t.enums({
+  IT: 'Italy',
+  US: 'United States'
+}, 'Country');
+
+const country = Country('IT');
+
+  // static members
+  Country.displayName;
+
+  // meta object
+  Country.meta.kind;
+  Country.meta.name;
+  Country.meta.identity;
+  Country.meta.map;
+
+  // of
+  const Country2 = t.enums.of(['IT', 'US'], 'Country2');
+  const Country3 = t.enums.of('IT US', 'Country3');
+
+//
+// maybe combinator
+//
+
+const MaybeString = t.maybe(t.String, 'MaybeString');
+
+MaybeString('s');
+MaybeString(null);
+MaybeString(undefined);
+
+  // static members
+  MaybeString.displayName;
+
+  // meta object
+  MaybeString.meta.kind;
+  MaybeString.meta.name;
+  MaybeString.meta.identity;
+  MaybeString.meta.type;
+
+//
+// tuple combinator
+//
+
+const Size = t.tuple<[number, number]>([t.Number, t.Number], 'Size');
+type Size = typeof Size.t;
+
+const size1 = Size([100, 200]);
+
+  // static members
+  Size.displayName;
+
+  // meta object
+  Size.meta.kind;
+  Size.meta.name;
+  Size.meta.identity;
+  Size.meta.types;
+
+  // update function
+  const size2 = Size.update(size1, {
+    0: { $set: 150 }
+  });
+
+//
+// union combinator
+//
+
+const Union = t.union<Person | Size>([Person, Size], 'Union');
+
+const union1 = Union({ name: 'Giulio', age: 42 });
+
+  // static members
+  Union.displayName;
+  Union.dispatch({ name: 'Giulio', age: 42 });
+
+  // meta object
+  Union.meta.kind;
+  Union.meta.name;
+  Union.meta.identity;
+  Union.meta.types;
+
+  // update function
+  const union2 = Union.update(union1, {
+    name: { $set: 'Guido' }
+  });
+
+//
+// union combinator
+//
+
+const Min = t.refinement(t.String, (s) => s.length > 2);
+const Max = t.refinement(t.String, (s) => s.length < 5);
+const MinMax = t.intersection<string>([Min, Max], 'MinMax');
+
+const minmax1 = MinMax('s');
+
+  // static members
+  MinMax.displayName;
+
+  // meta object
+  MinMax.meta.kind;
+  MinMax.meta.name;
+  MinMax.meta.identity;
+  MinMax.meta.types;
+
+  // update function
+  const minmax2 = MinMax.update(minmax1, { $set: 'ss' });
+
+//
+// declare combinator
+//
+type Tree = {
+  value: number;
+  left?: Tree;
+  right?: Tree;
+};
+const Tree = t.declare<Tree>('Tree');
+
+Tree.define(t.struct({
+  value: t.Number,
+  left: t.maybe(Tree),
+  right: t.maybe(Tree)
+}));
+
+const bst = Tree({
+  value: 5,
+  left: {
+    value: 2
+  },
+  right: {
+    left: {
+      value: 6
+    },
+    value: 7
+  }
+});
+
+//
+// is
+//
+t.is(1, t.Number);
+
+//
+// assert
+//
+t.assert(true, 'a message');
+t.assert(true, () => 'a lazy message');
+
+//
+// fail
+//
+t.fail('a message');
+
+//
+// isType
+//
+t.isType(t.String);
+t.isType(A);
+
+//
+// getTypeName
+//
+t.getTypeName(t.String);
+t.getTypeName(A);
+
+//
+// mixin
+//
+t.mixin({a: 1}, {b: 2}).a;
+t.mixin({a: 1}, {b: 2}).b;
+
+//
+// match
+//
+t.match(1,
+  t.String, (s) => 'a string',
+  t.Number, (n) => n > 2, (n) => 'a number gt 2', // case with a guard (optional)
+  t.Number, (n) => 'a number lte 2',
+  A,        (a) => 'an instance of A',
+  t.Any,    (x) => 'other...' // catch all
+);
+
+//
+// update
+//
+t.update({}, { a: { $set: 1 } });
 
