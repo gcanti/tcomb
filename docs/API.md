@@ -38,7 +38,7 @@ t.assert(x !== 0, 'cannot divide by x'); // => throws '[tcomb] cannot divide by 
 **Signature**
 
 ```js
-(message: string): void
+(message: string) => void
 ```
 
 **Note**. You can change the default behaviour when an assert fails overriding the `t.fail` function.

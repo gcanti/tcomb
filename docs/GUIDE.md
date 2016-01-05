@@ -1,30 +1,33 @@
 # A little guide to runtime type checking and runtime type introspection (WIP)
 
-Comments, suggestions and PRs are welcome, please open an issue [here](https://github.com/gcanti/tcomb).
+Comments and suggestions are welcome, please open an issue [here](https://github.com/gcanti/tcomb) or send a Pull Request.
 
 The examples of this guide use [tcomb](https://github.com/gcanti/tcomb), a library for Node.js and the browser which allows you to check the types of JavaScript values at runtime with a simple and concise syntax. It's great for Domain Driven Design and for adding safety to your internal code.
 
-# Basic type checking
+# Get started: basic type checking
 
-Let's start with a simple task, we want to add runtime type checking to the following function:
+Let's start with a simple task, adding runtime type checking to the following function:
 
 ```js
+// a, b should be numbers
 function sum(a, b) {
   return a + b;
 }
 ```
 
-and ensure that `a`, `b` are numbers. The simplest way is to add *asserts* (also called *invariants*) to the `sum` function.
+An easy way to achieve this goal is to add *asserts* (also called *invariants*) to the function.
 
 ## The `assert` function
 
-The `assert` function has the following signature:
+**Signature**
 
 ```js
-(guard: boolean, message?: string | () => string): void
+(guard: boolean, message?: string | () => string) => void
 ```
 
-and is used as the main building block:
+The `assert` function is the main building block of `tcomb`.
+
+**Example**
 
 ```js
 import t from 'tcomb';
@@ -41,7 +44,7 @@ function sum(a, b) {
 When an assert fails, the default behavior is throwing a `TypeError`.
 
 ```js
-sum(1, 's'); // => throws
+sum(1, 's'); // => throws TypeError
 ```
 
 ![](images/type-error.png)
@@ -54,7 +57,7 @@ Clicking the "sum" item in the Call Stack shows the offending line of code:
 
 ![](images/chrome-dev-tools-sum.png)
 
-Note that `message` can also be a function, this allows to define lazy error messages (i.e. the function contained in `message` is called only when the assert fails). With a function we could provide more informations when an assert fails without too much overhead (`JSON.stringify` is expensive):
+Note that `message` can also be a function so you can define *lazy error messages* (i.e. the function contained in `message` is called only when the assert fails). As a benefit you can get detailed messages without too much overhead (`JSON.stringify` is expensive):
 
 ```js
 import t from 'tcomb';
@@ -64,14 +67,24 @@ function sum(a, b) {
   t.assert(typeof b === 'number', () => `invalid value ${JSON.stringify(b)} supplied to argument b, expected a number`);
   return a + b;
 }
+
+sum(1, {x: 1}); // throws '[tcomb] invalid value {"x":1} supplied to argument b, expected a number'
 ```
 
-You can customise the failure behavior overriding the exported `fail(message: string)` function:
+You can customise the failure behavior overriding the exported `fail` function:
+
+**Signature**
+
+```js
+(message: string) => void
+```
+
+**Example**
 
 ```js
 t.fail = function (message) {
   console.error(message);
-}
+};
 
 sum(1, 's'); // => outputs to console 'invalid value "s" supplied to argument b, expected a number'
 ```
@@ -95,9 +108,11 @@ function sum(a, b) {
 
 then use modules like `envify` (for `browserify`) or `webpack.DefinePlugin` (for `webpack`) in your production build.
 
+**TODO**. Example configuration for browserify and webpack.
+
 ## Reducing the boilerplate
 
-Writing asserts can be cumbersome, let's see if we can write less. Every type defined with `tcomb`, included the built-in type `t.Number` (the type of all numbers), owns a static predicate `is(x: any) -> boolean` useful for type checking:
+Writing asserts can be cumbersome, let's see if we can write less. Every type defined with `tcomb`, included the built-in type `t.Number` (the type of all numbers), owns a static predicate `is(x: any) => boolean` useful for type checking:
 
 ```js
 import t from 'tcomb';
@@ -133,26 +148,48 @@ The following built-in types are exported by `tcomb`:
 - `t.RegExp`: regular expressions
 - `t.Date`: dates
 
-There are 2 additional built-in types exported by `tcomb`:
+There are 2 additional built-in types:
 
 - `t.Nil`: `null` or `undefined`
 - `t.Any`: any value (useful when you need a temporary placeholder or an escape hatch...)
 
 ## The `func` combinator
 
-Another way to type-check the `sum` function is to use the `func` combinator, which has the following signature:
+Another way to type-check the `sum` function is to use the `func` combinator:
+
+**Signature**
 
 ```js
-(domain: Array<TcombType>, codomain: TcombType, name?: string): TcombType
+(domain: Array<TcombType>, codomain: TcombType, name?: string) => TcombType
 ```
 
 **Example**
 
 ```js
-const sum = t.func([t.Number, t.Number], t.Number)((a, b) => a + b);
+const SumType = t.func([t.Number, t.Number], t.Number);
+
+// of() returns a type-checked version of its argument
+const sum = SumType.of((a, b) => a + b);
 
 sum(1, 's'); // => throws '[tcomb] Invalid value "s" supplied to [Number, Number]/1: Number'
 ```
+
+## Error message format
+
+The string `'Invalid value "s" supplied to [Number, Number]/1: Number'` is an example of the concise format used by `tcomb` in order to point to the offended type. You can read it like this:
+
+> The value of the second element of the tuple [Number, Number] is "s" but a Number was expected
+
+The general format of an error message is:
+
+```js
+'Invalid value <value> supplied to <context>'
+```
+
+where `<context>` is a slash-separated string with the following properties:
+
+- the first element is the name of the *root* type
+- the following elements have the format: `<field name>: <field type>` (arrays are 0-based)
 
 ## The babel plugin
 
@@ -167,4 +204,30 @@ function sum(a: t.Number, b: t.Number) {
 
 sum(1, 's'); // => throws '[tcomb] Invalid value "s" supplied to Number'
 ```
+
+# User defined types, the `irreducible` combinator
+
+`tcomb` exports the most common types but you can define your own. Say you want to add support for `Map`s, you can use the `irreducible` combinator:
+
+**Signature**
+
+```js
+(name: string, predicate: (x: any) => boolean) => TcombType
+```
+
+**Example**
+
+```js
+const MapType = t.irreducible('MapType', (x) => x instanceof Map);
+
+function size(map) {
+  MapType(map);
+  return map.size;
+}
+
+console.log(size(new Map())); // => 0
+console.log(size({})); // throws '[tcomb] Invalid value {} supplied to MapType'
+```
+
+**Note**. The built-in types (`t.String`, `t.Number`, etc...) are defined with the `irreducible` combinator.
 
