@@ -5,7 +5,7 @@ declare module tcomb {
 
   interface Type<T> extends Function {
     (value: T): T;
-    is: Predicate<any>;
+    is: TypeGuardPredicate<T>;
     displayName: string;
     meta: {
       kind: string;
@@ -20,12 +20,11 @@ declare module tcomb {
   //
 
   interface Irreducible<T> extends Type<T> {
-    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
       identity: boolean;
-      predicate: Predicate<any>;
+      predicate: TypeGuardPredicate<T>;
     };
   }
 
@@ -66,13 +65,12 @@ declare module tcomb {
   //
 
   interface Refinement<T> extends Type<T> {
-    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
       identity: boolean;
       type: Constructor<T>;
-      predicate: Predicate<T>;
+      predicate: TypeGuardPredicate<T>;
     };
     update: Update<T>;
   }
@@ -88,7 +86,6 @@ declare module tcomb {
 
   interface Struct<T> extends Type<T> {
     new (value: T): T;
-    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
@@ -106,7 +103,6 @@ declare module tcomb {
   //
 
   interface List<T> extends Type<Array<T>> {
-    is: TypeGuardPredicate<Array<T>>;
     meta: {
       kind: string;
       name: string;
@@ -123,7 +119,6 @@ declare module tcomb {
   //
 
   interface Dict<T> extends Type<{[key: string]: T;}> {
-    is: TypeGuardPredicate<{[key: string]: T;}>;
     meta: {
       kind: string;
       name: string;
@@ -141,7 +136,6 @@ declare module tcomb {
   //
 
   interface Enums extends Type<string> {
-    is: TypeGuardPredicate<string>;
     meta: {
       kind: string;
       name: string;
@@ -163,7 +157,6 @@ declare module tcomb {
   //
 
   interface Maybe<T> extends Type<void | T> {
-    is: TypeGuardPredicate<void | T>;
     meta: {
       kind: string;
       name: string;
@@ -180,7 +173,6 @@ declare module tcomb {
   //
 
   interface Tuple<T> extends Type<T> {
-    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
@@ -197,7 +189,6 @@ declare module tcomb {
   //
 
   interface Union<T> extends Type<T> {
-    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
@@ -215,7 +206,6 @@ declare module tcomb {
   //
 
   interface Intersection<T> extends Type<T> {
-    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
@@ -232,7 +222,6 @@ declare module tcomb {
   //
 
   interface Declare<T> extends Type<T> {
-    is: TypeGuardPredicate<T>;
     update: Update<T>;
     define<T>(type: Struct<T> | Tuple<T>): void;
   }
