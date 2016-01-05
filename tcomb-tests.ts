@@ -53,12 +53,20 @@ t.RegExp(/a/)
 // * Date *
 t.Date(new Date())
 
+// test type guard
+function testTypeGuardBuiltIn(x: string | number): string {
+  if (t.String.is(x)) {
+    return x;
+  }
+  return String(x);
+}
+
 //
 // irreducible combinator
 //
 
 // * based on string *
-const Url = t.irreducible<string>('Url', (s) => s.indexOf('http') === 0);
+const Url = t.irreducible<string>('Url', (s) => t.String.is(s) && s.indexOf('http') === 0);
 Url('s')
 
   // static members
@@ -74,7 +82,7 @@ Url('s')
   function f(url: typeof Url.t) {}
 
 // * based on Date *
-const PastDate = t.irreducible<Date>('PastDate', (date) => date.getTime() < new Date().getTime());
+const PastDate = t.irreducible<Date>('PastDate', (date) => t.Date.is(date) && date.getTime() < new Date().getTime());
 PastDate(new Date(1973, 10, 30))
 
 //
@@ -116,7 +124,7 @@ const Person = t.struct<Person>({
 }, 'Person');
 
 const person1 = new Person({ name: 'Giulio', age: 42 })
-const personp2 = Person({ name: 'Giulio', age: 42 })
+const person2 = Person({ name: 'Giulio', age: 42 })
 
   // static members
   Person.displayName;
@@ -254,6 +262,9 @@ const size1 = Size([100, 200]);
 //
 
 const Union = t.union<Person | Size>([Person, Size], 'Union');
+Union.dispatch = function (x) {
+  return t.Array.is(x) ? Size : Person;
+};
 
 const union1 = Union({ name: 'Giulio', age: 42 });
 

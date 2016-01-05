@@ -1,10 +1,11 @@
 declare module tcomb {
 
-  type Predicate = (x: any) => boolean;
+  type Predicate<T> = (x: T) => boolean;
+  type TypeGuardPredicate<T> = (x: any) => x is T;
 
   interface Type<T> extends Function {
     (value: T): T;
-    is: Predicate;
+    is: Predicate<any>;
     displayName: string;
     meta: {
       kind: string;
@@ -19,15 +20,16 @@ declare module tcomb {
   //
 
   interface Irreducible<T> extends Type<T> {
+    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
       identity: boolean;
-      predicate: Predicate;
+      predicate: Predicate<any>;
     };
   }
 
-  export function irreducible<T>(name: string, predicate: Predicate): Irreducible<T>;
+  export function irreducible<T>(name: string, predicate: Predicate<any>): Irreducible<T>;
 
   //
   // basic types
@@ -55,7 +57,6 @@ declare module tcomb {
   interface MergeCommand { $merge: Object; }
   type Command = ApplyCommand | PushCommand | RemoveCommand | SetCommand | SpliceCommand | SwapCommand | UnshiftCommand | MergeCommand;
   type Spec = Command | {[key: string]: Spec};
-
   type Update<T> = (instance: T, spec: Spec) => T;
 
   type Constructor<T> = Type<T> | Function;
@@ -65,17 +66,18 @@ declare module tcomb {
   //
 
   interface Refinement<T> extends Type<T> {
+    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
       identity: boolean;
       type: Constructor<T>;
-      predicate: Predicate;
+      predicate: Predicate<T>;
     };
     update: Update<T>;
   }
 
-  export function refinement<T>(type: Constructor<T>, predicate: Predicate, name?: string): Refinement<T>;
+  export function refinement<T>(type: Constructor<T>, predicate: Predicate<T>, name?: string): Refinement<T>;
 
   //
   // struct
@@ -86,6 +88,7 @@ declare module tcomb {
 
   interface Struct<T> extends Type<T> {
     new (value: T): T;
+    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
@@ -103,6 +106,7 @@ declare module tcomb {
   //
 
   interface List<T> extends Type<Array<T>> {
+    is: TypeGuardPredicate<Array<T>>;
     meta: {
       kind: string;
       name: string;
@@ -119,6 +123,7 @@ declare module tcomb {
   //
 
   interface Dict<T> extends Type<{[key: string]: T;}> {
+    is: TypeGuardPredicate<{[key: string]: T;}>;
     meta: {
       kind: string;
       name: string;
@@ -136,6 +141,7 @@ declare module tcomb {
   //
 
   interface Enums extends Type<string> {
+    is: TypeGuardPredicate<string>;
     meta: {
       kind: string;
       name: string;
@@ -144,7 +150,7 @@ declare module tcomb {
     };
   }
 
-  interface EnumsFunction {
+  interface EnumsFunction extends Function {
     (map: Object, name?: string): Enums;
     of(enums: string, name?: string): Enums;
     of(enums: Array<string>, name?: string): Enums;
@@ -157,6 +163,7 @@ declare module tcomb {
   //
 
   interface Maybe<T> extends Type<void | T> {
+    is: TypeGuardPredicate<void | T>;
     meta: {
       kind: string;
       name: string;
@@ -172,60 +179,62 @@ declare module tcomb {
   // tuple combinator
   //
 
-  type Types<T> = Array<Constructor<T>>;
-
   interface Tuple<T> extends Type<T> {
+    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
       identity: boolean;
-      types: Array<Type<any>>;
+      types: Array<Constructor<any>>;
     };
     update: Update<T>;
   }
 
-  export function tuple<T>(types: Array<Type<any>>, name?: string): Tuple<T>;
+  export function tuple<T>(types: Array<Constructor<any>>, name?: string): Tuple<T>;
 
   //
   // union combinator
   //
 
   interface Union<T> extends Type<T> {
+    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
       identity: boolean;
-      types: Array<Type<any>>;
+      types: Array<Constructor<T>>;
     };
     update: Update<T>;
-    dispatch(x: T): Union<T>;
+    dispatch(x: any): Constructor<T>;
   }
 
-  export function union<T>(types: Array<Type<any>>, name?: string): Union<T>;
+  export function union<T>(types: Array<Constructor<T>>, name?: string): Union<T>;
 
   //
   // intersection combinator
   //
 
   interface Intersection<T> extends Type<T> {
+    is: TypeGuardPredicate<T>;
     meta: {
       kind: string;
       name: string;
       identity: boolean;
-      types: Array<Type<any>>;
+      types: Array<Constructor<any>>;
     };
     update: Update<T>;
   }
 
-  export function intersection<T>(types: Array<Type<any>>, name?: string): Intersection<T>;
+  export function intersection<T>(types: Array<Constructor<any>>, name?: string): Intersection<T>;
 
   //
   // declare combinator
   //
 
   interface Declare<T> extends Type<T> {
+    is: TypeGuardPredicate<T>;
     update: Update<T>;
-    define<T>(type: Type<T>): void;
+    define<T>(type: Struct<T> | Tuple<T>): void;
   }
 
   export function declare<T>(name?: string): Declare<T>;
