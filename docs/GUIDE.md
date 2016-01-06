@@ -231,3 +231,91 @@ console.log(size({})); // throws '[tcomb] Invalid value {} supplied to MapType'
 
 **Note**. The built-in types (`t.String`, `t.Number`, etc...) are defined with the `irreducible` combinator.
 
+# Restricting a type, the `refinement` combinator
+
+I can use `t.String` in order to type-check generic strings, but often I want more precise types. Say I want to represent the `Password` type: the type of all strings whose length is greater then `6`:
+
+```js
+const Password = t.irreducible('Password', (x) => t.String.is(x) && x.length > 6);
+```
+
+This is too verbose, let's use the `refinement` combinator:
+
+**Signature**
+
+```js
+(type: tcombType, predicate: (x: any) => boolean, name?: string) => TcombType
+```
+
+**Example**
+
+```js
+const Password = t.refinement(t.String, (s) => s.length > 6);
+
+Password('short'); // throws '[tcomb] Invalid value "short" supplied to {String | <function1>}'
+```
+
+Note that in the predicate `(s) => x.length > 6` I no longer check for strings since the `refinement` combinator automatically handles that for me.
+
+For better error messages, give the type a name:
+
+```js
+const Password = t.refinement(t.String, (s) => s.length > 6, 'Password');
+
+Password('short'); // throws '[tcomb] Invalid value "short" supplied to Password'
+```
+
+## Chaining refinements
+
+**Example**. Representing an integer between `1` and `5`
+
+```js
+const Integer = t.refinement(t.Number, (n) => n % 1 === 0, 'Integer');
+
+const PositiveInteger = t.refinement(Integer, (i) => i > 0, 'PositiveInteger');
+
+const Rating = t.refinement(PositiveInteger, (r) => r <= 5, 'Rating');
+
+Rating(10); // throws '[tcomb] Invalid value 10 supplied to Rating'
+```
+
+Note that you can see the name of the failing type and the message in the Call Stack panel:
+
+![](images/display-name.png)
+
+## A first taste of runtime type introspection
+
+Every type defined with `tcomb` owns a static `meta` member containing at least the following properties:
+
+- `kind` a stringy enum containing the type kind (equal to `'irreducible'` for irreducibles or `'subtype'` for refinements)
+- `name` a string, the name of the type
+- `identity` a boolean, `true` if the type constructor can be treated as the identity function in production builds
+
+The refinements `meta` object owns an additional property `type` containing its *supertype*:
+
+**Example**
+
+```js
+Integer.meta.type === t.Number; // => true
+console.log(Integer.meta);
+```
+
+![](images/meta-object.png)
+
+We can exploit this information in order to define a function returning the type chain of a refinement:
+
+```js
+function getTypeChain(type) {
+  const name = type.meta.name;
+  const supertype = type.meta.type;
+  if (!supertype) {
+    // no more supertypes
+    return name;
+  }
+  // recurse
+  return [name].concat(getTypeChain(supertype));
+}
+
+console.log(getTypeChain(Rating)); // => ["Rating", "PositiveInteger", "Integer", "Number"]
+```
+
