@@ -319,3 +319,71 @@ function getTypeChain(type) {
 console.log(getTypeChain(Rating)); // => ["Rating", "PositiveInteger", "Integer", "Number"]
 ```
 
+# A particular kind of refinement, the `enums` combinator
+
+When a type represent a finite list of strings, instead of a refinement you can use the `enums` combinator:
+
+**Signature**
+
+```js
+(map: Object, name?: string) => TcombType
+```
+
+where `map` is a hash whose keys are the enums (values are free).
+
+**Example**
+
+```js
+const Country = t.enums({
+  IT: 'Italy',
+  US: 'United States'
+}, 'Country');
+
+Country('FR'); // throws '[tcomb] Invalid value "FR" supplied to Country (expected one of ["IT", "US"])'
+```
+
+## Real world example, building a select input from an enum
+
+The `meta` object of an enum owns an additional property `map` containing the keys:
+
+```js
+JSON.stringify(Country.meta.map); // => {"IT":"Italy","US":"United States"}
+```
+
+We can use that map to dinamically generate the options of a select which will be always in sync with the domain model:
+
+```js
+import t from 'tcomb';
+import React from 'react';
+import { render } from 'react-dom';
+import _ from 'lodash';
+
+render(
+  <select>
+    {_.map(Country.meta.map, (text, value) => <option key={value} value={value}>{text}</option>)}
+  </select>,
+  document.getElementById('app')
+)
+```
+
+## The `of` static function
+
+If you don't care of values you can use `enums.of`:
+
+**Example**
+
+```js
+// values will mirror the keys
+const Country = t.enums.of('IT US', 'Country');
+
+// same as
+const Country = t.enums.of(['IT', 'US'], 'Country');
+
+// same as
+const Country = t.enums({
+  IT: 'IT',
+  US: 'US'
+}, 'Country');
+```
+
+
