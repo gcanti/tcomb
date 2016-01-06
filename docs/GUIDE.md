@@ -350,7 +350,7 @@ The `meta` object of an enum owns an additional property `map` containing the ke
 JSON.stringify(Country.meta.map); // => {"IT":"Italy","US":"United States"}
 ```
 
-We can use that map to dinamically generate the options of a select which will be always in sync with the domain model:
+We can use that map to dinamically generate the options of a select (which will be always in sync with your domain model):
 
 ```js
 import t from 'tcomb';
@@ -364,6 +364,29 @@ render(
   </select>,
   document.getElementById('app')
 )
+```
+
+A more general abstraction:
+
+```js
+function isEnums(x) {
+  return x && x.meta && x.meta.kind === 'enums';
+}
+
+function renderSelect(type) {
+  // type checking
+  if (process.env.NODE_ENV !== 'production') {
+    t.assert(isEnums(type), () => `Invalid argument type ${JSON.stringify(type)} supplied to renderSelect(), expected an enum`);
+  }
+  return (
+    <select>
+      {_.map(type.meta.map, (text, value) => <option key={value} value={value}>{text}</option>)}
+    </select>
+  );
+}
+
+renderSelect(); // throws [tcomb] Invalid argument type undefined supplied to renderSelect(), expected an enum
+renderSelect(Country); // ok
 ```
 
 ## The `of` static function
@@ -386,4 +409,22 @@ const Country = t.enums({
 }, 'Country');
 ```
 
+# Optional values, the `maybe` combinator
 
+In all the combinators seen so far values are required, but what if I must handle optional values? The `maybe` combinator can be applied to every combinator:
+
+**Signature**
+
+```js
+(type: tcombType, name?: string) => TcombType
+```
+
+**Example**. An optional country.
+
+```js
+t.maybe(Country)(); // ok
+t.maybe(Country)(undefined); // ok
+t.maybe(Country)(null); // ok
+t.maybe(Country)('IT'); // ok
+t.maybe(Country)(1); // throws
+```
