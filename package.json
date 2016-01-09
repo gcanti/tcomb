@@ -3,10 +3,11 @@
   "version": "2.6.0",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
+  "typings": "tcomb.d.ts",
   "files": [
     "index.js",
     "lib",
-    "GUIDE.md"
+    "tcomb.d.ts"
   ],
   "scripts": {
     "lint": "eslint index.js lib test",
