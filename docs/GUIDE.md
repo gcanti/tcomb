@@ -342,7 +342,7 @@ const Country = t.enums({
 Country('FR'); // throws '[tcomb] Invalid value "FR" supplied to Country (expected one of ["IT", "US"])'
 ```
 
-## Real world example, building a select input from an enum
+**Example**. Building a select input from an enum
 
 The `meta` object of an enum owns an additional property `map` containing the keys:
 
@@ -411,7 +411,9 @@ const Country = t.enums({
 
 # Optional values, the `maybe` combinator
 
-In all the combinators seen so far values are required, but what if I must handle optional values? The `maybe` combinator can be applied to every combinator:
+Prolem. So far the values were always required, but what if I must handle optional values?
+
+Solution. There is the `maybe` combinator and it can be composed with every other combinator:
 
 **Signature**
 
@@ -428,3 +430,212 @@ t.maybe(Country)(null); // ok
 t.maybe(Country)('IT'); // ok
 t.maybe(Country)(1); // throws
 ```
+
+# Classes, the `struct` combinator
+
+Classes are common compound data structures (also called *product* types) thus there is a combinator for them, the `struct` combinator:
+
+**Signature**
+
+```js
+(props: {[key: string]: TcombType;}, name?: string) => TcombType
+```
+
+**Example**
+
+```js
+const Point = t.struct({
+  x: t.Number,
+  y: t.Number
+}, 'Point');
+
+// the keyword new is optional
+const point = Point({ x: 1, y: 2 });
+```
+
+Methods are defined as usual:
+
+```js
+Point.prototype.toString = function() {
+  return `(${this.x}, ${this.y})`;
+};
+
+console.log(String(point)); // => '(1, 2)'
+```
+
+**Example**. The `User` struct.
+
+```js
+const emailRegExp = ...long regexp here...
+
+const Email = t.refinement(t.String, (s) => emailRegExp.test(s), 'Email');
+
+const Role = t.enums.of([
+  'admin',
+  'guest'
+], 'Role');
+
+const User = t.struct({
+  id: t.String,
+  email: Email,
+  role: Role,
+  birthDate: t.maybe(t.Date),
+  name: t.maybe(t.String),
+  surname: t.maybe(t.String)
+}, 'User');
+
+const user = User({
+  id: 'A40',
+  email: 'user@example.com',
+  role: 'admin',
+  name: 'Giulio'
+});
+```
+
+Generally I prefer flat structures, however structs can be nested:
+
+```js
+const Anagraphic = t.struct({
+  birthDate: t.maybe(t.Date),
+  name: t.maybe(t.String),
+  surname: t.maybe(t.String)
+}, 'Anagraphic')
+
+const User = t.struct({
+  id: t.String,
+  email: Email,
+  role: Role,
+  anagraphic: Anagraphic
+}, 'User');
+
+const user = User({
+  id: 'A40',
+  email: 'user@example.com',
+  role: 'admin',
+  anagraphic: {
+    name: 'Giulio'
+  }
+});
+```
+
+### Refinement can be applied to all types
+
+Problem. What if I want to express the following invariant? "Name and surname are optional, but they must be both null or both valued".
+
+Solution. Define a refinement of `Anagraphic`:
+
+```js
+const BaseAnagraphic = t.struct({
+  birthDate: t.maybe(t.Date),
+  name: t.maybe(t.String),
+  surname: t.maybe(t.String)
+}, 'BaseAnagraphic');
+
+const Anagraphic = t.refinement(
+  BaseAnagraphic,
+  (x) => t.Nil.is(x.name) === t.Nil.is(x.surname),
+  'Anagraphic'
+);
+
+const User = t.struct({
+  id: t.String,
+  email: Email,
+  role: Role,
+  anagraphic: Anagraphic
+}, 'User');
+
+const user = User({
+  id: 'A40',
+  email: 'user@example.com',
+  role: 'admin',
+  anagraphic: {
+    name: 'Giulio'
+  }
+}); // thows tcomb] Invalid value {"name": "Giulio"} supplied to User/anagraphic: Anagraphic
+
+const user = User({
+  id: 'A40',
+  email: 'user@example.com',
+  role: 'admin',
+  anagraphic: {
+    name: 'Giulio',
+    surname: 'Canti'
+  }
+}); // ok
+```
+
+## Runtime type introspection, playing with structs
+
+**Example**. JSON serialisation / deserialisation.
+
+Serialising an instance of `User` is easy, just call `JSON.stringify`:
+
+```js
+const user = User({
+  id: 'A40',
+  email: 'user@example.com',
+  role: 'admin',
+  anagraphic: {}
+});
+
+console.log(JSON.stringify(user));
+// => {"id":"A40","email":"user@example.com","role":"admin","anagraphic":{"birthDate":null,"name":null,"surname":null}}
+```
+
+Deserialising is easy as well since struct constructors accept an object as argument:
+
+```js
+const json = JSON.parse(JSON.stringify(user));
+console.log(User(json)); // => a User instance
+```
+
+The problem comes when you add a `birthDate` and try to deserialise:
+
+```js
+const user = User({
+  id: 'A40',
+  email: 'user@example.com',
+  role: 'admin',
+  anagraphic: {
+    birthDate: new Date(1973, 10, 30)
+  }
+});
+
+const json = JSON.parse(JSON.stringify(user));
+
+console.log(User(json));
+// throws '[tcomb] Invalid value "1973-11-29T23:00:00.000Z" supplied to User/anagraphic: Anagraphics/birthDate: ?Date'
+```
+
+Problem. `'1973-11-29T23:00:00.000Z'` is a string but `Anagraphics` wants a `Date`.
+
+Solution. Use runtime type introspection to define a general reviver.
+
+```js
+function deserialise(value, type) {
+  const { kind } = type.meta;
+  switch (kind) {
+    case 'struct' :
+      return type(_.mapValues(value, (v, k) => deserialise(v, type.meta.props[k])));
+    case 'maybe' :
+    case 'subtype' : // the kind of refinement is 'subtype' (for legacy reasons)
+      return deserialise(value, type.meta.type);
+    case 'enums' :
+    case 'irreducible' :
+      if (t.Function.is(type.fromJSON)) {
+        return type.fromJSON(value);
+      }
+      return value;
+  }
+}
+
+// then configure your types
+t.Date.fromJSON = (s) => new Date(s);
+
+console.log(deserialise(json, User)); // => see the image below
+```
+
+![](images/struct-deserialisation.png)
+
+**Note**. `tcomb` is able to deserialise the nested structs: the value of the field `anagraphic` is an instance of `BaseAnagraphic`.
+

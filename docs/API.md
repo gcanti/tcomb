@@ -166,6 +166,41 @@ const Country = t.enums({
 }, 'Country');
 ```
 
+# The `maybe` combinator
+
+In `tcomb` optional values of type `T` can be represented by `union([Nil, T])`. Since it's very common to handle optional values, `tcomb` provide an ad-hoc combinator.
+
+**Signature**
+
+```js
+(type: tcombType, name?: string) => TcombType
+```
+
+**Example**
+
+```js
+const Person = t.struct({
+  name: t.String,
+  age: t.maybe(t.Number) // an optional number
+});
+
+Person({ name: 'Giulio' }); // => ok
+Person({ name: 'Giulio', age: null }); // => ok
+Person({ name: 'Giulio', age: undefined }); // => ok
+Person({ name: 'Giulio', age: 'a string' }); // => throws
+```
+
+**The `meta` object**
+
+```js
+{
+  kind: 'maybe',
+  name: name,
+  identity: ...depends on type,
+  type: type
+}
+```
+
 # The `struct` combinator
 
 **Signature**
@@ -435,41 +470,6 @@ MinMax.is('abcde'); // => false
   name: name,
   identity: ...depends on types,
   types: types
-}
-```
-
-# The `maybe` combinator
-
-In `tcomb` optional values of type `T` can be represented by `union([Nil, T])`. Since it's very common to handle optional values, `tcomb` provide an ad-hoc combinator.
-
-**Signature**
-
-```js
-(type: tcombType, name?: string) => TcombType
-```
-
-**Example**
-
-```js
-const Person = t.struct({
-  name: t.String,
-  age: t.maybe(t.Number) // an optional number
-});
-
-Person({ name: 'Giulio' }); // => ok
-Person({ name: 'Giulio', age: null }); // => ok
-Person({ name: 'Giulio', age: undefined }); // => ok
-Person({ name: 'Giulio', age: 'a string' }); // => throws
-```
-
-**The `meta` object**
-
-```js
-{
-  kind: 'maybe',
-  name: name,
-  identity: ...depends on type,
-  type: type
 }
 ```
 
