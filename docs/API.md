@@ -297,6 +297,12 @@ Cube.prototype.getVolume = function () {
 const Wrong = Point.extend({ x: t.Number }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
 ```
 
+Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
+
+```js
+const Point3D = t.struct.extend([Point, { z: t.Number }], 'Point3D');
+```
+
 # The `tuple` combinator
 
 **Signature**
