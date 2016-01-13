@@ -1,14 +1,16 @@
 {
   "name": "tcomb",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
+  "typings": "tcomb.d.ts",
   "files": [
     "index.js",
-    "GUIDE.md"
+    "lib",
+    "tcomb.d.ts"
   ],
   "scripts": {
-    "lint": "eslint index.js test",
+    "lint": "eslint index.js lib test",
     "test": "npm run lint && karma start"
   },
   "repository": {
@@ -23,7 +25,7 @@
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
     "es5-shim": "^4.3.1",
-    "eslint": "^1.2.0",
+    "eslint": "^1.10.3",
     "karma": "^0.13.15",
     "karma-browserify": "^4.4.2",
     "karma-mocha": "^0.2.1",

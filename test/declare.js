@@ -95,6 +95,24 @@ describe('t.declare([name])', function () {
       }, '[tcomb] Invalid argument type undefined supplied to define(type) (expected a fresh, unnamed type)');
     });
 
+    it('should play well with identity', function () {
+      var Tuple = t.declare('Tuple');
+      var Result = t.list(Tuple);
+      assert.equal(Tuple.meta && Tuple.meta.identity, false);
+      assert.equal(Result.meta && Result.meta.identity, false);
+      Tuple.define(t.tuple([t.String]));
+      assert.equal(Tuple.meta && Tuple.meta.identity, false);
+      assert.equal(Result.meta && Result.meta.identity, false);
+
+      Tuple = t.declare('Tuple');
+      assert.equal(Tuple.meta && Tuple.meta.identity, false);
+      assert.equal(Result.meta && Result.meta.identity, false);
+      Result = t.list(Tuple);
+      Tuple.define(t.struct({}));
+      assert.equal(Tuple.meta && Tuple.meta.identity, false);
+      assert.equal(Result.meta && Result.meta.identity, false);
+    });
+
   });
 
   describe('ctor', function () {
