@@ -171,6 +171,10 @@ function sum(a: t.Number, b: t.Number): t.Number {
 }
 ```
 
+**TypeScript definition file**
+
+[tcomb.d.ts](tcomb.d.ts)
+
 # Contributors
 
 - [Giulio Canti](https://github.com/gcanti) mantainer
