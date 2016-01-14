@@ -30,6 +30,20 @@ describe('t.struct(props, [name])', function () {
 
   });
 
+  describe('struct.extend', function () {
+    it('should handle an array of mixins', function () {
+      var Point = t.struct({
+        x: t.Number,
+        y: t.Number
+      }, 'Point');
+      var Point3D = t.struct.extend([Point, {z: t.Number}], 'Point3D');
+      assert.deepEqual(Point3D.meta.name, 'Point3D', 'name');
+      assert.deepEqual(Point3D.meta.props.x, t.Number, 'x');
+      assert.deepEqual(Point3D.meta.props.y, t.Number, 'y');
+      assert.deepEqual(Point3D.meta.props.z, t.Number, 'z');
+    });
+  });
+
   describe('constructor', function () {
 
     it('should be idempotent', function () {
