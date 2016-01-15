@@ -780,10 +780,14 @@ Returns the name of a tcomb type.
 t.getTypeName(t.String); // => 'String'
 ```
 
-If a name is not specified when defining the type, a default name will be provided according to [http://flowtype.org](http://flowtype.org).
+If a name is not specified when defining the type, a default name will be provided according to [http://flowtype.org](http://flowtype.org) syntax for type annotations.
 
 ```js
+t.getTypeName(t.maybe(t.String)); // => ?String
 t.getTypeName(t.struct({ name: t.String, surname: t.String })); // => '{name: String, surname: String}'
+t.getTypeName(t.union([t.String, t.Number])); // => String | Number
+t.getTypeName(t.dict(t.String, t.Number)); // => {[key: String]: Number}
+...
 ```
 
 ## The `mixin` function
