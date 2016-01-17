@@ -12,7 +12,21 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
-# v2.5.2
+# v2.6.0
+
+- **New Feature**
+  - `declare` API: recursive and mutually recursive types (thanks @utaal)
+  - typescript definition file, fix #160 (thanks @DanielRosenwasser)
+  - `t.struct.extend`, fix #164 (thanks @dzdrazil)
+- **Internal**
+  - split main file to separate modules, fix #158
+  - add "typings" field to package.json (TypeScript)
+  - add `predicate` field to irreducibles meta objects
+- **Documentation**
+  - revamp [docs/API.md](docs/API.md)
+  - add ["A little guide to runtime type checking and runtime type introspection"](docs/GUIDE.md) (WIP)
+
+## v2.5.2
 
 - **Bug Fix**
   - remove the assert checking if the type returned by a union dispatch function is correct (was causing issues with unions of unions or unions of intersections)
@@ -22,7 +36,7 @@
 - **Internal**
   - `t.update` should not change the reference when no changes occur, fix #153
 
-## v2.5.0
+# v2.5.0
 
 - **New Feature**
   - check if the type returned by a union dispatch function is correct, fix #136 (thanks @fcracker79)
@@ -36,7 +50,7 @@
 - **New Feature**
   - added struct multiple inheritance, fix #143
 
-## v2.4.0
+# v2.4.0
 
 - **New Feature**
   - unions
@@ -44,7 +58,7 @@
     - the default `dispatch` implementation now handles unions of unions, #126
     - show the offended union type in error messages
 
-## v2.3.0
+# v2.3.0
 
 - **New Feature**
   - Add support for lazy messages in asserts, fix #124
@@ -91,7 +105,7 @@
 - **Experimental**
   - pattern matching #121
 
-## v2.2.0
+# v2.2.0
 
 - **New Feature**
   - added `intersection` combinator fix #111
@@ -111,7 +125,7 @@
 - **Internal**
   - optimised the generation of default names for types
 
-## v2.1.0
+# v2.1.0
 
 - **New Feature**
   - added aliases for pre-defined irreducible types fix #112
@@ -122,7 +136,7 @@
 - **Experimental**
   - added `options.verbose` (default `true`) to handle messages (set `options.verbose = false` to improve performances in development)
 
-## v2.0.0
+# v2.0.0
 
 - **New Feature**
   - add support to types defined as ES6 classes #99

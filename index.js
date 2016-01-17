@@ -2,7 +2,7 @@
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2015 Giulio Canti
+ * Copyright (c) 2014-2016 Giulio Canti
  *
  */
 
