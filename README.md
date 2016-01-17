@@ -178,7 +178,8 @@ function sum(a: t.Number, b: t.Number): t.Number {
 # Contributors
 
 - [Giulio Canti](https://github.com/gcanti) mantainer
-- [Becky Conning](https://github.com/beckyconning) `func` combinator ideas and documentation.
+- [Becky Conning](https://github.com/beckyconning) `func` combinator ideas and documentation
+- [Andrea Lattuada](https://github.com/utaal) `declare` combinator
 
 # Similar projects
 
