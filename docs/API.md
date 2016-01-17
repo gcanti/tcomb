@@ -656,6 +656,8 @@ A.define(t.struct({
 }));
 ```
 
+**Note**. **Do not** try to type-check structures with circular references, that would blow the stack.
+
 # Updating immutable instances
 
 You can update an immutable instance with the provided `update` function:

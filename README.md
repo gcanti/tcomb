@@ -92,7 +92,7 @@ Write complex domain models in a breeze and with a small code footprint. Support
 * tuples
 * dictionaries
 * functions
-* recursive and mutually recursive types (v2.6)
+* recursive and mutually recursive types
 
 **Immutability and immutability helpers**
 
