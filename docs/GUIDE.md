@@ -614,19 +614,21 @@ Solution. Use runtime type introspection to define a general reviver.
 **Disclaimer**. This is just an example, it doesn't mean to be complete.
 
 ```js
+import _ from 'lodash';
+
 function deserialize(value, type) {
+  if (t.Function.is(type.fromJSON)) {
+    return type.fromJSON(value);
+  }
   const { kind } = type.meta;
   switch (kind) {
     case 'struct' :
       return type(_.mapValues(value, (v, k) => deserialize(v, type.meta.props[k])));
     case 'maybe' :
+      return t.Nil.is(value) ? null : deserialize(value, type.meta.type);
     case 'subtype' : // the kind of refinement is 'subtype' (for legacy reasons)
       return deserialize(value, type.meta.type);
-    case 'enums' :
-    case 'irreducible' :
-      if (t.Function.is(type.fromJSON)) {
-        return type.fromJSON(value);
-      }
+    default : // enums, irreducible
       return value;
   }
 }
