@@ -683,6 +683,8 @@ const p = Point({ x: 1, y: 2 });
 p = Point.update(p, {x: { '$set': 3 }}); // => { x: 3, y: 2 }
 ```
 
+**Note**. `$apply` can be used only with shallow cloneable values, i.e. `Object`s, `Array`s and primitive values (counterexample: an instance of `Date` is not shallow cloneable).
+
 **Removing a value from a dict**
 
 ```js
