@@ -589,7 +589,7 @@ const json = JSON.parse(JSON.stringify(user));
 console.log(User(json)); // => a User instance
 ```
 
-The problem comes when you add a `birthDate` and try to deserialise:
+The problem comes when you add a `birthDate` and try to deserialize:
 
 ```js
 const user = User({
@@ -611,15 +611,17 @@ Problem. `'1973-11-29T23:00:00.000Z'` is a string but `Anagraphics` wants a `Dat
 
 Solution. Use runtime type introspection to define a general reviver.
 
+**Disclaimer**. This is just an example, it doesn't mean to be complete.
+
 ```js
-function deserialise(value, type) {
+function deserialize(value, type) {
   const { kind } = type.meta;
   switch (kind) {
     case 'struct' :
-      return type(_.mapValues(value, (v, k) => deserialise(v, type.meta.props[k])));
+      return type(_.mapValues(value, (v, k) => deserialize(v, type.meta.props[k])));
     case 'maybe' :
     case 'subtype' : // the kind of refinement is 'subtype' (for legacy reasons)
-      return deserialise(value, type.meta.type);
+      return deserialize(value, type.meta.type);
     case 'enums' :
     case 'irreducible' :
       if (t.Function.is(type.fromJSON)) {
@@ -632,10 +634,10 @@ function deserialise(value, type) {
 // then configure your types
 t.Date.fromJSON = (s) => new Date(s);
 
-console.log(deserialise(json, User)); // => see the image below
+console.log(deserialize(json, User)); // => see the image below
 ```
 
 ![](images/struct-deserialisation.png)
 
-**Note**. `tcomb` is able to deserialise the nested structs: the value of the field `anagraphic` is an instance of `BaseAnagraphic`.
+**Note**. `tcomb` is able to deserialize the nested structs: the value of the field `anagraphic` is an instance of `BaseAnagraphic`.
 
