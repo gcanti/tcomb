@@ -95,6 +95,13 @@ describe('t.update(instance, spec)', function () {
     assert.deepEqual(actual, [1, 3, 2, 4]);
   });
 
+  it('can $merge and $remove at once', function () {
+    var instance = {a: [1, 2], b: true};
+    var actual = update(instance, { $merge: {a: [1, 2, 3] }, $remove: ['b'] });
+    assert.deepEqual(instance, {a: [1, 2], b: true});
+    assert.deepEqual(actual, {a: [1, 2, 3]});
+  });
+
   it('should not change the reference when no changes occurs', function () {
     var p1 = {x: 0, y: 1};
     var p2 = update(p1, {});
@@ -217,6 +224,11 @@ describe('t.update(instance, spec)', function () {
     it('should handle $remove command', function () {
       var updated = update(instance, {$remove: ['a']});
       assert.deepEqual(updated, {b: 2});
+    });
+  
+    it('can $merge and $remove at once', function () {
+      var updated = update(instance, { $merge: {a: [1, 2, 3] }, $remove: ['b'] });
+      assert.deepEqual(updated, {a: [1, 2, 3]});
     });
 
   });
