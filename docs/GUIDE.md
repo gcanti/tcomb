@@ -611,7 +611,7 @@ Problem. `'1973-11-29T23:00:00.000Z'` is a string but `Anagraphics` wants a `Dat
 
 Solution. Use runtime type introspection to define a general reviver.
 
-**Disclaimer**. This is just an example, it doesn't mean to be complete.
+**Disclaimer**. This is just an example, it doesn't mean to be complete (for a complete implementation see the `lib/fromJSON` module).
 
 ```js
 import _ from 'lodash';
