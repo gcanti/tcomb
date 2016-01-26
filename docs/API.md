@@ -848,3 +848,46 @@ Returns `true` if `x` is an instance of `type`.
 ```js
 (x: any, type: TcombType) => boolean
 ```
+
+# Other modules
+
+## The `lib/fromJSON` module
+
+Generic deserialization function.
+
+**Signature**
+
+```js
+(value: any, type: TcombType) => type
+```
+
+**Example**
+
+```js
+import fromJSON from 'tcomb/lib/fromJSON'
+
+const Person = t.struct({
+  name: t.String,
+  birthDate: t.Date
+});
+
+// configure your types
+t.Date.fromJSON = function (s) {
+  t.assert(t.String.is(s));
+  return new Date(s);
+};
+
+const source = {
+  name: 'Giulio',
+  birthDate: new Date(1973, 10, 30)
+};
+
+const json = JSON.parse(JSON.stringify(source));
+
+Person(json); // => throws '[tcomb] Invalid value "1973-11-29T23:00:00.000Z" supplied to Person/birthDate: Date'
+
+const person = fromJSON(json, Person);
+
+assert.ok(person instanceof Person); // => true
+assert.deepEqual(person, source); // => ok
+```
