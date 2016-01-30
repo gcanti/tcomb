@@ -173,7 +173,7 @@ function sum(a: t.Number, b: t.Number): t.Number {
 
 **TypeScript definition file**
 
-[tcomb.d.ts](tcomb.d.ts)
+[index.d.ts](index.d.ts)
 
 # Contributors
 

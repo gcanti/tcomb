@@ -1,4 +1,4 @@
-import t from './index'
+import * as t from './index'
 
 //
 // basic types
