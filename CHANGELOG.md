@@ -12,6 +12,16 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v2.7.0
+
+- **New Feature**
+  - `lib/fromJSON` module: generic deserialize, fix #169
+  - `lib/fromJSON` TypeScript definition file
+- **Bug Fix**
+  - t.update module: $apply doesn't play well with dates and regexps, fix #172
+  - t.update: cannot $merge and $remove at once, fix #170 (thanks @grahamlyus)
+  - TypeScript: fix Exported external package typings file '...' is not a module
+
 # v2.6.0
 
 - **New Feature**
