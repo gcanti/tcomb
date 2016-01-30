@@ -3,7 +3,7 @@
   "version": "2.6.0",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
-  "typings": "tcomb.d.ts",
+  "typings": "index.d.ts",
   "files": [
     "index.js",
     "lib",
