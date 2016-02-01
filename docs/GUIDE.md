@@ -643,3 +643,71 @@ console.log(deserialize(json, User)); // => see the image below
 
 **Note**. `tcomb` is able to deserialize the nested structs: the value of the field `anagraphic` is an instance of `BaseAnagraphic`.
 
+# Keep the domain model DRY
+
+In order to keep my domain model DRY I use a few techniques:
+
+## 1. Defining granular types
+
+Say you want to define a `User` as a struct with the following fields:
+
+- email
+- name
+- surname
+
+```js
+import t from 'tcomb'
+
+export default t.struct({
+  email: t.refinement(t.String, (s) => /@/.test(s), 'Email'),
+  name: t.String,
+  surname: t.String
+}, 'User')
+```
+
+The problem is that you can't re-utilize the `email` type as it's coupled with the `User` type. A quick solution is to split the definitions:
+
+```js
+// file Email.js
+import t from 'tcomb'
+
+export default t.refinement(t.String, (s) => /@/.test(s), 'Email')
+
+...
+
+// file User.js
+import t from 'tcomb'
+import Email from './Email'
+
+export default t.struct({
+  email: Email,
+  name: t.String,
+  surname: t.String
+}, 'User')
+```
+
+## 2. Extending a type
+
+When 2 structs share a subset of their fields you can use [mixins](https://github.com/gcanti/tcomb/blob/master/docs/API.md#extending-a-struct):
+
+```js
+// file IdentifiedUser.js
+import User from './User'
+
+// every field of User plus an id
+export default User.extends({ id: t.String }, 'IdentifiedUser')
+```
+
+## 3. Narrowing down the type and/or automatically sync using runtime type introspection
+
+All `tcomb`'s types are introspectables at runtime (see the `meta` object in the [docs](https://github.com/gcanti/tcomb/blob/master/docs/API.md#the-struct-combinator))
+
+```js
+// file Message.js
+import User from './User'
+
+export default t.struct({
+  email: User.meta.props.email, // automatically synced
+  message: t.String
+}, 'Message')
+```
