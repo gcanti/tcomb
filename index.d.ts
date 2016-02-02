@@ -1,4 +1,4 @@
-declare module tcomb {
+declare module Tcomb {
 
   type Predicate<T> = (x: T) => boolean;
   type TypeGuardPredicate<T> = (x: any) => x is T;
@@ -55,8 +55,8 @@ declare module tcomb {
   interface UnshiftCommand { $unshift: Array<any>; }
   interface MergeCommand { $merge: Object; }
   type Command = ApplyCommand | PushCommand | RemoveCommand | SetCommand | SpliceCommand | SwapCommand | UnshiftCommand | MergeCommand;
-  type Spec = Command | {[key: string]: Spec};
-  type Update<T> = (instance: T, spec: Spec) => T;
+  type UpdateSpec = Command | {[key: string]: UpdateSpec};
+  type Update<T> = (instance: T, spec: UpdateSpec) => T;
 
   type Constructor<T> = Type<T> | Function;
 
@@ -81,8 +81,8 @@ declare module tcomb {
   // struct
   //
 
-  type Props = {[key: string]: Constructor<any>};
-  type Mixin = Props | Struct<any>;
+  type StructProps = {[key: string]: Constructor<any>};
+  type StructMixin = StructProps | Struct<any>;
 
   interface Struct<T> extends Type<T> {
     new (value: T): T;
@@ -90,13 +90,13 @@ declare module tcomb {
       kind: string;
       name: string;
       identity: boolean;
-      props: Props;
+      props: StructProps;
     };
     update: Update<T>;
-    extend<E extends T>(mixins: Mixin | Array<Mixin>, name?: string): Struct<E>;
+    extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
   }
 
-  export function struct<T>(props: Props, name?: string): Struct<T>;
+  export function struct<T>(props: StructProps, name?: string): Struct<T>;
 
   //
   // list
@@ -245,6 +245,4 @@ declare module tcomb {
   export var update: Update<Object>;
 }
 
-declare module "tcomb" {
-  export = tcomb
-}
+export = Tcomb

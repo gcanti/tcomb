@@ -297,6 +297,12 @@ Cube.prototype.getVolume = function () {
 const Wrong = Point.extend({ x: t.Number }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
 ```
 
+Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
+
+```js
+const Point3D = t.struct.extend([Point, { z: t.Number }], 'Point3D');
+```
+
 # The `tuple` combinator
 
 **Signature**
@@ -650,6 +656,8 @@ A.define(t.struct({
 }));
 ```
 
+**Note**. **Do not** try to type-check structures with circular references, that would blow the stack.
+
 # Updating immutable instances
 
 You can update an immutable instance with the provided `update` function:
@@ -674,6 +682,8 @@ const p = Point({ x: 1, y: 2 });
 
 p = Point.update(p, {x: { '$set': 3 }}); // => { x: 3, y: 2 }
 ```
+
+**Note**. `$apply` can be used only with shallow cloneable values, i.e. `Object`s, `Array`s and primitive values (counterexample: an instance of `Date` is not shallow cloneable).
 
 **Removing a value from a dict**
 
@@ -774,10 +784,14 @@ Returns the name of a tcomb type.
 t.getTypeName(t.String); // => 'String'
 ```
 
-If a name is not specified when defining the type, a default name will be provided according to [http://flowtype.org](http://flowtype.org).
+If a name is not specified when defining the type, a default name will be provided according to [http://flowtype.org](http://flowtype.org) syntax for type annotations.
 
 ```js
+t.getTypeName(t.maybe(t.String)); // => ?String
 t.getTypeName(t.struct({ name: t.String, surname: t.String })); // => '{name: String, surname: String}'
+t.getTypeName(t.union([t.String, t.Number])); // => String | Number
+t.getTypeName(t.dict(t.String, t.Number)); // => {[key: String]: Number}
+...
 ```
 
 ## The `mixin` function
@@ -833,4 +847,47 @@ Returns `true` if `x` is an instance of `type`.
 
 ```js
 (x: any, type: TcombType) => boolean
+```
+
+# Other modules
+
+## The `lib/fromJSON` module
+
+Generic deserialization function.
+
+**Signature**
+
+```js
+(value: any, type: TcombType) => type
+```
+
+**Example**
+
+```js
+import fromJSON from 'tcomb/lib/fromJSON'
+
+const Person = t.struct({
+  name: t.String,
+  birthDate: t.Date
+});
+
+// configure your types
+t.Date.fromJSON = function (s) {
+  t.assert(t.String.is(s));
+  return new Date(s);
+};
+
+const source = {
+  name: 'Giulio',
+  birthDate: new Date(1973, 10, 30)
+};
+
+const json = JSON.parse(JSON.stringify(source));
+
+Person(json); // => throws '[tcomb] Invalid value "1973-11-29T23:00:00.000Z" supplied to Person/birthDate: Date'
+
+const person = fromJSON(json, Person);
+
+assert.ok(person instanceof Person); // => true
+assert.deepEqual(person, source); // => ok
 ```

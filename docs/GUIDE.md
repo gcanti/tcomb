@@ -589,7 +589,7 @@ const json = JSON.parse(JSON.stringify(user));
 console.log(User(json)); // => a User instance
 ```
 
-The problem comes when you add a `birthDate` and try to deserialise:
+The problem comes when you add a `birthDate` and try to deserialize:
 
 ```js
 const user = User({
@@ -611,20 +611,24 @@ Problem. `'1973-11-29T23:00:00.000Z'` is a string but `Anagraphics` wants a `Dat
 
 Solution. Use runtime type introspection to define a general reviver.
 
+**Disclaimer**. This is just an example, it doesn't mean to be complete (for a complete implementation see the `lib/fromJSON` module).
+
 ```js
-function deserialise(value, type) {
+import _ from 'lodash';
+
+function deserialize(value, type) {
+  if (t.Function.is(type.fromJSON)) {
+    return type.fromJSON(value);
+  }
   const { kind } = type.meta;
   switch (kind) {
     case 'struct' :
-      return type(_.mapValues(value, (v, k) => deserialise(v, type.meta.props[k])));
+      return type(_.mapValues(value, (v, k) => deserialize(v, type.meta.props[k])));
     case 'maybe' :
+      return t.Nil.is(value) ? null : deserialize(value, type.meta.type);
     case 'subtype' : // the kind of refinement is 'subtype' (for legacy reasons)
-      return deserialise(value, type.meta.type);
-    case 'enums' :
-    case 'irreducible' :
-      if (t.Function.is(type.fromJSON)) {
-        return type.fromJSON(value);
-      }
+      return deserialize(value, type.meta.type);
+    default : // enums, irreducible
       return value;
   }
 }
@@ -632,10 +636,78 @@ function deserialise(value, type) {
 // then configure your types
 t.Date.fromJSON = (s) => new Date(s);
 
-console.log(deserialise(json, User)); // => see the image below
+console.log(deserialize(json, User)); // => see the image below
 ```
 
 ![](images/struct-deserialisation.png)
 
-**Note**. `tcomb` is able to deserialise the nested structs: the value of the field `anagraphic` is an instance of `BaseAnagraphic`.
+**Note**. `tcomb` is able to deserialize the nested structs: the value of the field `anagraphic` is an instance of `BaseAnagraphic`.
 
+# Keep the domain model DRY
+
+In order to keep my domain model DRY I use a few techniques:
+
+## 1. Defining granular types
+
+Say you want to define a `User` as a struct with the following fields:
+
+- email
+- name
+- surname
+
+```js
+import t from 'tcomb'
+
+export default t.struct({
+  email: t.refinement(t.String, (s) => /@/.test(s), 'Email'),
+  name: t.String,
+  surname: t.String
+}, 'User')
+```
+
+The problem is that you can't re-utilize the `email` type as it's coupled with the `User` type. A quick solution is to split the definitions:
+
+```js
+// file Email.js
+import t from 'tcomb'
+
+export default t.refinement(t.String, (s) => /@/.test(s), 'Email')
+
+...
+
+// file User.js
+import t from 'tcomb'
+import Email from './Email'
+
+export default t.struct({
+  email: Email,
+  name: t.String,
+  surname: t.String
+}, 'User')
+```
+
+## 2. Extending a type
+
+When 2 structs share a subset of their fields you can use [mixins](https://github.com/gcanti/tcomb/blob/master/docs/API.md#extending-a-struct):
+
+```js
+// file IdentifiedUser.js
+import User from './User'
+
+// every field of User plus an id
+export default User.extends({ id: t.String }, 'IdentifiedUser')
+```
+
+## 3. Narrowing down the type and/or automatically sync using runtime type introspection
+
+All `tcomb`'s types are introspectables at runtime (see the `meta` object in the [docs](https://github.com/gcanti/tcomb/blob/master/docs/API.md#the-struct-combinator))
+
+```js
+// file Message.js
+import User from './User'
+
+export default t.struct({
+  email: User.meta.props.email, // automatically synced
+  message: t.String
+}, 'Message')
+```

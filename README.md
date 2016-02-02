@@ -92,7 +92,7 @@ Write complex domain models in a breeze and with a small code footprint. Support
 * tuples
 * dictionaries
 * functions
-* recursive and mutually recursive types (v2.6)
+* recursive and mutually recursive types
 
 **Immutability and immutability helpers**
 
@@ -171,10 +171,15 @@ function sum(a: t.Number, b: t.Number): t.Number {
 }
 ```
 
+**TypeScript definition file**
+
+[index.d.ts](index.d.ts)
+
 # Contributors
 
 - [Giulio Canti](https://github.com/gcanti) mantainer
-- [Becky Conning](https://github.com/beckyconning) `func` combinator ideas and documentation.
+- [Becky Conning](https://github.com/beckyconning) `func` combinator ideas and documentation
+- [Andrea Lattuada](https://github.com/utaal) `declare` combinator
 
 # Similar projects
 

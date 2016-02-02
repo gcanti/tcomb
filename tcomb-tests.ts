@@ -1,4 +1,4 @@
-import * as t from 'tcomb'
+import * as t from './index'
 
 //
 // basic types
