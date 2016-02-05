@@ -21,6 +21,7 @@
   - t.update module: $apply doesn't play well with dates and regexps, fix #172
   - t.update: cannot $merge and $remove at once, fix #170 (thanks @grahamlyus)
   - TypeScript: fix Exported external package typings file '...' is not a module
+  - misleading error message in `Struct.extend` functions, fix #177 (thanks @Firfi)
 
 # v2.6.0
 
