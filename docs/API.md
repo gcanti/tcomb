@@ -249,12 +249,12 @@ Point.prototype.toString = function () {
 Every struct constructor owns an
 
 ```js
-type Mixin = Object | TcombType;
+type Mixin = Object | TcombStruct;
 
-extend(mixins: Mixin | Array<Mixin>, name?: string) => TcombType
+extend(mixins: Mixin | Array<Mixin>, name?: string) => TcombStruct
 ```
 
-function where `mixins` can be an object containing the new props, an array of objects, a type or an array of types
+function where `mixins` can be an object containing the new props, an array of objects, a struct or an array of structs
 
 **Example**
 
