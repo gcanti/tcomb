@@ -174,7 +174,7 @@ describe('t.union(types, [name])', function () {
 
   });
 
-  describe('update(instance, spec)', function () {
+  describe('update(instance, patch)', function () {
 
     it('should update the right instance', function () {
       var circle = Shape.update({ center: { x: 0, y: 0 }, radius: 10 }, { radius: { $set: 15 } });

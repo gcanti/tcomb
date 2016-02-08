@@ -55,8 +55,8 @@ declare module Tcomb {
   interface UnshiftCommand { $unshift: Array<any>; }
   interface MergeCommand { $merge: Object; }
   type Command = ApplyCommand | PushCommand | RemoveCommand | SetCommand | SpliceCommand | SwapCommand | UnshiftCommand | MergeCommand;
-  type UpdateSpec = Command | {[key: string]: UpdateSpec};
-  type Update<T> = (instance: T, spec: UpdateSpec) => T;
+  type UpdatePatch = Command | {[key: string]: UpdatePatch};
+  type Update<T> = (instance: T, spec: UpdatePatch) => T;
 
   type Constructor<T> = Type<T> | Function;
 

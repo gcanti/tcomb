@@ -109,7 +109,7 @@ describe('t.dict(domain, codomain, [name])', function () {
 
   });
 
-  describe('update(instance, spec)', function () {
+  describe('update(instance, patch)', function () {
 
     it('should return a new instance', function () {
       var Dictionary = t.dict(t.String, t.String);

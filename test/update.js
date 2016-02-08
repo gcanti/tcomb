@@ -3,7 +3,7 @@ var assert = require('assert');
 var t = require('../index');
 var throwsWithMessage = require('./util').throwsWithMessage;
 
-describe('t.update(instance, spec)', function () {
+describe('t.update(instance, patch)', function () {
 
   var update = t.update;
   var Tuple = t.tuple([t.String, t.Number]);
@@ -14,10 +14,10 @@ describe('t.update(instance, spec)', function () {
     y: t.Number
   });
 
-  it('should throw if spec is invalid', function () {
+  it('should throw if patch is invalid', function () {
     throwsWithMessage(function () {
       t.update({});
-    }, '[tcomb] Invalid argument spec undefined supplied to function update(instance, spec): expected an object containing commands');
+    }, '[tcomb] Invalid argument patch undefined supplied to function update(instance, patch): expected an object containing commands');
   });
 
   it('should handle $set command', function () {

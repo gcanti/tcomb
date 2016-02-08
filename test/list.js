@@ -118,7 +118,7 @@ describe('t.list(type, [name])', function () {
 
   });
 
-  describe('update(instance, spec)', function () {
+  describe('update(instance, patch)', function () {
 
     it('should return a new instance', function () {
       var ListOfStrings = t.list(t.String);

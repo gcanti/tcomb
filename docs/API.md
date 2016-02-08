@@ -663,7 +663,7 @@ A.define(t.struct({
 You can update an immutable instance with the provided `update` function:
 
 ```js
-MyTcombType.update(instance, spec)
+MyTcombType.update(instance, patch)
 ```
 
 The following commands are compatible with the [Facebook Immutability Helpers](http://facebook.github.io/react/docs/update.html):
@@ -750,7 +750,7 @@ Immutability helper for POJOs.
 **Signature**
 
 ```js
-update(instance: Object, spec: Object) => Object
+update(instance: Object, patch: Object) => Object
 ```
 
 **Example**
@@ -763,7 +763,7 @@ t.update(x, { a: { $set: 2 } }); // => { a: 2 }, x is untouched
 **Note**. You can change the default behaviour overriding the `t.update` function:
 
 ```js
-t.update = function (instance, spec) {
+t.update = function (instance, patch) {
   // your implementation here
 };
 ```

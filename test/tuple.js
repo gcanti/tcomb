@@ -97,7 +97,7 @@ describe('t.tuple(types, [name])', function () {
 
   });
 
-  describe('update(instance, spec)', function () {
+  describe('update(instance, patch)', function () {
 
     it('should return a new instance', function () {
       var Tuple = t.tuple([t.String, t.Number]);

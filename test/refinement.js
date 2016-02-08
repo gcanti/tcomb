@@ -99,7 +99,7 @@ describe('t.refinement(type, predicate, [name])', function () {
 
   });
 
-  describe('update(instance, spec)', function () {
+  describe('update(instance, patch)', function () {
 
     var Type = t.refinement(t.String, function (s) { return s.length > 2; });
     var instance = Type('abc');
