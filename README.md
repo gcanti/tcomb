@@ -104,7 +104,7 @@ const person2 = Person.update(person, {
 });
 ```
 
-where `spec` is an object contaning *commands*. The following commands are compatible with the [Facebook Immutability Helpers](http://facebook.github.io/react/docs/update.html):
+where `spec` is an object containing *commands*. The following commands are compatible with the [Facebook Immutability Helpers](http://facebook.github.io/react/docs/update.html):
 
 * `$push`
 * `$unshift`
@@ -177,7 +177,7 @@ function sum(a: t.Number, b: t.Number): t.Number {
 
 # Contributors
 
-- [Giulio Canti](https://github.com/gcanti) mantainer
+- [Giulio Canti](https://github.com/gcanti) maintainer
 - [Becky Conning](https://github.com/beckyconning) `func` combinator ideas and documentation
 - [Andrea Lattuada](https://github.com/utaal) `declare` combinator
 
