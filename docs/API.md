@@ -436,7 +436,7 @@ In order to use a union **as a constructor** you must implement the `dispatch` s
 
 ```js
 Actions.dispatch = function dispatch(x) {
-  const mapTypeToConstructor = {
+  const typeToConstructor = {
     'increment': IncrementAction,
     'decrement': DecrementAction
   };
