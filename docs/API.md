@@ -379,7 +379,7 @@ const path = Path([
 **Example**
 
 ```js
-const Phones = dict(t.String, t.Number);
+const Phones = t.dict(t.String, t.Number);
 
 // phones is immutable
 const phones = Tel({ 'jack': 4098, 'sape': 4139 });
