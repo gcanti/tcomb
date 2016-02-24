@@ -18,5 +18,7 @@ Tell us what happens instead
 
 ### Stack trace and console log
 
+Hint: it would help a lot if you enable the debugger ("Pause on exceptions" in the "Source" panel of Chrome dev tools) and spot the place where the error is thrown
+
 ```
 ```
