@@ -191,7 +191,6 @@ function sum(a: t.Number, b: t.Number): t.Number {
 * [deep-freeze](https://www.npmjs.com/package/deep-freeze)
 * [freezer](https://github.com/arqex/freezer)
 * [icedam](https://github.com/winkler1/icedam)
-* [immutable-store](https://github.com/christianalfoni/immutable-store)
 * [ObjectModel](https://github.com/sylvainpolletvillard/ObjectModel)
 * [rfx](https://github.com/ericelliott/rfx)
 

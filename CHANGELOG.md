@@ -12,6 +12,13 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.0.0
+
+**Warning**. If you don't rely in your codebase on the property `maybe(MyType)(undefined) === null` this **is not a breaking change** for you.
+
+- **Breaking Change**
+  - prevent `Maybe` constructor from altering the value when `Nil`, fix #183 (thanks @gabro)
+
 # v2.7.0
 
 - **New Feature**

@@ -1,6 +1,6 @@
 {
   "name": "tcomb",
-  "version": "2.7.0",
+  "version": "3.0.0",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -24,8 +24,8 @@
   },
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
-    "eslint": "^1.10.3",
-    "mocha": "^2.3.4"
+    "eslint": "1.10.3",
+    "mocha": "2.3.4"
   },
   "tags": [
     "type",
