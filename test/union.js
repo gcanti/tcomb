@@ -53,7 +53,7 @@ describe('t.union(types, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     it('should hydrate the input', function () {
       var circle = Shape({center: {x: 0, y: 0}, radius: 10});

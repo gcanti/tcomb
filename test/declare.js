@@ -115,7 +115,7 @@ describe('t.declare([name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     it('should be idempotent', function () {
       var p1 = A({
@@ -158,6 +158,217 @@ describe('t.declare([name])', function () {
         }
       });
       assert.ok(A.is(a));
+    });
+
+  });
+
+  describe('cyclic references', function() {
+    var TreeItem = t.declare('TreeItem');
+
+    TreeItem.define(t.struct({
+      id: t.Number,
+      parent: t.maybe(TreeItem),
+      children: t.list(TreeItem),
+      favoriteChild: t.maybe(TreeItem)
+    }));
+
+    it('should allow cyclic references in structs', function() {
+      var root = {id: 1, parent: null, children: []};
+      var child = {id: 2, parent: root, children: []};
+
+      root.children.push(child);
+      root.favoriteChild = child;
+
+      var treeItem = TreeItem(root);
+      var treeItemFavoriteChild = treeItem.favoriteChild;
+
+      assert(TreeItem.is(treeItem));
+      assert(TreeItem.is(treeItemFavoriteChild));
+      assert(treeItemFavoriteChild.parent === treeItem);
+      assert(treeItem.children[0] === treeItemFavoriteChild);
+
+      var treeItemIdempotent = TreeItem(treeItem);
+
+      assert(treeItemIdempotent === treeItem);
+    });
+
+    it('should allow cyclic references in tuples', function() {
+      var Tuple = t.declare('Tuple');
+      Tuple.define(t.tuple([t.Number, t.maybe(Tuple)]));
+
+      var tuple = [1, null];
+      tuple[1] = tuple;
+
+      var result = Tuple(tuple);
+
+      assert(Tuple.is(result));
+      assert(result[1] === result);
+
+      var resultIdempotent = Tuple(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow indirect cyclic references in tuples (via tuple)', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.tuple([TupleWithContainer]);
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = [tupleWithContainer];
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1][0] === result);
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow indirect cyclic references in tuples (via struct)', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.struct({tuple: TupleWithContainer});
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = {tuple: tupleWithContainer};
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1].tuple === result);
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow indirect cyclic references in tuples (via dict)', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.dict(t.String, TupleWithContainer);
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = {tuple: tupleWithContainer};
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1].tuple === result);
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow indirect cyclic references in tuples (via list)', function() {
+      var TupleWithContainer = t.declare('TupleWithContainer');
+      var Container = t.list(TupleWithContainer);
+
+      TupleWithContainer.define(t.tuple([t.Number, Container]));
+
+      var tupleWithContainer = [1, null];
+      tupleWithContainer[1] = [tupleWithContainer];
+
+      var result = TupleWithContainer(tupleWithContainer);
+
+      assert(TupleWithContainer.is(result));
+      assert(result[1][0] === result);
+
+      var resultIdempotent = TupleWithContainer(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should allow multiple cyclic references in tuples', function() {
+      /*
+       *    /\
+       *  /\  /\
+       * a   b   c
+       */
+      var Tuple = t.declare('Tuple');
+      Tuple.define(t.tuple([t.Number, t.maybe(Tuple), t.maybe(Tuple)]));
+
+      var a = [1, null, null];
+      var b = [2, null, null];
+      var c = [3, null, null];
+
+      a[1] = b;
+      b[1] = a;
+      b[2] = c;
+      c[1] = a;
+      c[2] = b;
+
+      var result = Tuple(a);
+
+      assert(Tuple.is(result));
+      assert(result[1][1] === result);
+      assert(result[1][2][1] === result);
+      assert(result[1] === result[1][2][2]);
+
+      var resultIdempotent = Tuple(result);
+
+      assert(resultIdempotent === result);
+    });
+
+    it('should have namespaces for different types', function() {
+      var A = t.declare('A');
+      var B = t.declare('B');
+
+      A.define(t.struct({
+        value: t.Number,
+        b: B
+      }));
+
+      B.define(t.struct({
+        value: t.Number,
+        b: A
+      }));
+
+      var monster = {value: 1};
+      monster.b = monster;
+
+      var result = A(monster);
+
+      assert(A.is(result));
+      assert(B.is(result.b));
+    });
+
+    it('should return same instances when the same instance is used multiple times in a struct', function() {
+      var A = t.struct({
+        value: t.Number
+      });
+
+      var B = t.struct({
+        a1: A,
+        a2: A
+      });
+
+      var a = { value: 3 };
+      var b = B({
+        a1: a,
+        a2: a
+      });
+
+      assert(b.a1 === b.a2);
+    });
+
+    it('should return same instances when the same instance is used multiple times in a tuple', function() {
+      var A = t.struct({
+        value: t.Number
+      });
+
+      var B = t.tuple([A, A]);
+
+      var a = { value: 3 };
+      var b = B([a, a]);
+
+      assert(b[0] === b[1]);
     });
 
   });

@@ -33,7 +33,7 @@ describe('t.intersection(types, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     it('should throw with a contextual error message if used with wrong arguments', function () {
 

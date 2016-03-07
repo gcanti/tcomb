@@ -32,7 +32,7 @@ describe('t.refinement(type, predicate, [name])', function () {
 
   });
 
-  describe('constructor', function () {
+  describe('ctor', function () {
 
     it('should throw if used with new and a type that is not instantiable with new', function () {
       util.throwsWithMessage(function () {
