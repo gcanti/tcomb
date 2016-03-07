@@ -63,7 +63,7 @@ describe('t.maybe(type, [name])', function () {
     it('should hydrate the elements of the maybe in production', util.production(function () {
       var T = t.maybe(Point);
       assert.deepEqual(T(null), null);
-      assert.deepEqual(T(undefined), null);
+      assert.ok(typeof T(undefined) === 'undefined');
       assert.ok(Point.is(T({x: 0, y: 0})));
     }));
 
@@ -84,6 +84,12 @@ describe('t.maybe(type, [name])', function () {
       assert.equal(p0 === p1, false);
       assert.equal(p1 === p2, true);
     }));
+
+    it('should be idempotent on Nil values', function () {
+      var T = t.maybe(t.String, 'T');
+      assert.deepEqual(T(null), null);
+      assert.ok(typeof T(undefined) === 'undefined');
+    });
 
   });
 
