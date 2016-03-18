@@ -891,3 +891,24 @@ const person = fromJSON(json, Person);
 assert.ok(person instanceof Person); // => true
 assert.deepEqual(person, source); // => ok
 ```
+
+## The `lib/installTypeFormatter` module
+
+Chrome Dev Tools custom formatter for tcomb types.
+
+Chrome (v47+) has support for custom "formatters". A formatter tells Chrome's Dev Tools how to display values in the Console, Scope list, etc. This means we can display Structs, Lists, Dicts and other types, in a much better way.
+
+Essentially, it turns this:
+
+![before_formatting](images/before_formatting.png)
+
+into:
+
+![after_formatting](images/after_formatting.png)
+
+**Setup**
+
+```js
+import installTypeFormatter from 'tcomb/lib/installTypeFormatter'
+installTypeFormatter()
+```
