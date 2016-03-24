@@ -355,3 +355,16 @@ describe('t.Date', function () {
   });
 
 });
+
+describe('t.Type', function () {
+
+  describe('#is(x)', function () {
+
+    it('should return true if x is a tcomb type', function () {
+      assert.equal(t.Type.is(t.String), true);
+      assert.equal(t.Type.is(1), false);
+    });
+
+  });
+
+});

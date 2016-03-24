@@ -22,6 +22,7 @@ t.Integer = require('./lib/Integer');
 t.Object = require('./lib/Object');
 t.RegExp = require('./lib/RegExp');
 t.String = require('./lib/String');
+t.Type = require('./lib/Type');
 
 // short alias are deprecated
 t.Arr = t.Array;
