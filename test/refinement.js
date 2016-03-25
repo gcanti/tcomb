@@ -112,4 +112,18 @@ describe('t.refinement(type, predicate, [name])', function () {
 
   });
 
+  describe('Integer type', function () {
+
+    it('should type check integers', function () {
+      assert.equal(t.Integer.is(0), true);
+      assert.equal(t.Integer.is(-0), true);
+      assert.equal(t.Integer.is(0.0), true);
+      assert.equal(t.Integer.is(10), true);
+      assert.equal(t.Integer.is(-10), true);
+      assert.equal(t.Integer.is(0.5), false);
+      assert.equal(t.Integer.is(-0.5), false);
+    });
+
+  });
+
 });

@@ -16,6 +16,8 @@
 
 - **New Feature**
   - Chrome Dev Tools custom formatter for tcomb types
+  - add `t.Integer` to standard types
+  - add `t.Type` to standard types
 
 # v3.0.0
 
