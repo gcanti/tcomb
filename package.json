@@ -12,7 +12,8 @@
   "scripts": {
     "lint": "eslint index.js lib test",
     "test": "npm run lint && mocha",
-    "dist": "webpack"
+    "dist": "webpack",
+    "perf": "node ./perf/perf"
   },
   "repository": {
     "type": "git",
