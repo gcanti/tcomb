@@ -181,6 +181,20 @@ function sum(a: t.Number, b: t.Number): t.Number {
 - [Becky Conning](https://github.com/beckyconning) `func` combinator ideas and documentation
 - [Andrea Lattuada](https://github.com/utaal) `declare` combinator
 
+# How to Build a standalone bundle
+
+```sh
+git clone git@github.com:gcanti/tcomb.git
+cd tcomb
+npm install
+npm run dist
+```
+
+Will output 2 files:
+
+- `dist/tcomb.js` (development)
+- `dist/tcomb.min.js` (production) `Object.freeze` calls and asserts stripped out
+
 # Similar projects
 
 * [typed-immutable](https://github.com/Gozala/typed-immutable)
