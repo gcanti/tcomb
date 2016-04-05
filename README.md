@@ -195,6 +195,19 @@ Will output 2 files:
 - `dist/tcomb.js` (development)
 - `dist/tcomb.min.js` (production) `Object.freeze` calls and asserts stripped out
 
+# Related libraries
+
+* [tcomb-doc](https://github.com/gcanti/tcomb-doc) Documentation tool for tcomb
+* [tcomb-validation](https://github.com/gcanti/tcomb-validation) Validation library based on type combinators
+* [tcomb-json-schema](https://github.com/gcanti/tcomb-json-schema) Transforms a JSON Schema to a tcomb type
+* [tcomb-defaults](https://github.com/ahdinosaur/tcomb-defaults) default properties in tcomb structs
+* [reactuate](https://github.com/reactuate/reactuate) React/Redux stack (not a boilerplate kit)
+* [tcomb-react](https://github.com/gcanti/tcomb-react) Alternative syntax for PropTypes
+* [mongorito-tcomb](https://github.com/xouabita/mongorito-tcomb) Bring schema validation to Mongorito thanks to tcomb
+* [tcomb-form](https://github.com/gcanti/tcomb-form) Forms library for react
+* [tcomb-form-types](https://github.com/Industrial/tcomb-form-types) Adds Types/Validations to tcomb-form
+* [tcomb-form-native](https://github.com/gcanti/tcomb-form-native) Forms library for react-native
+
 # Similar projects
 
 * [typed-immutable](https://github.com/Gozala/typed-immutable)
