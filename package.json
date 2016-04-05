@@ -11,7 +11,9 @@
   ],
   "scripts": {
     "lint": "eslint index.js lib test",
-    "test": "npm run lint && mocha"
+    "test": "npm run lint && mocha",
+    "dist": "webpack",
+    "perf": "node ./perf/perf"
   },
   "repository": {
     "type": "git",
@@ -24,8 +26,10 @@
   },
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
+    "benchmark": "2.1.0",
     "eslint": "1.10.3",
-    "mocha": "2.3.4"
+    "mocha": "2.3.4",
+    "webpack": "1.12.14"
   },
   "tags": [
     "type",
