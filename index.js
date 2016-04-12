@@ -1,5 +1,7 @@
 /*! @preserve
  *
+ * tcomb.js - Type checking and DDD for JavaScript
+ *
  * The MIT License (MIT)
  *
  * Copyright (c) 2014-2016 Giulio Canti
