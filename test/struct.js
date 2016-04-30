@@ -58,10 +58,10 @@ describe('t.struct(props, [name])', function () {
     it('should accept only valid values', function () {
       throwsWithMessage(function () {
         Point(1);
-      }, '[tcomb] Invalid value 1 supplied to {x: Number, y: Number} (expected an object)');
+      }, '[tcomb] Invalid value 1 supplied to Struct{x: Number, y: Number} (expected an object)');
       throwsWithMessage(function () {
         Point({});
-      }, '[tcomb] Invalid value undefined supplied to {x: Number, y: Number}/x: Number');
+      }, '[tcomb] Invalid value undefined supplied to Struct{x: Number, y: Number}/x: Number');
     });
 
   });

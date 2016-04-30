@@ -43,7 +43,7 @@ describe('t.getTypeName(type)', function () {
   });
 
   it('should return a meaningful name of a Nameless type', function () {
-    assert.deepEqual(t.getTypeName(NamelessStruct), '{}');
+    assert.deepEqual(t.getTypeName(NamelessStruct), 'Struct{}');
     assert.deepEqual(t.getTypeName(NamelessUnion), 'String | Number');
     assert.deepEqual(t.getTypeName(NamelessMaybe), '?String');
     assert.deepEqual(t.getTypeName(NamelessEnums), '"a" | "b"');

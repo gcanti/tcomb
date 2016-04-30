@@ -51,7 +51,7 @@ describe('t.declare([name])', function () {
         Nameless1({});
       }, function(err) {
         assert.strictEqual(err instanceof Error, true);
-        assert.ok(/\[tcomb\] Invalid value .+ supplied to {thing: Declare\$[0-9]+}\/thing: {thing: Declare\$[0-9]+} \(expected an object\)/m.test(err.message));
+        assert.ok(/\[tcomb\] Invalid value .+ supplied to Struct{thing: Declare\$[0-9]+}\/thing: Struct{thing: Declare\$[0-9]+} \(expected an object\)/m.test(err.message));
         return true;
       });
       var Nameless2 = t.declare();
@@ -132,10 +132,10 @@ describe('t.declare([name])', function () {
     it('should accept only valid values', function () {
       throwsWithMessage(function () {
         A({b: 12});
-      }, '[tcomb] Invalid value 12 supplied to {b: ?{a: ?A}}/b: ?{a: ?A} (expected an object)');
+      }, '[tcomb] Invalid value 12 supplied to Struct{b: ?Struct{a: ?A}}/b: ?Struct{a: ?A} (expected an object)');
       throwsWithMessage(function () {
         A({b: B({ a: 13 }) });
-      }, '[tcomb] Invalid value 13 supplied to {a: ?A}/a: ?A (expected an object)');
+      }, '[tcomb] Invalid value 13 supplied to Struct{a: ?A}/a: ?A (expected an object)');
     });
 
     it('should throw if the type was not defined', function () {
