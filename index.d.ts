@@ -82,7 +82,7 @@ declare module Tcomb {
   //
 
   type StructProps = {[key: string]: Constructor<any>};
-  type StructMixin = StructProps | Struct<any>;
+  type StructMixin = StructProps | Struct<any> | Interface<any>;
 
   interface Struct<T> extends Type<T> {
     new (value: T): T;
@@ -97,6 +97,23 @@ declare module Tcomb {
   }
 
   export function struct<T>(props: StructProps, name?: string): Struct<T>;
+
+  //
+  // interface
+  //
+
+  interface Interface<T> extends Type<T> {
+    meta: {
+      kind: string;
+      name: string;
+      identity: boolean;
+      props: StructProps;
+    };
+    update: Update<T>;
+    extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
+  }
+
+  export function interface<T>(props: StructProps, name?: string): Interface<T>;
 
   //
   // list
