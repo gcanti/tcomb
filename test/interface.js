@@ -64,6 +64,16 @@ describe('t.interface(props, [name])', function () {
 
   });
 
+  describe('interface.extend', function () {
+    it('should handle an array of mixins', function () {
+      var Point3DInterface = t.inter.extend([PointInterface, {z: t.Number}], 'Point3DInterface');
+      assert.deepEqual(Point3DInterface.meta.name, 'Point3DInterface', 'name');
+      assert.deepEqual(Point3DInterface.meta.props.x, t.Number, 'x');
+      assert.deepEqual(Point3DInterface.meta.props.y, t.Number, 'y');
+      assert.deepEqual(Point3DInterface.meta.props.z, t.Number, 'z');
+    });
+  });
+
   describe('#is(x)', function () {
 
     it('should return true when x is an instance of the interface', function () {
@@ -106,5 +116,28 @@ describe('t.interface(props, [name])', function () {
     });
 
   });
+
+  describe('#extend(xs, [name])', function () {
+
+    it('should extend an existing interface', function () {
+      var Point3DInterface = PointInterface.extend({z: t.Number}, 'Point3DInterface');
+      assert.deepEqual(Point3DInterface.meta.name, 'Point3DInterface', 'name');
+      assert.deepEqual(Point3DInterface.meta.props.x, t.Number, 'x');
+      assert.deepEqual(Point3DInterface.meta.props.y, t.Number, 'y');
+      assert.deepEqual(Point3DInterface.meta.props.z, t.Number, 'z');
+    });
+
+    it('should handle an array as argument', function () {
+      var Mixin = [{b: t.Number, c: t.Boolean}];
+      var NewInterface = PointInterface.extend(Mixin, 'NewInterface');
+      assert.deepEqual(t.getTypeName(NewInterface), 'NewInterface');
+      assert.deepEqual(NewInterface.meta.props.x, t.Number);
+      assert.deepEqual(NewInterface.meta.props.y, t.Number);
+      assert.deepEqual(NewInterface.meta.props.b, t.Number);
+      assert.deepEqual(NewInterface.meta.props.c, t.Boolean);
+    });
+
+  });
+
 
 });

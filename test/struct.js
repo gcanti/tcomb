@@ -89,7 +89,7 @@ describe('t.struct(props, [name])', function () {
 
   });
 
-  describe('#extend(props, [name])', function () {
+  describe('#extend(xs, [name])', function () {
 
     it('should extend an existing struct', function () {
       var Point = t.struct({
