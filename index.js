@@ -51,6 +51,8 @@ t.union = require('./lib/union');
 t.func = require('./lib/func');
 t.intersection = require('./lib/intersection');
 t.subtype = t.refinement;
+t.inter = require('./lib/interface'); // IE8 alias
+t['interface'] = t.inter;
 
 // functions
 t.assert = t;
