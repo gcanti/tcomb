@@ -47,6 +47,7 @@ t.assert(x !== 0, 'cannot divide by x'); // => throws '[tcomb] cannot divide by 
 
 - `t.String`: strings
 - `t.Number`: numbers
+- `t.Integer`: integers
 - `t.Boolean`: booleans
 - `t.Array`: arrays
 - `t.Object`: plain objects
@@ -56,6 +57,7 @@ t.assert(x !== 0, 'cannot divide by x'); // => throws '[tcomb] cannot divide by 
 - `t.Date`: dates
 - `t.Nil`: `null` or `undefined`
 - `t.Any`: any value
+- `t.Type`: a `tcomb` type
 
 # The `irreducible` combinator
 
@@ -478,6 +480,83 @@ MinMax.is('abcde'); // => false
   types: types
 }
 ```
+
+# The `interface` combinator
+
+There is an alias (`inter`) for IE8 compatibility.
+
+**Differences from structs**
+
+- `is` doesn't leverage `instanceof`, structural typing is used instead
+- allows additional props
+- also checks prototype keys
+
+**Signature**
+
+```js
+(props: {[key: string]: TcombType;}, name?: string) => TcombType
+```
+
+**Example**
+
+```js
+const Foo = t.interface({
+  x: t.Number,
+  y: t.Number
+}, 'Foo');
+
+var foo = Foo({ x: 1, y: 2 }); // => { x: 1, y: 2 }
+foo instanceof Foo; // => false (it's a pojo)
+Foo.is({ x: 1, y: 2 }); // => true
+
+// allows additional props
+Foo.is({ x: 1, y: 2, z: 3 }); // => true
+
+// checks types
+Foo.is({ x: 1, y: '2' }); // => false
+
+// doesn't allow missing props
+Foo.is({ x: 1 }); // => false
+
+const Point = t.struct({
+  x: t.Number,
+  y: t.Number
+}, 'Point');
+
+const Bar = t.interface({
+  point: Point
+}, 'Bar');
+
+// hydrates prop values
+const bar = Bar({ point: {x: 0, y: 0} });
+Point.is(bar.point); // => true
+
+const Serializable = t.interface({
+  serialize: t.Function
+})
+
+Point.prototype.serialize = function () {
+  ...
+};
+
+function doSerialize(serializable: Serializable) {
+  ...
+}
+
+doSerialize(bar.point); // => ok
+```
+
+**The `meta` object**
+
+```js
+{
+  kind: 'interface',
+  name: name,
+  identity: ...depends on props,
+  props: props
+}
+```
+
 
 # The `func` combinator
 

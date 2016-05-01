@@ -24,6 +24,8 @@ describe('t.getTypeName(type)', function () {
   var NamedFunc = t.func(t.String, t.String, 'NamedFunc');
   var NamelessIntersection = t.intersection([t.String, t.Number]);
   var NamedIntersection = t.intersection([t.String, t.Number], 'NamedIntersection');
+  var NamelessInterface = t.inter({a: t.String, b: t.Number});
+  var NamedInterface = t.inter({a: t.String, b: t.Number}, 'NamedInterface');
 
   it('should return the name of a function', function () {
     assert.deepEqual(t.getTypeName(function myname(){}), 'myname');
@@ -40,10 +42,11 @@ describe('t.getTypeName(type)', function () {
     assert.deepEqual(t.getTypeName(NamedDict), 'NamedDict');
     assert.deepEqual(t.getTypeName(NamedFunc), 'NamedFunc');
     assert.deepEqual(t.getTypeName(NamedIntersection), 'NamedIntersection');
+    assert.deepEqual(t.getTypeName(NamedInterface), 'NamedInterface');
   });
 
   it('should return a meaningful name of a Nameless type', function () {
-    assert.deepEqual(t.getTypeName(NamelessStruct), '{}');
+    assert.deepEqual(t.getTypeName(NamelessStruct), 'Struct{}');
     assert.deepEqual(t.getTypeName(NamelessUnion), 'String | Number');
     assert.deepEqual(t.getTypeName(NamelessMaybe), '?String');
     assert.deepEqual(t.getTypeName(NamelessEnums), '"a" | "b"');
@@ -53,6 +56,7 @@ describe('t.getTypeName(type)', function () {
     assert.deepEqual(t.getTypeName(NamelessDict), '{[key: String]: String}');
     assert.deepEqual(t.getTypeName(NamelessFunc), '(String) => String');
     assert.deepEqual(t.getTypeName(NamelessIntersection), 'String & Number');
+    assert.deepEqual(t.getTypeName(NamelessInterface), '{a: String, b: Number}');
   });
 
 });

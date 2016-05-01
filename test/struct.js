@@ -58,10 +58,10 @@ describe('t.struct(props, [name])', function () {
     it('should accept only valid values', function () {
       throwsWithMessage(function () {
         Point(1);
-      }, '[tcomb] Invalid value 1 supplied to {x: Number, y: Number} (expected an object)');
+      }, '[tcomb] Invalid value 1 supplied to Struct{x: Number, y: Number} (expected an object)');
       throwsWithMessage(function () {
         Point({});
-      }, '[tcomb] Invalid value undefined supplied to {x: Number, y: Number}/x: Number');
+      }, '[tcomb] Invalid value undefined supplied to Struct{x: Number, y: Number}/x: Number');
     });
 
   });
@@ -89,7 +89,7 @@ describe('t.struct(props, [name])', function () {
 
   });
 
-  describe('#extend(props, [name])', function () {
+  describe('#extend(xs, [name])', function () {
 
     it('should extend an existing struct', function () {
       var Point = t.struct({
@@ -113,18 +113,22 @@ describe('t.struct(props, [name])', function () {
       assert.deepEqual(NewType.meta.props.c, t.Boolean);
     });
 
-    it('should handle a struct (or list of structs) as argument', function () {
+    it('should handle an array of objects or structs or interfaces as argument', function () {
       var A = t.struct({a: t.String}, 'A');
       var B = t.struct({b: t.String}, 'B');
       var C = t.struct({c: t.String}, 'C');
       var MixinD = {d: t.String};
-      var E = A.extend([B, C, MixinD]);
+      var I = t.inter({i: t.String}, 'I');
+      I.prototype.imethod = function() {};
+      var E = A.extend([B, C, MixinD, I]);
       assert.deepEqual(E.meta.props, {
         a: t.String,
         b: t.String,
         c: t.String,
-        d: t.String
+        d: t.String,
+        i: t.String
       });
+      assert.equal(E.prototype.imethod === I.prototype.imethod, true);
     });
 
     it('should support prototypal inheritance', function () {
