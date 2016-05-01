@@ -93,6 +93,7 @@ Write complex domain models in a breeze and with a small code footprint. Support
 * dictionaries
 * functions
 * recursive and mutually recursive types
+* interfaces
 
 **Immutability and immutability helpers**
 

@@ -551,7 +551,7 @@ const user = User({
   anagraphic: {
     name: 'Giulio'
   }
-}); // thows tcomb] Invalid value {"name": "Giulio"} supplied to User/anagraphic: Anagraphic
+}); // throws [tcomb] Invalid value {"name": "Giulio"} supplied to User/anagraphic: Anagraphic
 
 const user = User({
   id: 'A40',
