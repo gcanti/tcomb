@@ -34,20 +34,6 @@ describe('t.struct(props, [name])', function () {
 
   });
 
-  describe('struct.extend', function () {
-    it('should handle an array of mixins', function () {
-      var Point = t.struct({
-        x: t.Number,
-        y: t.Number
-      }, 'Point');
-      var Point3D = t.struct.extend([Point, {z: t.Number}], 'Point3D');
-      assert.deepEqual(Point3D.meta.name, 'Point3D', 'name');
-      assert.deepEqual(Point3D.meta.props.x, t.Number, 'x');
-      assert.deepEqual(Point3D.meta.props.y, t.Number, 'y');
-      assert.deepEqual(Point3D.meta.props.z, t.Number, 'z');
-    });
-  });
-
   describe('struct.getOptions', function () {
 
     it('should handle options', function () {
@@ -163,90 +149,6 @@ describe('t.struct(props, [name])', function () {
       assert.ok(Type.is(newInstance));
       assert.deepEqual(instance.name, 'Giulio');
       assert.deepEqual(newInstance.name, 'Canti');
-    });
-
-  });
-
-  describe('#extend(xs, [name])', function () {
-
-    it('should extend an existing struct', function () {
-      var Point = t.struct({
-        x: t.Number,
-        y: t.Number
-      }, 'Point');
-      var Point3D = Point.extend({z: t.Number}, 'Point3D');
-      assert.deepEqual(Point3D.meta.name, 'Point3D', 'name');
-      assert.deepEqual(Point3D.meta.props.x, t.Number, 'x');
-      assert.deepEqual(Point3D.meta.props.y, t.Number, 'y');
-      assert.deepEqual(Point3D.meta.props.z, t.Number, 'z');
-    });
-
-    it('should handle an array as argument', function () {
-      var Type = t.struct({a: t.String}, 'Type');
-      var Mixin = [{b: t.Number, c: t.Boolean}];
-      var NewType = Type.extend(Mixin, 'NewType');
-      assert.deepEqual(t.getTypeName(NewType), 'NewType');
-      assert.deepEqual(NewType.meta.props.a, t.String);
-      assert.deepEqual(NewType.meta.props.b, t.Number);
-      assert.deepEqual(NewType.meta.props.c, t.Boolean);
-    });
-
-    it('should handle an array of objects or structs or interfaces as argument', function () {
-      var A = t.struct({a: t.String}, 'A');
-      var B = t.struct({b: t.String}, 'B');
-      var C = t.struct({c: t.String}, 'C');
-      var MixinD = {d: t.String};
-      var I = t.inter({i: t.String}, 'I');
-      I.prototype.imethod = function() {};
-      var E = A.extend([B, C, MixinD, I]);
-      assert.deepEqual(E.meta.props, {
-        a: t.String,
-        b: t.String,
-        c: t.String,
-        d: t.String,
-        i: t.String
-      });
-      assert.equal(E.prototype.imethod === I.prototype.imethod, true);
-    });
-
-    it('should support prototypal inheritance', function () {
-      var Rectangle = t.struct({
-        w: t.Number,
-        h: t.Number
-      }, 'Rectangle');
-      Rectangle.prototype.area = function () {
-        return this.w * this.h;
-      };
-      var Cube = Rectangle.extend({
-        l: t.Number
-      });
-      Cube.prototype.volume = function () {
-        return this.area() * this.l;
-      };
-
-      assert(typeof Rectangle.prototype.area === 'function');
-      assert(typeof Cube.prototype.area === 'function');
-      assert(undefined === Rectangle.prototype.volume);
-      assert(typeof Cube.prototype.volume === 'function');
-      assert(Cube.prototype.constructor === Cube);
-
-      var c = new Cube({w: 2, h: 2, l: 2});
-      assert.deepEqual(c.volume(), 8);
-    });
-
-    it('should support multiple prototypal inheritance', function () {
-      var A = t.struct({ a: t.Str }, 'A');
-      A.prototype.amethod = function () {};
-      var B = t.struct({ b: t.Str }, 'B');
-      B.prototype.bmethod = function () {};
-      var C = t.struct({ c: t.Str }, 'C');
-      C.prototype.cmethod = function () {};
-      var Z = C.extend([A, B], 'Z');
-      var z = new Z({ a: 'a', b: 'b', c: 'c' });
-      assert.strictEqual(Z.meta.name, 'Z');
-      assert.strictEqual(t.Function.is(z.cmethod), true);
-      assert.strictEqual(t.Function.is(z.bmethod), true);
-      assert.strictEqual(t.Function.is(z.amethod), true);
     });
 
   });
