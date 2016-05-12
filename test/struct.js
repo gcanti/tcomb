@@ -64,6 +64,33 @@ describe('t.struct(props, [name])', function () {
       }, '[tcomb] Invalid value undefined supplied to Struct{x: Number, y: Number}/x: Number');
     });
 
+    it('should handle strict option', function () {
+      var Person = t.struct({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, { name: 'Person', strict: true });
+
+      assert.strictEqual(Person.meta.name, 'Person');
+      assert.strictEqual(Person.meta.strict, true);
+
+      throwsWithMessage(function () {
+        new Person({ name: 'Giulio', age: 42 });
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+
+      throwsWithMessage(function () {
+        // simulating a typo on a maybe prop
+        new Person({ name: 'Giulio', sur: 'Canti' });
+      }, '[tcomb] Invalid additional prop "sur" supplied to Person');
+
+      function Input(name) {
+        this.name = name;
+      }
+      Input.prototype.method = function () {};
+      assert.doesNotThrow(function () {
+        new Person(new Input('Giulio'));
+      });
+    });
+
   });
 
   describe('#is(x)', function () {
