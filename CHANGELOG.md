@@ -15,10 +15,19 @@
 # v3.1.0
 
 - **New Feature**
-  - Chrome Dev Tools custom formatter for tcomb types
   - add `t.Integer` to standard types
   - add `t.Type` to standard types
-  - `interface` combinator
+  - `interface` combinator, fix #195, [docs](https://github.com/gcanti/tcomb/blob/master/docs/API.md#the-interface-combinator) (thanks @ctrlplusb)
+    - add interface support to fromJSON (@minedeljkovic)
+  - add support for extending refinements, fix #179, [docs](https://github.com/gcanti/tcomb/blob/master/docs/API.md#extending-structs)
+  - local and global `strict` option for structs and interfaces, fix #203, [docs](https://github.com/gcanti/tcomb/blob/master/docs/API.md#strictness)
+  - Chrome Dev Tools custom formatter for tcomb types [docs](https://github.com/gcanti/tcomb/blob/master/docs/API.md#the-libinstalltypeformatter-module)
+- **Bug Fix**
+  - More intelligent immutability update handling, fix #199 (thanks @ctrlplusb)
+  - func combinator: support optional arguments, fix #198 (thanks @ivan-kleshnin)
+- **Internal**
+  - add "Struct" prefix to structs default name
+  - `mixin()` now allows identical references for overlapping properties
 
 # v3.0.0
 
@@ -49,8 +58,8 @@
   - add "typings" field to package.json (TypeScript)
   - add `predicate` field to irreducibles meta objects
 - **Documentation**
-  - revamp [docs/API.md](docs/API.md)
-  - add ["A little guide to runtime type checking and runtime type introspection"](docs/GUIDE.md) (WIP)
+  - revamp [API.md](https://github.com/gcanti/tcomb/blob/master/docs/API.md)
+  - add ["A little guide to runtime type checking and runtime type introspection"](https://github.com/gcanti/tcomb/blob/master/docs/GUIDE.md) (WIP)
 
 ## v2.5.2
 
