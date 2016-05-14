@@ -16,15 +16,19 @@ describe('t.struct(props, [name])', function () {
 
       throwsWithMessage(function () {
         t.struct();
-      }, '[tcomb] Invalid argument props undefined supplied to struct(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props undefined supplied to struct(props, [options]) combinator (expected a dictionary String -> Type)');
 
       throwsWithMessage(function () {
         t.struct({a: null});
-      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to struct(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to struct(props, [options]) combinator (expected a dictionary String -> Type)');
 
       throwsWithMessage(function () {
         t.struct({}, 1);
-      }, '[tcomb] Invalid argument name 1 supplied to struct(props, [name]) combinator (expected a string)');
+      }, '[tcomb] Invalid argument name 1 supplied to struct(props, [options]) combinator (expected a string)');
+
+      throwsWithMessage(function () {
+        t.struct({}, {strict: 1});
+      }, '[tcomb] Invalid argument strict 1 supplied to struct(props, [options]) combinator (expected a boolean)');
 
     });
 
@@ -42,6 +46,25 @@ describe('t.struct(props, [name])', function () {
       assert.deepEqual(Point3D.meta.props.y, t.Number, 'y');
       assert.deepEqual(Point3D.meta.props.z, t.Number, 'z');
     });
+  });
+
+  describe('struct.getOptions', function () {
+
+    it('should handle options', function () {
+      assert.deepEqual(t.struct.getOptions(), { strict: false });
+      assert.deepEqual(t.struct.getOptions({}), { strict: false });
+      assert.deepEqual(t.struct.getOptions('Person'), { strict: false, name: 'Person' });
+      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true });
+      t.struct.strict = true;
+      assert.deepEqual(t.struct.getOptions(), { strict: true });
+      assert.deepEqual(t.struct.getOptions({}), { strict: true });
+      assert.deepEqual(t.struct.getOptions('Person'), { strict: true, name: 'Person' });
+      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true });
+      t.struct.strict = false;
+    });
+
   });
 
   describe('constructor', function () {
@@ -89,6 +112,34 @@ describe('t.struct(props, [name])', function () {
       assert.doesNotThrow(function () {
         new Person(new Input('Giulio'));
       });
+    });
+
+    it('should handle global strict option', function () {
+      t.struct.strict = true;
+      var Person = t.struct({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, 'Person');
+
+      throwsWithMessage(function () {
+        new Person({ name: 'Giulio', age: 42 });
+        t.struct.strict = false;
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+      t.struct.strict = false;
+    });
+
+    it('how to handle unions of structs when global strict is true', function () {
+      var T1 = t.struct({}, { strict: false });
+      var T2 = t.struct({}, { strict: false });
+      var U = t.union([T1, T2]);
+      U.dispatch = function (x) {
+        switch (x.type) {
+          case '1': return T1;
+          case '2': return T2;
+        }
+      };
+      var x = U({type: '2'});
+      assert.strictEqual(x instanceof T2, true);
     });
 
   });
