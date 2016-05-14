@@ -111,8 +111,16 @@ describe('t.interface(props, [name])', function () {
         this.name = name;
       }
       Input.prototype.method = function () {};
-      assert.doesNotThrow(function () {
+      throwsWithMessage(function () {
         Person(new Input('Giulio'));
+      }, '[tcomb] Invalid additional prop "method" supplied to Person');
+
+      var InputInterface = t.inter({
+        name: t.String,
+        method: t.Function
+      }, { name: 'InputInterface', strict: true });
+      assert.doesNotThrow(function () {
+        InputInterface(new Input('Giulio'));
       });
     });
 
@@ -157,6 +165,30 @@ describe('t.interface(props, [name])', function () {
       });
       Point.prototype.serialize = function () {};
       assert.equal(Serializable.is(Point({ x: 1, y: 2 })), true);
+      delete Point.prototype.serialize;
+    });
+
+    it('should handle strict option', function () {
+      var Person = t.inter({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, { name: 'Person', strict: true });
+
+      assert.equal(Person.is({ name: 'Giulio' }), true);
+      assert.equal(Person.is({ name: 'Giulio', age: 42 }), false);
+      assert.equal(Person.is({ name: 'Giulio', sur: 'Canti' }), false);
+
+      function Input(name) {
+        this.name = name;
+      }
+      Input.prototype.method = function () {};
+      assert.equal(Person.is(new Input('Giulio')), false);
+
+      var InputInterface = t.inter({
+        name: t.String,
+        method: t.Function
+      }, { name: 'InputInterface', strict: true });
+      assert.equal(InputInterface.is(new Input('Giulio')), true);
     });
 
   });
