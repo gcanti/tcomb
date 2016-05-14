@@ -68,6 +68,24 @@ describe('fromJSON', function () {
     assert.deepEqual(actual, source);
   });
 
+  it('should handle interface', function () {
+    var MyType = t.interface({
+      name: t.String,
+      birthDate: MyDate
+    }, 'MyType');
+
+    util.throwsWithMessage(function () {
+      fromJSON(null, MyType);
+    }, '[tcomb] Invalid argument value null supplied to fromJSON(value, type) (expected an object)');
+
+    var source = {
+      name: 'Giulio',
+      birthDate: date
+    };
+    var json = jsonify(source);
+    assert.deepEqual(fromJSON(json, MyType), source);
+  });
+
   it('should handle list', function () {
     var MyType = t.list(MyDate, 'MyType');
 
