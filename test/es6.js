@@ -80,7 +80,7 @@ describe('ES6 classes', function () {
     assert.deepEqual(f(c), 'Class');
     throwsWithMessage(function () {
       f(1);
-    }, '[tcomb] Invalid value 1 supplied to [Class]/0: Class');
+    }, '[tcomb] Invalid value 1 supplied to arguments of function (Class) => String/0: Class');
   });
 
 });
