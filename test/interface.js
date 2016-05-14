@@ -20,15 +20,42 @@ describe('t.interface(props, [name])', function () {
   describe('combinator', function () {
 
     it('should throw if used with wrong arguments', function () {
+
       throwsWithMessage(function () {
         t.inter();
-      }, '[tcomb] Invalid argument props undefined supplied to interface(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props undefined supplied to interface(props, [options]) combinator (expected a dictionary String -> Type)');
+
       throwsWithMessage(function () {
         t.inter({a: null});
-      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to interface(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to interface(props, [options]) combinator (expected a dictionary String -> Type)');
+
       throwsWithMessage(function () {
         t.inter({}, 1);
-      }, '[tcomb] Invalid argument name 1 supplied to interface(props, [name]) combinator (expected a string)');
+      }, '[tcomb] Invalid argument name 1 supplied to interface(props, [options]) combinator (expected a string)');
+
+      throwsWithMessage(function () {
+        t.inter({}, {strict: 1});
+      }, '[tcomb] Invalid argument strict 1 supplied to struct(props, [options]) combinator (expected a boolean)');
+
+    });
+
+  });
+
+  describe('inter.getOptions', function () {
+
+    it('should handle options', function () {
+      assert.deepEqual(t.inter.getOptions(), { strict: false });
+      assert.deepEqual(t.inter.getOptions({}), { strict: false });
+      assert.deepEqual(t.inter.getOptions('Person'), { strict: false, name: 'Person' });
+      assert.deepEqual(t.inter.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.inter.getOptions({ strict: true }), { strict: true });
+      t.inter.strict = true;
+      assert.deepEqual(t.inter.getOptions(), { strict: true });
+      assert.deepEqual(t.inter.getOptions({}), { strict: true });
+      assert.deepEqual(t.inter.getOptions('Person'), { strict: true, name: 'Person' });
+      assert.deepEqual(t.inter.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.inter.getOptions({ strict: true }), { strict: true });
+      t.inter.strict = false;
     });
 
   });
@@ -60,6 +87,47 @@ describe('t.interface(props, [name])', function () {
     it('should hydrate fields', function () {
       var hi = HydrateInterface({ point: { x: 0, y: 1} });
       assert.equal(Point.is(hi.point), true);
+    });
+
+    it('should handle strict option', function () {
+      var Person = t.inter({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, { name: 'Person', strict: true });
+
+      assert.strictEqual(Person.meta.name, 'Person');
+      assert.strictEqual(Person.meta.strict, true);
+
+      throwsWithMessage(function () {
+        Person({ name: 'Giulio', age: 42 });
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+
+      throwsWithMessage(function () {
+        // simulating a typo on a maybe prop
+        Person({ name: 'Giulio', sur: 'Canti' });
+      }, '[tcomb] Invalid additional prop "sur" supplied to Person');
+
+      function Input(name) {
+        this.name = name;
+      }
+      Input.prototype.method = function () {};
+      assert.doesNotThrow(function () {
+        Person(new Input('Giulio'));
+      });
+    });
+
+    it('should handle global strict option', function () {
+      t.inter.strict = true;
+      var Person = t.inter({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, 'Person');
+
+      throwsWithMessage(function () {
+        Person({ name: 'Giulio', age: 42 });
+        t.inter.strict = false;
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+      t.inter.strict = false;
     });
 
   });
