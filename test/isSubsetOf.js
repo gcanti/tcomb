@@ -32,8 +32,37 @@ describe.only('isSubsetOf(subset, type)', function () {
 		});
 	});
 
-	context('[enum]', function() {
+	context('[enums]', function() {
+		var enums1 = t.enums({
+			US: 'United States',
+			IT: 'Italy'
+		});
+		var enums2 = t.enums({
+			US: 'United States of America',
+			IT: 'Italy'
+		});
+		var enums3 = t.enums.of(['US', 'IT']);
+		var enums4 = t.enums.of('US IT');
+		var enums5 = t.enums.of([1, 7, 8]);
 
+		it('should return true when both arguments are the same', function () {
+			assert.equal(isSubsetOf(enums1, enums1), true);
+			assert.equal(isSubsetOf(enums3, enums3), true);
+			assert.equal(isSubsetOf(enums4, enums4), true);
+		});
+
+		it('should return true when both arguments are functionally equivalent', function () {
+			// Note that values aren't checked.
+			assert.equal(isSubsetOf(enums1, enums2), true);
+			assert.equal(isSubsetOf(enums1, enums3), true);
+			assert.equal(isSubsetOf(enums1, enums4), true);
+		});
+
+		it('should return true when the superset fits all the enum\'s types', function () {
+			assert.equal(isSubsetOf(enums1, t.String), true);
+			// Objects' keys in JavaScript are always strings, even when they don't seem like it.
+			assert.equal(isSubsetOf(enums5, t.String), true);
+		});
 	});
 
 	context('[func]', function() {
@@ -41,7 +70,19 @@ describe.only('isSubsetOf(subset, type)', function () {
 	});
 
 	context('[intersection]', function() {
+		// Min and max must be literally the same due to how refinements are judged as subsets.
+		var min = t.refinement(t.String, function (s) { return s.length > 2; });
+		var max = t.refinement(t.String, function (s) { return s.length < 5; });
+		var intersection1 = t.intersection([min, max]);
+		var intersection2 = t.intersection([min, max]);
 
+		it('should return true when both arguments are the same', function () {
+			assert.equal(isSubsetOf(intersection1, intersection1), true);
+		});
+
+		it('should return true when both arguments are functionally equivalent', function () {
+			assert.equal(isSubsetOf(intersection1, intersection2), true);
+		});
 	});
 
 	context('[irreducible]', function () {
