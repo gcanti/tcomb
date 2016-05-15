@@ -208,7 +208,12 @@ Person({ name: 'Giulio', age: 'a string' }); // => throws
 **Signature**
 
 ```js
-(props: {[key: string]: TcombType;}, name?: string) => TcombType
+type Options = {
+  name?: string,
+  strict?: boolean
+};
+
+(props: {[key: string]: TcombType;}, options?: string | Options) => TcombType
 ```
 
 **Example**
@@ -236,6 +241,28 @@ const point = Point({ x: 1, y: 2 });
 }
 ```
 
+## Strictness
+
+If `strict = true` then no additional props are allowed:
+
+```js
+const Point = t.struct({
+  x: t.Number,
+  y: t.Number
+}, 'Point');
+
+Point({ x: 1, y: 2, z: 3 }); // => ok
+
+const Point = t.struct({
+  x: t.Number,
+  y: t.Number
+}, { name: 'Point', strict: true });
+
+Point({ x: 1, y: 2, z: 3 }); // => throws '[tcomb] Invalid additional prop "z" supplied to Point'
+```
+
+You can set a global default (locally overridable) by setting `t.struct.strict`.
+
 ## Defining methods on a struct
 
 Methods are defined as usual:
@@ -246,17 +273,16 @@ Point.prototype.toString = function () {
 };
 ```
 
-## Extending a struct
+## Extending structs
 
-Every struct constructor owns an
+Every struct constructor owns an `extend` function:
 
 ```js
-type Mixin = Object | TcombStruct;
+type Props = {[key: String]: Type};
+type Mixin = Props | TcombStruct | TcombInterface | refinement(Mixin);
 
 extend(mixins: Mixin | Array<Mixin>, name?: string) => TcombStruct
 ```
-
-function where `mixins` can be an object containing the new props, an array of objects, a struct or an array of structs
 
 **Example**
 
@@ -293,10 +319,10 @@ Cube.prototype.getVolume = function () {
 };
 ```
 
-**Note**. Repeated props are not allowed:
+**Note**. Repeated props are not allowed (unless they are strictly equal):
 
 ```js
-const Wrong = Point.extend({ x: t.Number }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
+const Wrong = Point.extend({ x: t.String }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
 ```
 
 Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
@@ -304,6 +330,8 @@ Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, name?: stri
 ```js
 const Point3D = t.struct.extend([Point, { z: t.Number }], 'Point3D');
 ```
+
+**Note**. The implementation uses the top level function `extend(combinator, mixins, name)` defined in `tcomb/lib/extend`
 
 # The `tuple` combinator
 
@@ -488,13 +516,18 @@ There is an alias (`inter`) for IE8 compatibility.
 **Differences from structs**
 
 - `is` doesn't leverage `instanceof`, structural typing is used instead
-- allows additional props
+- doesn't filter additional props
 - also checks prototype keys
 
 **Signature**
 
 ```js
-(props: {[key: string]: TcombType;}, name?: string) => TcombType
+type Options = {
+  name?: string,
+  strict?: boolean
+};
+
+(props: {[key: string]: TcombType;}, options?: string | Options) => TcombType
 ```
 
 **Example**
@@ -557,6 +590,62 @@ doSerialize(bar.point); // => ok
 }
 ```
 
+## Strictness
+
+If `strict = true` then no additional props or prototype keys are allowed:
+
+```js
+Foo({ x: 1, y: 2, z: 3 }); // => ok
+
+const Foo = t.interface({
+  x: t.Number,
+  y: t.Number
+}, { name: 'Foo', strict: true });
+
+Foo({ x: 1, y: 2, z: 3 }); // => throws '[tcomb] Invalid additional prop "z" supplied to Foo'
+
+Foo(new Point({ x: 1, y: 2 })); // => throws '[tcomb] Invalid additional prop "serialize" supplied to Foo'
+```
+
+You can set a global default (locally overridable) by setting `t.struct.strict`.
+
+## Extending interfaces
+
+Every interface constructor owns an `extend` function:
+
+```js
+type Props = {[key: String]: Type};
+type Mixin = Props | TcombStruct | TcombInterface | refinement(Mixin);
+
+extend(mixins: Mixin | Array<Mixin>, name?: string) => TcombStruct
+```
+
+**Example**
+
+```js
+const Point3D = Point.extend({ z: t.Number }, 'Point3D');
+
+// multiple inheritance
+const A = interface({...});
+const B = struct({...});
+const MixinC = {...};
+const MixinD = {...};
+const E = A.extend([B, MixinC, MixinD]);
+```
+
+**Note**. Repeated props are not allowed (unless they are strictly equal):
+
+```js
+const Wrong = Point.extend({ x: t.String }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
+```
+
+Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
+
+```js
+const Point3D = t.struct.extend([Point, { z: t.Number }], 'Point3D');
+```
+
+**Note**. The implementation uses the top level function `extend(combinator, mixins, name)` defined in `tcomb/lib/extend`
 
 # The `func` combinator
 

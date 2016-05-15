@@ -16,32 +16,41 @@ describe('t.struct(props, [name])', function () {
 
       throwsWithMessage(function () {
         t.struct();
-      }, '[tcomb] Invalid argument props undefined supplied to struct(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props undefined supplied to struct(props, [options]) combinator (expected a dictionary String -> Type)');
 
       throwsWithMessage(function () {
         t.struct({a: null});
-      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to struct(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to struct(props, [options]) combinator (expected a dictionary String -> Type)');
 
       throwsWithMessage(function () {
         t.struct({}, 1);
-      }, '[tcomb] Invalid argument name 1 supplied to struct(props, [name]) combinator (expected a string)');
+      }, '[tcomb] Invalid argument name 1 supplied to struct(props, [options]) combinator (expected a string)');
+
+      throwsWithMessage(function () {
+        t.struct({}, {strict: 1});
+      }, '[tcomb] Invalid argument strict 1 supplied to struct(props, [options]) combinator (expected a boolean)');
 
     });
 
   });
 
-  describe('struct.extend', function () {
-    it('should handle an array of mixins', function () {
-      var Point = t.struct({
-        x: t.Number,
-        y: t.Number
-      }, 'Point');
-      var Point3D = t.struct.extend([Point, {z: t.Number}], 'Point3D');
-      assert.deepEqual(Point3D.meta.name, 'Point3D', 'name');
-      assert.deepEqual(Point3D.meta.props.x, t.Number, 'x');
-      assert.deepEqual(Point3D.meta.props.y, t.Number, 'y');
-      assert.deepEqual(Point3D.meta.props.z, t.Number, 'z');
+  describe('struct.getOptions', function () {
+
+    it('should handle options', function () {
+      assert.deepEqual(t.struct.getOptions(), { strict: false });
+      assert.deepEqual(t.struct.getOptions({}), { strict: false });
+      assert.deepEqual(t.struct.getOptions('Person'), { strict: false, name: 'Person' });
+      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true });
+      t.struct.strict = true;
+      assert.deepEqual(t.struct.getOptions(), { strict: true });
+      assert.deepEqual(t.struct.getOptions({}), { strict: true });
+      assert.deepEqual(t.struct.getOptions('Person'), { strict: true, name: 'Person' });
+      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true });
+      t.struct.strict = false;
     });
+
   });
 
   describe('constructor', function () {
@@ -62,6 +71,61 @@ describe('t.struct(props, [name])', function () {
       throwsWithMessage(function () {
         Point({});
       }, '[tcomb] Invalid value undefined supplied to Struct{x: Number, y: Number}/x: Number');
+    });
+
+    it('should handle strict option', function () {
+      var Person = t.struct({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, { name: 'Person', strict: true });
+
+      assert.strictEqual(Person.meta.name, 'Person');
+      assert.strictEqual(Person.meta.strict, true);
+
+      throwsWithMessage(function () {
+        new Person({ name: 'Giulio', age: 42 });
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+
+      throwsWithMessage(function () {
+        // simulating a typo on a maybe prop
+        new Person({ name: 'Giulio', sur: 'Canti' });
+      }, '[tcomb] Invalid additional prop "sur" supplied to Person');
+
+      function Input(name) {
+        this.name = name;
+      }
+      Input.prototype.method = function () {};
+      assert.doesNotThrow(function () {
+        new Person(new Input('Giulio'));
+      });
+    });
+
+    it('should handle global strict option', function () {
+      t.struct.strict = true;
+      var Person = t.struct({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, 'Person');
+
+      throwsWithMessage(function () {
+        new Person({ name: 'Giulio', age: 42 });
+        t.struct.strict = false;
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+      t.struct.strict = false;
+    });
+
+    it('how to handle unions of structs when global strict is true', function () {
+      var T1 = t.struct({}, { strict: false });
+      var T2 = t.struct({}, { strict: false });
+      var U = t.union([T1, T2]);
+      U.dispatch = function (x) {
+        switch (x.type) {
+          case '1': return T1;
+          case '2': return T2;
+        }
+      };
+      var x = U({type: '2'});
+      assert.strictEqual(x instanceof T2, true);
     });
 
   });
@@ -85,90 +149,6 @@ describe('t.struct(props, [name])', function () {
       assert.ok(Type.is(newInstance));
       assert.deepEqual(instance.name, 'Giulio');
       assert.deepEqual(newInstance.name, 'Canti');
-    });
-
-  });
-
-  describe('#extend(xs, [name])', function () {
-
-    it('should extend an existing struct', function () {
-      var Point = t.struct({
-        x: t.Number,
-        y: t.Number
-      }, 'Point');
-      var Point3D = Point.extend({z: t.Number}, 'Point3D');
-      assert.deepEqual(Point3D.meta.name, 'Point3D', 'name');
-      assert.deepEqual(Point3D.meta.props.x, t.Number, 'x');
-      assert.deepEqual(Point3D.meta.props.y, t.Number, 'y');
-      assert.deepEqual(Point3D.meta.props.z, t.Number, 'z');
-    });
-
-    it('should handle an array as argument', function () {
-      var Type = t.struct({a: t.String}, 'Type');
-      var Mixin = [{b: t.Number, c: t.Boolean}];
-      var NewType = Type.extend(Mixin, 'NewType');
-      assert.deepEqual(t.getTypeName(NewType), 'NewType');
-      assert.deepEqual(NewType.meta.props.a, t.String);
-      assert.deepEqual(NewType.meta.props.b, t.Number);
-      assert.deepEqual(NewType.meta.props.c, t.Boolean);
-    });
-
-    it('should handle an array of objects or structs or interfaces as argument', function () {
-      var A = t.struct({a: t.String}, 'A');
-      var B = t.struct({b: t.String}, 'B');
-      var C = t.struct({c: t.String}, 'C');
-      var MixinD = {d: t.String};
-      var I = t.inter({i: t.String}, 'I');
-      I.prototype.imethod = function() {};
-      var E = A.extend([B, C, MixinD, I]);
-      assert.deepEqual(E.meta.props, {
-        a: t.String,
-        b: t.String,
-        c: t.String,
-        d: t.String,
-        i: t.String
-      });
-      assert.equal(E.prototype.imethod === I.prototype.imethod, true);
-    });
-
-    it('should support prototypal inheritance', function () {
-      var Rectangle = t.struct({
-        w: t.Number,
-        h: t.Number
-      }, 'Rectangle');
-      Rectangle.prototype.area = function () {
-        return this.w * this.h;
-      };
-      var Cube = Rectangle.extend({
-        l: t.Number
-      });
-      Cube.prototype.volume = function () {
-        return this.area() * this.l;
-      };
-
-      assert(typeof Rectangle.prototype.area === 'function');
-      assert(typeof Cube.prototype.area === 'function');
-      assert(undefined === Rectangle.prototype.volume);
-      assert(typeof Cube.prototype.volume === 'function');
-      assert(Cube.prototype.constructor === Cube);
-
-      var c = new Cube({w: 2, h: 2, l: 2});
-      assert.deepEqual(c.volume(), 8);
-    });
-
-    it('should support multiple prototypal inheritance', function () {
-      var A = t.struct({ a: t.Str }, 'A');
-      A.prototype.amethod = function () {};
-      var B = t.struct({ b: t.Str }, 'B');
-      B.prototype.bmethod = function () {};
-      var C = t.struct({ c: t.Str }, 'C');
-      C.prototype.cmethod = function () {};
-      var Z = C.extend([A, B], 'Z');
-      var z = new Z({ a: 'a', b: 'b', c: 'c' });
-      assert.strictEqual(Z.meta.name, 'Z');
-      assert.strictEqual(t.Function.is(z.cmethod), true);
-      assert.strictEqual(t.Function.is(z.bmethod), true);
-      assert.strictEqual(t.Function.is(z.amethod), true);
     });
 
   });
