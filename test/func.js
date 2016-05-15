@@ -36,12 +36,38 @@ describe('t.func(domain, codomain, [name])', function () {
 
       util.throwsWithMessage(function () {
         sum(1, 2, 3);
-      }, '[tcomb] Invalid value [\n  1,\n  2,\n  3\n] supplied to [Number, Number] (expected an array of length 2)');
+      }, '[tcomb] Invalid value [\n  1,\n  2,\n  3\n] supplied to arguments of function (Number, Number) => Number (expected an array of length 2)');
 
       util.throwsWithMessage(function () {
         sum('a', 2);
-      }, '[tcomb] Invalid value "a" supplied to [Number, Number]/0: Number');
+      }, '[tcomb] Invalid value "a" supplied to arguments of function (Number, Number) => Number/0: Number');
 
+    });
+
+    it('should handle optional arguments', function () {
+      function Class(a) {
+        this.a = a;
+      }
+      assert.equal(t.func.getOptionalArgumentsIndex([t.Number, t.Number]), 2);
+      assert.equal(t.func.getOptionalArgumentsIndex([t.Number, t.maybe(t.Number)]), 1);
+      assert.equal(t.func.getOptionalArgumentsIndex([t.maybe(t.Number)]), 0);
+      assert.equal(t.func.getOptionalArgumentsIndex([t.Number, t.maybe(t.Number), t.Number]), 3);
+      assert.equal(t.func.getOptionalArgumentsIndex([]), 0);
+      assert.equal(t.func.getOptionalArgumentsIndex([Class]), 1);
+      assert.equal(t.func.getOptionalArgumentsIndex([Class, t.maybe(t.Number)]), 1);
+
+      var T = t.func([t.Number, t.maybe(t.Number)], t.Number);
+      var sum = T.of(function (a, b) {
+        if (t.Nil.is(b)) {
+          b = 2;
+        }
+        return a + b;
+      });
+      assert.equal(sum(1), 3);
+      assert.equal(sum(1, 2), 3);
+      util.throwsWithMessage(function () {
+        sum(1, 'a');
+      }, '[tcomb] Invalid value "a" supplied to arguments of function (Number, ?Number) => Number/1: ?Number');
     });
 
     it('should check the return value', function () {
@@ -90,6 +116,16 @@ describe('t.func(domain, codomain, [name])', function () {
 
   describe('currying', function () {
 
+    it('should throw if no arguments are passed in', function () {
+      var Type = t.func([t.Number, t.Number, t.Number], t.Number);
+      var sum = Type(function (a, b, c) {
+        return a + b + c;
+      }, true);
+      util.throwsWithMessage(function () {
+        sum();
+      }, '[tcomb] Invalid arguments.length = 0 for curried function (Number, Number, Number) => Number');
+    });
+
     it('should curry functions', function () {
       var Type = t.func([t.Number, t.Number, t.Number], t.Number);
       var sum = Type(function (a, b, c) {
@@ -117,12 +153,12 @@ describe('t.func(domain, codomain, [name])', function () {
 
       util.throwsWithMessage(function () {
         sum('a');
-      }, '[tcomb] Invalid value "a" supplied to [Number]/0: Number');
+      }, '[tcomb] Invalid value "a" supplied to arguments of function (Number, Number) => Number/0: Number');
 
       util.throwsWithMessage(function () {
         var sum1 = sum(1);
         sum1('a');
-      }, '[tcomb] Invalid value "a" supplied to [Number]/0: Number');
+      }, '[tcomb] Invalid value "a" supplied to arguments of function (Number) => Number/0: Number');
 
     });
 
@@ -138,7 +174,7 @@ describe('t.func(domain, codomain, [name])', function () {
       assert.deepEqual(sum(1, 2, 3), 6);
       util.throwsWithMessage(function () {
         sum(1, 2);
-      }, '[tcomb] Invalid value [\n  1,\n  2\n] supplied to [Number, Number, Number] (expected an array of length 3)');
+      }, '[tcomb] Invalid value [\n  1,\n  2\n] supplied to arguments of function (Number, Number, Number) => Number (expected an array of length 3)');
     });
 
   });

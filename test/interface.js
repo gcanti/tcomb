@@ -20,15 +20,42 @@ describe('t.interface(props, [name])', function () {
   describe('combinator', function () {
 
     it('should throw if used with wrong arguments', function () {
+
       throwsWithMessage(function () {
         t.inter();
-      }, '[tcomb] Invalid argument props undefined supplied to interface(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props undefined supplied to interface(props, [options]) combinator (expected a dictionary String -> Type)');
+
       throwsWithMessage(function () {
         t.inter({a: null});
-      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to interface(props, [name]) combinator (expected a dictionary String -> Type)');
+      }, '[tcomb] Invalid argument props {\n  "a": null\n} supplied to interface(props, [options]) combinator (expected a dictionary String -> Type)');
+
       throwsWithMessage(function () {
         t.inter({}, 1);
-      }, '[tcomb] Invalid argument name 1 supplied to interface(props, [name]) combinator (expected a string)');
+      }, '[tcomb] Invalid argument name 1 supplied to interface(props, [options]) combinator (expected a string)');
+
+      throwsWithMessage(function () {
+        t.inter({}, {strict: 1});
+      }, '[tcomb] Invalid argument strict 1 supplied to struct(props, [options]) combinator (expected a boolean)');
+
+    });
+
+  });
+
+  describe('inter.getOptions', function () {
+
+    it('should handle options', function () {
+      assert.deepEqual(t.inter.getOptions(), { strict: false });
+      assert.deepEqual(t.inter.getOptions({}), { strict: false });
+      assert.deepEqual(t.inter.getOptions('Person'), { strict: false, name: 'Person' });
+      assert.deepEqual(t.inter.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.inter.getOptions({ strict: true }), { strict: true });
+      t.inter.strict = true;
+      assert.deepEqual(t.inter.getOptions(), { strict: true });
+      assert.deepEqual(t.inter.getOptions({}), { strict: true });
+      assert.deepEqual(t.inter.getOptions('Person'), { strict: true, name: 'Person' });
+      assert.deepEqual(t.inter.getOptions({ strict: false }), { strict: false });
+      assert.deepEqual(t.inter.getOptions({ strict: true }), { strict: true });
+      t.inter.strict = false;
     });
 
   });
@@ -62,16 +89,55 @@ describe('t.interface(props, [name])', function () {
       assert.equal(Point.is(hi.point), true);
     });
 
-  });
+    it('should handle strict option', function () {
+      var Person = t.inter({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, { name: 'Person', strict: true });
 
-  describe('interface.extend', function () {
-    it('should handle an array of mixins', function () {
-      var Point3DInterface = t.inter.extend([PointInterface, {z: t.Number}], 'Point3DInterface');
-      assert.deepEqual(Point3DInterface.meta.name, 'Point3DInterface', 'name');
-      assert.deepEqual(Point3DInterface.meta.props.x, t.Number, 'x');
-      assert.deepEqual(Point3DInterface.meta.props.y, t.Number, 'y');
-      assert.deepEqual(Point3DInterface.meta.props.z, t.Number, 'z');
+      assert.strictEqual(Person.meta.name, 'Person');
+      assert.strictEqual(Person.meta.strict, true);
+
+      throwsWithMessage(function () {
+        Person({ name: 'Giulio', age: 42 });
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+
+      throwsWithMessage(function () {
+        // simulating a typo on a maybe prop
+        Person({ name: 'Giulio', sur: 'Canti' });
+      }, '[tcomb] Invalid additional prop "sur" supplied to Person');
+
+      function Input(name) {
+        this.name = name;
+      }
+      Input.prototype.method = function () {};
+      throwsWithMessage(function () {
+        Person(new Input('Giulio'));
+      }, '[tcomb] Invalid additional prop "method" supplied to Person');
+
+      var InputInterface = t.inter({
+        name: t.String,
+        method: t.Function
+      }, { name: 'InputInterface', strict: true });
+      assert.doesNotThrow(function () {
+        InputInterface(new Input('Giulio'));
+      });
     });
+
+    it('should handle global strict option', function () {
+      t.inter.strict = true;
+      var Person = t.inter({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, 'Person');
+
+      throwsWithMessage(function () {
+        Person({ name: 'Giulio', age: 42 });
+        t.inter.strict = false;
+      }, '[tcomb] Invalid additional prop "age" supplied to Person');
+      t.inter.strict = false;
+    });
+
   });
 
   describe('#is(x)', function () {
@@ -99,6 +165,30 @@ describe('t.interface(props, [name])', function () {
       });
       Point.prototype.serialize = function () {};
       assert.equal(Serializable.is(Point({ x: 1, y: 2 })), true);
+      delete Point.prototype.serialize;
+    });
+
+    it('should handle strict option', function () {
+      var Person = t.inter({
+        name: t.String,
+        surname: t.maybe(t.String)
+      }, { name: 'Person', strict: true });
+
+      assert.equal(Person.is({ name: 'Giulio' }), true);
+      assert.equal(Person.is({ name: 'Giulio', age: 42 }), false);
+      assert.equal(Person.is({ name: 'Giulio', sur: 'Canti' }), false);
+
+      function Input(name) {
+        this.name = name;
+      }
+      Input.prototype.method = function () {};
+      assert.equal(Person.is(new Input('Giulio')), false);
+
+      var InputInterface = t.inter({
+        name: t.String,
+        method: t.Function
+      }, { name: 'InputInterface', strict: true });
+      assert.equal(InputInterface.is(new Input('Giulio')), true);
     });
 
   });
@@ -116,28 +206,5 @@ describe('t.interface(props, [name])', function () {
     });
 
   });
-
-  describe('#extend(xs, [name])', function () {
-
-    it('should extend an existing interface', function () {
-      var Point3DInterface = PointInterface.extend({z: t.Number}, 'Point3DInterface');
-      assert.deepEqual(Point3DInterface.meta.name, 'Point3DInterface', 'name');
-      assert.deepEqual(Point3DInterface.meta.props.x, t.Number, 'x');
-      assert.deepEqual(Point3DInterface.meta.props.y, t.Number, 'y');
-      assert.deepEqual(Point3DInterface.meta.props.z, t.Number, 'z');
-    });
-
-    it('should handle an array as argument', function () {
-      var Mixin = [{b: t.Number, c: t.Boolean}];
-      var NewInterface = PointInterface.extend(Mixin, 'NewInterface');
-      assert.deepEqual(t.getTypeName(NewInterface), 'NewInterface');
-      assert.deepEqual(NewInterface.meta.props.x, t.Number);
-      assert.deepEqual(NewInterface.meta.props.y, t.Number);
-      assert.deepEqual(NewInterface.meta.props.b, t.Number);
-      assert.deepEqual(NewInterface.meta.props.c, t.Boolean);
-    });
-
-  });
-
 
 });
