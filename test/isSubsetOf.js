@@ -30,6 +30,10 @@ describe.only('isSubsetOf(subset, type)', function () {
 		it('should return true when the superset is t.Object', function () {
 			assert.equal(isSubsetOf(dict1, t.Object), true);
 		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(dict1, t.Number), false);
+		});
 	});
 
 	context('[enums]', function() {
@@ -63,6 +67,10 @@ describe.only('isSubsetOf(subset, type)', function () {
 			// Objects' keys in JavaScript are always strings, even when they don't seem like it.
 			assert.equal(isSubsetOf(enums5, t.String), true);
 		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(enums1, t.Number), false);
+		});
 	});
 
 	context('[func]', function() {
@@ -82,6 +90,14 @@ describe.only('isSubsetOf(subset, type)', function () {
 
 		it('should return true when both arguments are functionally equivalent', function () {
 			assert.equal(isSubsetOf(intersection1, intersection2), true);
+		});
+
+		it('should return true when the superset satisfies the subset', function () {
+			assert.equal(isSubsetOf(intersection1, t.String), true);
+		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(intersection1, t.Number), false);
 		});
 	});
 
@@ -114,6 +130,10 @@ describe.only('isSubsetOf(subset, type)', function () {
 		it('should return true when the superset is t.Array', function () {
 			assert.equal(isSubsetOf(list1, t.Array), true);
 		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(list1, t.String), false);
+		});
 	});
 
 	context('[maybe]', function() {
@@ -130,6 +150,10 @@ describe.only('isSubsetOf(subset, type)', function () {
 
 		it('should return true when the superset is t.Nil', function () {
 			assert.equal(isSubsetOf(maybe1, t.Nil), true);
+		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(maybe1, t.Object), false);
 		});
 	});
 
@@ -164,7 +188,7 @@ describe.only('isSubsetOf(subset, type)', function () {
 			assert.equal(isSubsetOf(refinement1, refinement4), false);
 		});
 
-		it('should return false when the superset is unrelated', function () {
+		it('should return false when the superset does not satisfy the subset', function () {
 			assert.equal(isSubsetOf(refinement1, t.Number), false);
 		});
 	});
@@ -190,6 +214,10 @@ describe.only('isSubsetOf(subset, type)', function () {
 		it('should return true when the superset is t.Object', function () {
 			assert.equal(isSubsetOf(struct1, t.Object), true);
 		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(struct1, t.String), false);
+		});
 	});
 
 	context('[tuple]', function() {
@@ -206,6 +234,10 @@ describe.only('isSubsetOf(subset, type)', function () {
 
 		it('should return true when the superset is t.Array', function () {
 			assert.equal(isSubsetOf(tuple1, t.Array), true);
+		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(tuple1, t.String), false);
 		});
 	});
 
