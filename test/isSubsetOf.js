@@ -134,7 +134,39 @@ describe.only('isSubsetOf(subset, type)', function () {
 	});
 
 	context('[refinement]', function() {
+		var func = function (s) {
+			return s.length < 10;
+		};
+		var refinement1 = t.refinement(t.String, func);
+		var refinement2 = t.refinement(t.String, func);
+		var refinement3 = t.refinement(refinement1, function (s) { return s.length < 3; });
+		var refinement4 = t.refinement(t.String, function (s) { return s.length < 10; });
 
+		it('should return true when both arguments are the same', function () {
+			assert.equal(isSubsetOf(refinement1, refinement1), true);
+		});
+
+		it('should return true when both arguments are functionally equivalent', function () {
+			assert.equal(isSubsetOf(refinement1, refinement2), true);
+		});
+
+		it('should return true when the subset refines the superset  (shallow)', function () {
+			assert.equal(isSubsetOf(refinement1, t.String), true);
+		});
+
+		it('should return true when the subset refines the superset (deep)', function () {
+			assert.equal(isSubsetOf(refinement3, t.String), true);
+		});
+
+		it('should return false when both refinements have different predicates', function () {
+			assert.equal(isSubsetOf(refinement1, refinement3), false);
+			// Even functionally equivalent predicates can't be determined equal.
+			assert.equal(isSubsetOf(refinement1, refinement4), false);
+		});
+
+		it('should return false when the superset is unrelated', function () {
+			assert.equal(isSubsetOf(refinement1, t.Number), false);
+		});
 	});
 
 	context('[struct]', function() {
