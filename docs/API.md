@@ -969,7 +969,7 @@ Safe version of mixin, properties cannot be overwritten.
 **Signature**
 
 ```js
-(target: Object, source: Object, override?: boolean) => Object
+(target: Object, source: Object, unsafe?: boolean = false) => Object
 ```
 
 **Example**
@@ -977,6 +977,7 @@ Safe version of mixin, properties cannot be overwritten.
 ```js
 t.mixin({ a: 1 }, { b: 2 }); // => { a: 1, b: 2 }
 t.mixin({ a: 1 }, { a: 2 }); // => throws
+t.mixin({ a: 1 }, { a: 1 }); // => ok
 t.mixin({ a: 1 }, { a: 2 }, true); // { a: 2 }
 ```
 
