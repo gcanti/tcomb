@@ -27,6 +27,11 @@ function sum(a, b) {
 }
 
 sum(1, 's'); // throws '[tcomb] Invalid value "s" supplied to Number'
+
+// using babel-plugin-tcomb
+function sum(a: t.Number, b: t.Number) {
+  return a + b;
+}
 ```
 
 A user defined type:
