@@ -4,7 +4,7 @@ var t = require('../index');
 var isSubsetOf = require('../lib/isSubsetOf');
 var util = require('./util');
 
-describe.only('isSubsetOf(subset, type)', function () {
+describe('isSubsetOf(subset, type)', function () {
   it('should throw with a bad type argument', function () {
     util.throwsWithMessage(function () {
       isSubsetOf();
