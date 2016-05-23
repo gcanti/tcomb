@@ -77,6 +77,52 @@ describe.only('isSubsetOf(subset, type)', function () {
 
 	});
 
+	context('[interface]', function() {
+		var interface1 = t.interface({
+			x: t.Number,
+			y: t.Number
+		});
+		var interface2 = t.interface({
+			x: t.Number,
+			y: t.Number
+		});
+		var interface3 = interface1.extend({
+			z: t.Number
+		});
+		var interface4 = t.interface({
+			x: t.Number,
+			y: t.Number
+		}, {name: 'Interface4', strict: true});
+		var interface5 = interface4.extend({
+			z: t.Number
+		});
+
+		it('should return true when both arguments are the same', function () {
+			assert.equal(isSubsetOf(interface1, interface1), true);
+		});
+
+		it('should return true when both arguments are functionally equivalent', function () {
+			// Structs are either literally the same or they're not equal.
+			assert.equal(isSubsetOf(interface1, interface2), true);
+		});
+
+		it('should return true when the superset extends the subset', function () {
+			assert.equal(isSubsetOf(interface3, interface1), true);
+		});
+
+		it('should return false when the superset extends the subset, but the superset is strict', function () {
+			assert.equal(isSubsetOf(interface5, interface4), false);
+		});
+
+		it('should return true when the superset is t.Object', function () {
+			assert.equal(isSubsetOf(interface1, t.Object), true);
+		});
+
+		it('should return false when the superset does not satisfy the subset', function () {
+			assert.equal(isSubsetOf(interface1, t.String), false);
+		});
+	});
+
 	context('[intersection]', function() {
 		// Min and max must be literally the same due to how refinements are judged as subsets.
 		var min = t.refinement(t.String, function (s) { return s.length > 2; });
@@ -202,13 +248,21 @@ describe.only('isSubsetOf(subset, type)', function () {
 			x: t.Number,
 			y: t.Number
 		});
+		var struct3 = struct1.extend({
+			z: t.Number
+		});
 
 		it('should return true when both arguments are the same', function () {
 			assert.equal(isSubsetOf(struct1, struct1), true);
 		});
 
-		it('should return true when both arguments are functionally equivalent', function () {
-			assert.equal(isSubsetOf(struct1, struct2), true);
+		it('should return false when both arguments are functionally equivalent', function () {
+			// Structs are either literally the same or they're not equal.
+			assert.equal(isSubsetOf(struct1, struct2), false);
+		});
+
+		it('should return false when the subset extends the superset', function () {
+			assert.equal(isSubsetOf(struct3, struct1), false);
 		});
 
 		it('should return true when the superset is t.Object', function () {
