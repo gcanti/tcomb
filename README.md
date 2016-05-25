@@ -60,6 +60,10 @@ const person = Person({
 }); // throws '[tcomb] Invalid value undefined supplied to Person/name: String'
 ```
 
+Chrome DevTools:
+
+![throws](docs/images/throws.png)
+
 # Docs
 
 - [API](docs/API.md)
