@@ -635,10 +635,10 @@ const E = A.extend([B, MixinC, MixinD]);
 const Wrong = Point.extend({ x: t.String }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
 ```
 
-Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
+Alternatively you can use the `t.interface.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
 
 ```js
-const Point3D = t.struct.extend([Point, { z: t.Number }], 'Point3D');
+const Point3D = t.interface.extend([Point, { z: t.Number }], 'Point3D');
 ```
 
 **Note**. The implementation uses the top level function `extend(combinator, mixins, name)` defined in `tcomb/lib/extend`
