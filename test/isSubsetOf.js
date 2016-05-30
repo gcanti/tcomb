@@ -311,6 +311,36 @@ describe('isSubsetOf(subset, type)', function () {
 
   });
 
+  it('Recursive types', function () {
+
+    var Tree1 = t.declare('Tree1');
+
+    Tree1.define(t.interface({
+      value: t.Number,
+      left: t.maybe(Tree1),
+      right: t.maybe(Tree1)
+    }));
+
+    var Tree2 = t.declare('Tree2');
+
+    Tree2.define(t.interface({
+      value: t.Integer,
+      left: t.maybe(Tree2),
+      right: t.maybe(Tree2)
+    }));
+
+    var Tree3 = t.declare('Tree3');
+
+    Tree3.define(t.interface({
+      value: t.String,
+      left: t.maybe(Tree3),
+      right: t.maybe(Tree3)
+    }));
+
+    lt(Tree2, Tree1);
+    ko(Tree2, Tree3);
+  });
+
   describe('original tests', function () {
 
     context('[dict]', function() {
