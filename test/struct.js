@@ -37,17 +37,17 @@ describe('t.struct(props, [name])', function () {
   describe('struct.getOptions', function () {
 
     it('should handle options', function () {
-      assert.deepEqual(t.struct.getOptions(), { strict: false });
-      assert.deepEqual(t.struct.getOptions({}), { strict: false });
-      assert.deepEqual(t.struct.getOptions('Person'), { strict: false, name: 'Person' });
-      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false });
-      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true });
+      assert.deepEqual(t.struct.getOptions(), { strict: false, defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions({}), { strict: false, defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions('Person'), { strict: false, name: 'Person', defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false, defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true, defaultProps: {} });
       t.struct.strict = true;
-      assert.deepEqual(t.struct.getOptions(), { strict: true });
-      assert.deepEqual(t.struct.getOptions({}), { strict: true });
-      assert.deepEqual(t.struct.getOptions('Person'), { strict: true, name: 'Person' });
-      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false });
-      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true });
+      assert.deepEqual(t.struct.getOptions(), { strict: true, defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions({}), { strict: true, defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions('Person'), { strict: true, name: 'Person', defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions({ strict: false }), { strict: false, defaultProps: {} });
+      assert.deepEqual(t.struct.getOptions({ strict: true }), { strict: true, defaultProps: {} });
       t.struct.strict = false;
     });
 
@@ -149,6 +149,47 @@ describe('t.struct(props, [name])', function () {
       assert.ok(Type.is(newInstance));
       assert.deepEqual(instance.name, 'Giulio');
       assert.deepEqual(newInstance.name, 'Canti');
+    });
+
+  });
+
+  describe('default props', function () {
+
+    it('should throw if used with wrong arguments', function () {
+      throwsWithMessage(function () {
+        t.struct({}, { defaultProps: 1 });
+      }, '[tcomb] Invalid argument defaultProps 1 supplied to struct(props, [options]) combinator (expected an object)');
+    });
+
+    it('should handle the defaultProps option', function () {
+      var T = t.struct({
+        name: t.String,
+        surname: t.String
+      }, { defaultProps: { surname: 'Canti' } });
+      assert.doesNotThrow(function () {
+        T({ name: 'Giulio' });
+      });
+    });
+
+    it('should apply defaults if a props is undefined', function () {
+      var T = t.struct({
+        name: t.maybe(t.String)
+      }, { defaultProps: { name: 'Giulio' } });
+      assert.strictEqual(T({}).name, 'Giulio');
+      assert.strictEqual(T({ name: undefined }).name, 'Giulio');
+      assert.strictEqual(T({ name: null }).name, null);
+    });
+
+    it('should apply the default after an update', function () {
+      var T = t.struct({
+        name: t.String,
+        surname: t.String
+      }, { defaultProps: { surname: 'Canti' } });
+      var p1 = T({ name: 'Giulio' });
+      var p2 = T.update(p1, {
+        surname: { $set: undefined }
+      });
+      assert.strictEqual(p2.name, 'Giulio');
     });
 
   });
