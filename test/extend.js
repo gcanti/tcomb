@@ -18,10 +18,39 @@ describe('extend(combinator, mixins, [name])', function () {
   it('should throw if used with wrong arguments', function () {
     throwsWithMessage(function () {
       t.struct.extend();
-    }, '[tcomb] Invalid argument mixins supplied to extend(combinator, mixins, name), expected an array');
+    }, '[tcomb] Invalid argument mixins supplied to extend(combinator, mixins, options), expected an array');
     throwsWithMessage(function () {
       t.struct.extend([1]);
-    }, '[tcomb] Invalid argument mixins[0] supplied to extend(combinator, mixins, name), expected an object, struct, interface or a refinement (of struct or interface)');
+    }, '[tcomb] Invalid argument mixins[0] supplied to extend(combinator, mixins, options), expected an object, struct, interface or a refinement (of struct or interface)');
+  });
+
+  it('should handle defaultProps', function () {
+    var A1 = t.struct({ a: t.String }, { defaultProps: { a: 'default-a' } });
+    var B1 = t.struct({ b: t.String }, { defaultProps: { b: 'default-b' } });
+    var C1 = t.struct.extend([A1, B1, { z: t.Number }], { defaultProps: { z: 1 } });
+    assert.deepEqual(C1.meta.defaultProps, {
+      a: 'default-a',
+      b: 'default-b',
+      z: 1
+    });
+    assert.deepEqual(C1({}), {
+      a: 'default-a',
+      b: 'default-b',
+      z: 1
+    });
+
+    var A2 = t.struct({ a: t.String }, { defaultProps: { a: 'default-a' } });
+    var B2 = t.struct({ b: t.String }, { defaultProps: { b: 'default-b' } });
+    var C2 = t.struct.extend([A2, B2, { z: t.Number }], 'C2');
+    assert.deepEqual(C2.meta.defaultProps, {
+      a: 'default-a',
+      b: 'default-b'
+    });
+    assert.deepEqual(C2({ z: 2 }), {
+      a: 'default-a',
+      b: 'default-b',
+      z: 2
+    });
   });
 
   describe('struct.extend(mixins, [name])', function () {
