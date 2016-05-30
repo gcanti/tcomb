@@ -261,8 +261,6 @@ const Point = t.struct({
 Point({ x: 1, y: 2, z: 3 }); // => throws '[tcomb] Invalid additional prop "z" supplied to Point'
 ```
 
-You can set a global default (locally overridable) by setting `t.struct.strict`.
-
 ## Defining methods on a struct
 
 Methods are defined as usual:
@@ -606,8 +604,6 @@ Foo({ x: 1, y: 2, z: 3 }); // => throws '[tcomb] Invalid additional prop "z" sup
 
 Foo(new Point({ x: 1, y: 2 })); // => throws '[tcomb] Invalid additional prop "serialize" supplied to Foo'
 ```
-
-You can set a global default (locally overridable) by setting `t.struct.strict`.
 
 ## Extending interfaces
 
