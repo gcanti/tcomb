@@ -4,12 +4,6 @@ var t = require('../index');
 var isSubsetOf = require('../lib/isSubsetOf');
 var util = require('./util');
 
-/*
-
-- why typed functions? They are values not types
-
-*/
-
 function getTypeName(T) {
   if (T.meta.kind === 'interface') {
     return t.getTypeName(T) + ' (strict: ' + T.meta.strict + ')';
