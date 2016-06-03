@@ -12,6 +12,14 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.0
+
+- **New Feature**
+  - `isSubsetOf` module, function for determining whether one type is compatible with another type (@R3D4C73D)
+  - default props for structs (thanks @timoxley)
+- **Documentation**
+  - global strict settings are deprecated (see https://github.com/gcanti/tcomb/issues/168#issuecomment-222422999)
+
 # v3.1.0
 
 - **New Feature**
