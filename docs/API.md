@@ -210,7 +210,8 @@ Person({ name: 'Giulio', age: 'a string' }); // => throws
 ```js
 type Options = {
   name?: string,
-  strict?: boolean
+  strict?: boolean,
+  defaultProps?: Object
 };
 
 (props: {[key: string]: TcombType;}, options?: string | Options) => TcombType
@@ -235,9 +236,11 @@ const point = Point({ x: 1, y: 2 });
 ```js
 {
   kind: 'struct',
-  name: name,
+  name: options.name,
   identity: false,
-  props: props
+  props: props,
+  strict: options.strict,
+  defaultProps: options.defaultProps
 }
 ```
 
@@ -278,8 +281,13 @@ Every struct constructor owns an `extend` function:
 ```js
 type Props = {[key: String]: Type};
 type Mixin = Props | TcombStruct | TcombInterface | refinement(Mixin);
+type Options = {
+  name?: string,
+  strict?: boolean,
+  defaultProps?: Object
+};
 
-extend(mixins: Mixin | Array<Mixin>, name?: string) => TcombStruct
+extend(mixins: Mixin | Array<Mixin>, options?: : string | Options) => TcombStruct
 ```
 
 **Example**
@@ -323,13 +331,13 @@ Cube.prototype.getVolume = function () {
 const Wrong = Point.extend({ x: t.String }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
 ```
 
-Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
+Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, options?: string | Options) => TcombType` function:
 
 ```js
 const Point3D = t.struct.extend([Point, { z: t.Number }], 'Point3D');
 ```
 
-**Note**. The implementation uses the top level function `extend(combinator, mixins, name)` defined in `tcomb/lib/extend`
+**Note**. The implementation uses the top level function `extend(combinator, mixins, options)` defined in `tcomb/lib/extend`
 
 # The `tuple` combinator
 
@@ -582,9 +590,10 @@ doSerialize(bar.point); // => ok
 ```js
 {
   kind: 'interface',
-  name: name,
+  name: options.name,
   identity: ...depends on props,
-  props: props
+  props: props,
+  strict: options.strict
 }
 ```
 
@@ -612,8 +621,12 @@ Every interface constructor owns an `extend` function:
 ```js
 type Props = {[key: String]: Type};
 type Mixin = Props | TcombStruct | TcombInterface | refinement(Mixin);
+type Options = {
+  name?: string,
+  strict?: boolean
+};
 
-extend(mixins: Mixin | Array<Mixin>, name?: string) => TcombStruct
+extend(mixins: Mixin | Array<Mixin>, options?: string | Options) => TcombStruct
 ```
 
 **Example**
@@ -635,13 +648,13 @@ const E = A.extend([B, MixinC, MixinD]);
 const Wrong = Point.extend({ x: t.String }); // => throws '[tcomb] Invalid call to mixin(target, source, [overwrite]): cannot overwrite property "x" of target object'
 ```
 
-Alternatively you can use the `t.interface.extend(mixins: Array<Mixin>, name?: string) => TcombType` function:
+Alternatively you can use the `t.interface.extend(mixins: Array<Mixin>, options?: string | Options) => TcombType` function:
 
 ```js
 const Point3D = t.interface.extend([Point, { z: t.Number }], 'Point3D');
 ```
 
-**Note**. The implementation uses the top level function `extend(combinator, mixins, name)` defined in `tcomb/lib/extend`
+**Note**. The implementation uses the top level function `extend(combinator, mixins, options)` defined in `tcomb/lib/extend`
 
 # The `func` combinator
 
