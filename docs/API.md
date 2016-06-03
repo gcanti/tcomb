@@ -1070,6 +1070,42 @@ assert.ok(person instanceof Person); // => true
 assert.deepEqual(person, source); // => ok
 ```
 
+## The `lib/isSubsetOf` module
+
+Function for determining whether one type is compatible with another type.
+
+**Signature**
+
+```js
+(subset: TcombType, type: TcombType) => boolean
+```
+
+**Example**
+
+```js
+import isSubsetOf from 'tcomb/lib/isSubsetOf';
+
+const Point = t.interface({
+  x: t.Number,
+  y: t.Number
+}, 'Point');
+
+const StrictPoint = t.interface({
+  x: t.Number,
+  y: t.Number
+}, {name: 'StrictPoint', strict: true});
+
+const Point3D = t.interface({
+  x: t.Number,
+  y: t.Number,
+  z: t.Number
+}, 'Point3D');
+
+isSubsetOf(Point3D, Point);  // => true
+isSubsetOf(Point, Point3D);  // => false
+isSubsetOf(Point3D, StrictPoint);  // => false
+```
+
 ## The `lib/installTypeFormatter` module
 
 Chrome Dev Tools custom formatter for tcomb types.
