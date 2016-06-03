@@ -1090,3 +1090,42 @@ into:
 import installTypeFormatter from 'tcomb/lib/installTypeFormatter'
 installTypeFormatter()
 ```
+
+## The `lib/isSubsetOf` module
+
+Function for determining whether one type is compatible with another type.
+
+**Signature**
+
+```js
+(subset: Type, superset: Type) => boolean
+```
+
+**Example**
+
+```js
+import t from 'tcomb'
+import isSubsetOf from 'tcomb/lib/isSubsetOf';
+
+isSubsetOf(t.Integer, t.Number) // => true
+
+const Point = t.interface({
+  x: t.Number,
+  y: t.Number
+}, 'Point');
+
+const Point3D = t.interface({
+  x: t.Number,
+  y: t.Number,
+  z: t.Number
+}, 'Point3D');
+
+isSubsetOf(Point3D, Point) // => true
+
+const StrictPoint = t.interface({
+  x: t.Number,
+  y: t.Number
+}, { name: 'StrictPoint', strict: true });
+
+isSubsetOf(Point3D, StrictPoint) // => false
+```
