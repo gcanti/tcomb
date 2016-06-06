@@ -24,6 +24,15 @@ describe('t.func(domain, codomain, [name])', function () {
     assert.ok(T.is(T(f)));
   });
 
+  it('should throw if arguments are wrong', function () {
+    var T1 = t.func(t.Number, t.Number);
+    var T2 = t.func(t.Number, t.String);
+    var f = T2.of(function () { return 'hi'; });
+    util.throwsWithMessage(function () {
+      T1(f);
+    }, '[tcomb] Invalid value "<function0>" supplied to (Number) => Number');
+  });
+
   describe('of', function () {
 
     it('should check the arguments', function () {
@@ -118,7 +127,7 @@ describe('t.func(domain, codomain, [name])', function () {
 
     it('should throw if no arguments are passed in', function () {
       var Type = t.func([t.Number, t.Number, t.Number], t.Number);
-      var sum = Type(function (a, b, c) {
+      var sum = Type.of(function (a, b, c) {
         return a + b + c;
       }, true);
       util.throwsWithMessage(function () {
@@ -128,7 +137,7 @@ describe('t.func(domain, codomain, [name])', function () {
 
     it('should curry functions', function () {
       var Type = t.func([t.Number, t.Number, t.Number], t.Number);
-      var sum = Type(function (a, b, c) {
+      var sum = Type.of(function (a, b, c) {
         return a + b + c;
       }, true);
       assert.deepEqual(sum(1, 2, 3), 6);
