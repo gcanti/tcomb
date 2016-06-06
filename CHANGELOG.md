@@ -12,6 +12,13 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.1
+
+- **Bug Fix**
+  - fix missing path argument in FuncType
+- **Polish**
+  - better stringify serialization for functions
+
 # v3.2.0
 
 - **New Feature**
