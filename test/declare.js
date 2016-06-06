@@ -92,7 +92,7 @@ describe('t.declare([name])', function () {
       throwsWithMessage(function () {
         var ANum = t.declare();
         ANum.define(t.Number);
-      }, '[tcomb] Invalid argument type undefined supplied to define(type) (expected a fresh, unnamed type)');
+      }, '[tcomb] Invalid argument type "Number" supplied to define(type) (expected a fresh, unnamed type)');
     });
 
     it('should play well with identity', function () {
