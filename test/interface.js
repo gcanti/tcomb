@@ -13,6 +13,10 @@ var PointInterface = t.inter({
   y: t.Number
 });
 
+var ToStringable = t.inter({
+  toString: t.Function
+});
+
 var HydrateInterface = t.inter({point: Point});
 
 describe('t.interface(props, [name])', function () {
@@ -73,7 +77,7 @@ describe('t.interface(props, [name])', function () {
     it('should accept only valid values', function () {
       throwsWithMessage(function () {
         PointInterface(1);
-      }, '[tcomb] Invalid value 1 supplied to {x: Number, y: Number} (expected an object)');
+      }, '[tcomb] Invalid value undefined supplied to {x: Number, y: Number}/x: Number');
       throwsWithMessage(function () {
         PointInterface({});
       }, '[tcomb] Invalid value undefined supplied to {x: Number, y: Number}/x: Number');
@@ -149,6 +153,9 @@ describe('t.interface(props, [name])', function () {
 
     it('should check types', function () {
       assert.equal(PointInterface.is({ x: 1, y: 'a' }), false);
+      assert.equal(PointInterface.is(1), false);
+      assert.equal(ToStringable.is(1), true);
+      assert.equal(ToStringable.is({}), true);
     });
 
     it('should allow additional props', function () {

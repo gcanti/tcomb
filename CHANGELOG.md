@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.2
+
+- **Bug Fix**
+  - relax `isObject` contraint in interface combinator, fix #214
+
 # v3.2.1
 
 - **Bug Fix**
