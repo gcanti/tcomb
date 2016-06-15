@@ -81,6 +81,12 @@ describe('t.interface(props, [name])', function () {
       throwsWithMessage(function () {
         PointInterface({});
       }, '[tcomb] Invalid value undefined supplied to {x: Number, y: Number}/x: Number');
+      throwsWithMessage(function () {
+        PointInterface(null);
+      }, '[tcomb] Invalid value null supplied to {x: Number, y: Number}');
+      throwsWithMessage(function () {
+        PointInterface(undefined);
+      }, '[tcomb] Invalid value undefined supplied to {x: Number, y: Number}');
     });
 
     it('should have meta.identity = true if contains a type with identity = true', function () {
