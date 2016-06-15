@@ -29,7 +29,7 @@ function sum(a, b) {
 sum(1, 's'); // throws '[tcomb] Invalid value "s" supplied to Number'
 
 // using babel-plugin-tcomb
-function sum(a: t.Number, b: t.Number) {
+function sum(a: number, b: number) {
   return a + b;
 }
 ```
@@ -173,10 +173,10 @@ console.log(result); // => 'a number'
 
 **Babel plugin**
 
-With [babel-plugin-tcomb](https://github.com/gcanti/babel-plugin-tcomb) you can use type annotations:
+Using [babel-plugin-tcomb](https://github.com/gcanti/babel-plugin-tcomb) you can also write (Flow compatible) type annotations:
 
 ```js
-function sum(a: t.Number, b: t.Number): t.Number {
+function sum(a: number, b: number): number {
   return a + b;
 }
 ```
@@ -210,7 +210,6 @@ Will output 2 files:
 * [tcomb-doc](https://github.com/gcanti/tcomb-doc) Documentation tool for tcomb
 * [tcomb-validation](https://github.com/gcanti/tcomb-validation) Validation library based on type combinators
 * [tcomb-json-schema](https://github.com/gcanti/tcomb-json-schema) Transforms a JSON Schema to a tcomb type
-* [tcomb-defaults](https://github.com/ahdinosaur/tcomb-defaults) default properties in tcomb structs
 * [reactuate](https://github.com/reactuate/reactuate) React/Redux stack (not a boilerplate kit)
 * [tcomb-react](https://github.com/gcanti/tcomb-react) Alternative syntax for PropTypes
 * [mongorito-tcomb](https://github.com/xouabita/mongorito-tcomb) Bring schema validation to Mongorito thanks to tcomb
