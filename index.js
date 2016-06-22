@@ -21,10 +21,12 @@ t.Function = require('./lib/Function');
 t.Nil = require('./lib/Nil');
 t.Number = require('./lib/Number');
 t.Integer = require('./lib/Integer');
+t.IntegerT = t.Integer;
 t.Object = require('./lib/Object');
 t.RegExp = require('./lib/RegExp');
 t.String = require('./lib/String');
 t.Type = require('./lib/Type');
+t.TypeT = t.Type;
 
 // short alias are deprecated
 t.Arr = t.Array;
