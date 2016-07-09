@@ -2,6 +2,7 @@
 var assert = require('assert');
 var t = require('../index');
 var throwsWithMessage = require('./util').throwsWithMessage;
+var create = require('../lib/create');
 
 var A = t.declare('A');
 
@@ -101,7 +102,7 @@ describe('t.declare([name])', function () {
       assert.equal(Tuple.meta && Tuple.meta.identity, false);
       assert.equal(Result.meta && Result.meta.identity, false);
       Tuple.define(t.tuple([t.String]));
-      assert.equal(Tuple.meta && Tuple.meta.identity, false);
+      assert.equal(Tuple.meta && Tuple.meta.identity, true);
       assert.equal(Result.meta && Result.meta.identity, false);
 
       Tuple = t.declare('Tuple');
@@ -111,6 +112,16 @@ describe('t.declare([name])', function () {
       Tuple.define(t.struct({}));
       assert.equal(Tuple.meta && Tuple.meta.identity, false);
       assert.equal(Result.meta && Result.meta.identity, false);
+    });
+
+    it('should play well with enums', function () {
+      var A = t.declare('A');
+      A.define(t.enums.of(['a']));
+      assert.strictEqual(create(A, 'a'), 'a');
+
+      var B = t.declare('B');
+      B.define(t.refinement(t.String, function () { return true; }));
+      assert.strictEqual(create(B, 'a string'), 'a string');
     });
 
   });
