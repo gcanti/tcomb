@@ -91,6 +91,12 @@ describe('t.maybe(type, [name])', function () {
       assert.ok(typeof T(undefined) === 'undefined');
     });
 
+    it('should play well with JSON.stringify (#227)', function () {
+      var thing = t.struct({ foo: t.maybe(t.struct({ bar: t.String })) });
+      assert.strictEqual(JSON.stringify(thing({foo: null})), '{"foo":null}');
+      assert.strictEqual(JSON.stringify(thing({foo: undefined})), '{}');
+    });
+
   });
 
   describe('is(x)', function () {
