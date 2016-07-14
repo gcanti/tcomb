@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# 3.2.7
+
+- **Bug Fix**
+  - add support for class constructors, `fromJSON` module (@gcanti)
+
 # v3.2.6
 
 - **Bug Fix**

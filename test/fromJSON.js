@@ -32,6 +32,13 @@ describe('fromJSON', function () {
     assert.equal(fromJSON('aaa', MyType), 3);
   });
 
+  it('should handle class constructors', function () {
+    var expected = '1973-11-30T00:00:00.000Z';
+    assert.strictEqual(fromJSON('1973-11-30T00:00:00.000Z', Date).toISOString(), expected);
+    var actual = new RegExp('a');
+    assert.strictEqual(fromJSON(actual, RegExp), actual);
+  });
+
   it('should handle maybe', function () {
     var MyType = t.maybe(MyDate);
     assert.strictEqual(fromJSON(null, MyType), null);
