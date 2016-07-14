@@ -1046,14 +1046,8 @@ import fromJSON from 'tcomb/lib/fromJSON'
 
 const Person = t.struct({
   name: t.String,
-  birthDate: t.Date
+  birthDate: Date
 });
-
-// configure your types
-t.Date.fromJSON = function (s) {
-  t.assert(t.String.is(s));
-  return new Date(s);
-};
 
 const source = {
   name: 'Giulio',
@@ -1069,6 +1063,8 @@ const person = fromJSON(json, Person);
 assert.ok(person instanceof Person); // => true
 assert.deepEqual(person, source); // => ok
 ```
+
+You can add a static `fromJSON: (jsonValue: any) => any` function to your types as a custom reviver.
 
 ## The `lib/installTypeFormatter` module
 
