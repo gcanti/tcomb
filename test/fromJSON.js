@@ -35,8 +35,21 @@ describe('fromJSON', function () {
   it('should handle class constructors', function () {
     var expected = '1973-11-30T00:00:00.000Z';
     assert.strictEqual(fromJSON('1973-11-30T00:00:00.000Z', Date).toISOString(), expected);
+
     var actual = new RegExp('a');
     assert.strictEqual(fromJSON(actual, RegExp), actual);
+
+    var NonEmptyString = t.refinement(t.String, function (s) { return s.length > 0; }, 'NonEmptyString');
+    NonEmptyString.fromJSON = function (s) { return s.trim(); };
+    util.throwsWithMessage(function () {
+      fromJSON(' ', NonEmptyString);
+    }, '[tcomb] Invalid value "" supplied to NonEmptyString');
+
+    Date.fromJSON = function (s) {
+      return new Date(s);
+    };
+    assert.strictEqual(fromJSON('1973-11-30T00:00:00.000Z', Date).toISOString(), expected);
+    delete Date.fromJSON;
   });
 
   it('should handle maybe', function () {
