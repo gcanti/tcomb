@@ -27,9 +27,9 @@ describe('fromJSON', function () {
   it('should handle a static fromJSON function attached to the type', function () {
     var MyType = t.refinement(t.String, function () { return true; });
     MyType.fromJSON = function (s) {
-      return s.length;
+      return s + 'ok';
     };
-    assert.equal(fromJSON('aaa', MyType), 3);
+    assert.equal(fromJSON('aaa', MyType), 'aaaok');
   });
 
   it('should handle class constructors', function () {

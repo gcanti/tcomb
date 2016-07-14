@@ -16,6 +16,7 @@
 
 - **Bug Fix**
   - add support for class constructors, `fromJSON` module (@gcanti)
+  - type-check the value returned by a custom reviver, `fromJSON` module (@gcanti)
 
 # v3.2.6
 
