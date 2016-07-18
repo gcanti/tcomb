@@ -172,6 +172,14 @@ describe('t.union(types, [name])', function () {
       });
     });
 
+    it('should handle constructors', function () {
+      function A() {}
+      var U = t.union([t.Boolean, A], 'U');
+      assert.doesNotThrow(function () {
+        U(new A());
+      });
+    });
+
   });
 
   describe('update(instance, patch)', function () {
