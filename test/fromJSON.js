@@ -56,6 +56,9 @@ describe('fromJSON', function () {
     var MyType = t.maybe(MyDate);
     assert.strictEqual(fromJSON(null, MyType), null);
     assert.deepEqual(fromJSON(jsonify(date), MyType), date);
+    util.throwsWithMessage(function () {
+      fromJSON(1, t.maybe(t.String));
+    }, '[tcomb] Invalid value 1 supplied to ?String');
   });
 
   it('should handle refinement', function () {
@@ -66,6 +69,9 @@ describe('fromJSON', function () {
     util.throwsWithMessage(function () {
       fromJSON(jsonify(new Date(123375600000)), MyType);
     }, '[tcomb] Invalid argument value "1973-11-28T23:00:00.000Z" supplied to fromJSON(value, type) (expected a valid MyType)');
+    util.throwsWithMessage(function () {
+      fromJSON(1, t.refinement(t.String, function (s) { return s.length > 2; }));
+    }, '[tcomb] Invalid value 1 supplied to {String | <function1>}');
   });
 
   it('should handle struct', function () {
@@ -86,6 +92,10 @@ describe('fromJSON', function () {
     var actual = fromJSON(json, MyType);
     assert.ok(actual instanceof MyType);
     assert.deepEqual(actual, source);
+
+    util.throwsWithMessage(function () {
+      fromJSON({}, MyType);
+    }, '[tcomb] Invalid value undefined supplied to MyType/name: String');
   });
 
   it('should handle interface', function () {
@@ -104,6 +114,10 @@ describe('fromJSON', function () {
     };
     var json = jsonify(source);
     assert.deepEqual(fromJSON(json, MyType), source);
+
+    util.throwsWithMessage(function () {
+      fromJSON({}, MyType);
+    }, '[tcomb] Invalid value undefined supplied to MyType/name: String');
   });
 
   it('should handle list', function () {
@@ -116,6 +130,10 @@ describe('fromJSON', function () {
     var source = [new Date(2016, 10, 30), new Date(2073, 10, 30)];
     var json = jsonify(source);
     assert.deepEqual(fromJSON(json, MyType), source);
+
+    util.throwsWithMessage(function () {
+      fromJSON([1], t.list(t.String));
+    }, '[tcomb] Invalid value 1 supplied to Array<String>/0: String');
   });
 
   it('should handle union', function () {
@@ -148,6 +166,10 @@ describe('fromJSON', function () {
     var source = ['s', new Date(2016, 10, 30)];
     var json = jsonify(source);
     assert.deepEqual(fromJSON(json, MyType), source);
+
+    util.throwsWithMessage(function () {
+      fromJSON([1, 1], MyType);
+    }, '[tcomb] Invalid value 1 supplied to MyType/0: String');
   });
 
   it('should handle dict', function () {
@@ -160,6 +182,13 @@ describe('fromJSON', function () {
     var source = {a: new Date(2016, 10, 30)};
     var json = jsonify(source);
     assert.deepEqual(fromJSON(json, MyType), source);
+
+    util.throwsWithMessage(function () {
+      fromJSON({a: 'a'}, t.dict(t.refinement(t.String, function (s) { s.length > 2; }, 'Gt2'), t.String));
+    }, '[tcomb] Invalid value "a" supplied to {[key: Gt2]: String}/Gt2');
+    util.throwsWithMessage(function () {
+      fromJSON({a: 1}, t.dict(t.String, t.String));
+    }, '[tcomb] Invalid value 1 supplied to {[key: String]: String}/a: String');
   });
 
 });

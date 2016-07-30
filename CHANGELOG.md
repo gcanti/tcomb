@@ -14,6 +14,8 @@
 
 # 3.2.9
 
+- **New Feature**
+  - fromJSON: track error path, fix #235 (@gcanti)
 - **Internal**
   - change shallow copy in order to improve perfs (@gcanti)
 
