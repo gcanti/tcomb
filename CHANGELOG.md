@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# 3.2.10
+
+- **Bug Fix**
+  - handle nully values in interface `is` function (@gcanti)
+
 # 3.2.9
 
 - **New Feature**
