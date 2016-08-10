@@ -162,6 +162,8 @@ describe('t.interface(props, [name])', function () {
       assert.equal(PointInterface.is(1), false);
       assert.equal(ToStringable.is(1), true);
       assert.equal(ToStringable.is({}), true);
+      assert.equal(PointInterface.is(null), false);
+      assert.equal(PointInterface.is(undefined), false);
     });
 
     it('should allow additional props', function () {
