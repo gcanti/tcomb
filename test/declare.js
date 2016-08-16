@@ -124,6 +124,25 @@ describe('t.declare([name])', function () {
       assert.strictEqual(create(B, 'a string'), 'a string');
     });
 
+    it('should play well with custom dispatch', function () {
+      function dispatch(x) {
+        return t.String.is(x) ? t.String : U;
+      }
+      var U = t.declare('U');
+      U.dispatch = dispatch;
+      var UU = t.union([t.String, t.list(U)]);
+      U.define(UU);
+      assert.strictEqual(U.dispatch, dispatch);
+      assert.strictEqual(UU.dispatch, dispatch);
+
+      var U2 = t.declare('U');
+      U2.define(t.union([t.String, t.list(U)]));
+      U2.dispatch = dispatch;
+      throwsWithMessage(function () {
+        U2('a');
+      }, '[tcomb] Please define the custom U.dispatch function before calling U.define()');
+    });
+
   });
 
   describe('constructor', function () {

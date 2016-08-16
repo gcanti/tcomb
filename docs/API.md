@@ -833,7 +833,18 @@ A.define(t.struct({
 }));
 ```
 
-**Note**. **Do not** try to type-check structures with circular references, that would blow the stack.
+**Warning**. **Do not** try to type-check structures with circular references, that would blow the stack.
+
+**Warning**. If you define a union with a custom `dispatch`, do define the `dispatch` function before calling `define`
+
+```js
+const U = t.declare('U')
+// good
+U.dispatch = (x) => t.String.is(x) ? t.String : U
+U.define(t.union([t.String, t.list(U)]))
+// bad
+// U.dispatch = (x) => t.String.is(x) ? t.String : U
+```
 
 # Updating immutable instances
 
