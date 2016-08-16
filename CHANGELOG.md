@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# 3.2.11
+
+- **Bug Fix**
+  - allow declare'd unions with custom dispatch, fix #242 (@gcanti)
+
 # 3.2.10
 
 - **Bug Fix**
