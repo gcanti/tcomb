@@ -97,6 +97,17 @@ describe('t.interface(props, [name])', function () {
     it('should hydrate fields', function () {
       var hi = HydrateInterface({ point: { x: 0, y: 1} });
       assert.equal(Point.is(hi.point), true);
+      var A = t.struct({ x: t.Number });
+      var B = t.inter({ a: A });
+      var actual = B({
+        a: { x: 1 },
+        extra: 3
+      });
+      assert.equal(actual.a instanceof A, true);
+      assert.deepEqual(actual, {
+        a: { x: 1 },
+        extra: 3
+      });
     });
 
     it('should handle strict option', function () {

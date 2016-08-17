@@ -12,29 +12,34 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
-# 3.2.11
+# v3.2.12
+
+- **Bug Fix**
+  - now `interface` doesn't filter additional props when props contain a struct, fix #245 (@gcanti)
+
+# v3.2.11
 
 - **Bug Fix**
   - allow declare'd unions with custom dispatch, fix #242 (@gcanti)
 
-# 3.2.10
+# v3.2.10
 
 - **Bug Fix**
   - handle nully values in interface `is` function (@gcanti)
 
-# 3.2.9
+# v3.2.9
 
 - **New Feature**
   - fromJSON: track error path, fix #235 (@gcanti)
 - **Internal**
   - change shallow copy in order to improve perfs (@gcanti)
 
-# 3.2.8
+# v3.2.8
 
 - **Bug Fix**
   - mixing types and classes in a union throws, fix #232 (@gcanti)
 
-# 3.2.7
+# v3.2.7
 
 - **Bug Fix**
   - add support for class constructors, `fromJSON` module (@gcanti)
