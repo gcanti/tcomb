@@ -46,7 +46,7 @@ A type-checked class:
 const Person = t.struct({
   name: t.String,              // required string
   surname: t.maybe(t.String),  // optional string
-  age: Integer,                // required integer
+  age: t.Integer,                // required integer
   tags: t.list(t.String)       // a list of strings
 }, 'Person');
 
