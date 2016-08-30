@@ -191,4 +191,17 @@ describe('fromJSON', function () {
     }, '[tcomb] Invalid value 1 supplied to {[key: String]: String}/a: String');
   });
 
+  it('should handle intersections', function () {
+    var A = t.inter({ foo: t.String });
+    var B = t.inter({ bar: Date });
+    var AB = t.intersection([A, B]);
+    var json = {
+      foo: 'asd',
+      bar: '2016-10-27T00:00:00.000+00:00'
+    };
+    assert.ok(fromJSON(json, AB).bar instanceof Date);
+    var I2 = t.intersection([t.Number, t.Number]);
+    assert.ok(typeof fromJSON(1, I2) === 'number');
+  });
+
 });
