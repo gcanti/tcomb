@@ -1,5 +1,6 @@
 /* globals describe, it */
 var assert = require('assert');
+var vm = require('vm');
 var t = require('../index');
 var util = require('./util');
 
@@ -110,6 +111,13 @@ describe('t.list(type, [name])', function () {
       assert.equal(Path.is([p1, p2]), true);
       assert.equal(Path.is(1), false);
       assert.equal(Path.is([1]), false);
+    });
+
+    it('should return true when x is a list of type instances returned from vm', function () {
+      assert.equal(Path.is(vm.runInNewContext('[]', { Array: Array })), true);
+      assert.equal(Path.is(vm.runInNewContext('[p1, p2]', { Array: Array, p1: p1, p2: p2 })), true);
+      assert.equal(Path.is(vm.runInNewContext('1', { Array: Array })), false);
+      assert.equal(Path.is(vm.runInNewContext('[1]', { Array: Array })), false);
     });
 
     it('should be used as a predicate', function () {
