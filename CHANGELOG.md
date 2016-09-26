@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.15
+
+- **New Feature**
+  - Added support for overwriting `defaultProps` in `t.struct.extend`, fix #257 (@tehnomaag)
+
 # v3.2.14
 
 - **Bug Fix**
