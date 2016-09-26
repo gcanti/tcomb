@@ -337,6 +337,27 @@ Alternatively you can use the `t.struct.extend(mixins: Array<Mixin>, options?: s
 const Point3D = t.struct.extend([Point, { z: t.Number }], 'Point3D');
 ```
 
+**Note**. Repeated defaultProps overwrite previously set values:
+
+```js
+const Base = t.struct(
+  { value: t.String },
+  { defaultProps: { value: "base" }}
+);
+const Extended = Base.extend(
+  {},
+  { defaultProps: { value: "override-extended" }}
+);
+const DeepExtended = t.struct.extend(
+  [Base, Extended, {}],
+  { defaultProps: { value: "override-deep" }}
+);
+
+Base({}).value;          // equals 'base'
+Extended({}).value;      // equals 'override-extended'
+DeepExtended({}).value;  // equals 'override-deep'
+```
+
 **Note**. The implementation uses the top level function `extend(combinator, mixins, options)` defined in `tcomb/lib/extend`
 
 # The `tuple` combinator
