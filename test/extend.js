@@ -53,6 +53,57 @@ describe('extend(combinator, mixins, [name])', function () {
     });
   });
 
+  it('should override defaultProps', function () {
+    var A1 = t.struct({ a: t.String }, { defaultProps: { a: 'default-a' } });
+    var B1 = t.struct({ b: t.String }, { defaultProps: { b: 'default-b' } });
+    var C1 = t.struct.extend([A1, B1, { z: t.Number }], { defaultProps: {
+      a: 'override-c',
+      b: 'override-c',
+      z: 1
+    }});
+    assert.deepEqual(A1.meta.defaultProps, {
+      a: 'default-a'
+    });
+    assert.deepEqual(B1.meta.defaultProps, {
+      b: 'default-b'
+    });
+    assert.deepEqual(C1.meta.defaultProps, {
+      a: 'override-c',
+      b: 'override-c',
+      z: 1
+    });
+    assert.deepEqual(C1({}), {
+      a: 'override-c',
+      b: 'override-c',
+      z: 1
+    });
+  });
+
+  it('should override deep defaultProps', function () {
+    var A1 = t.struct({ z: t.String }, { defaultProps: { z: 'default-a' } });
+    var B1 = t.struct.extend([A1], { defaultProps: { z: 'override-b' } });
+    var C1 = t.struct.extend([B1, {}], { defaultProps: {}});
+    var D1 = t.struct.extend([C1, {}], { defaultProps: { z: 'override-d' }});
+    assert.deepEqual(A1.meta.defaultProps, {
+      z: 'default-a'
+    });
+    assert.deepEqual(B1.meta.defaultProps, {
+      z: 'override-b'
+    });
+    assert.deepEqual(C1.meta.defaultProps, {
+      z: 'override-b'
+    });
+    assert.deepEqual(D1.meta.defaultProps, {
+      z: 'override-d'
+    });
+    assert.deepEqual(D1({}), {
+      z: 'override-d'
+    });
+    assert.deepEqual(D1({ z: 'provided-d' }), {
+      z: 'provided-d'
+    });
+  });
+
   describe('struct.extend(mixins, [name])', function () {
 
     it('should handle an array of mixins', function () {
