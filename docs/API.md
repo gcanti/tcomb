@@ -500,7 +500,7 @@ Actions.dispatch = function dispatch(x) {
   return typeToConstructor[x.type];
 };
 
-const incrementAction = Action({ type: 'increment', step: 1 });
+const incrementAction = Actions({ type: 'increment', step: 1 });
 ```
 
 **Note**. `tcomb` provides a default implementation of `dispatch` which you can override.
