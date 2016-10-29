@@ -135,6 +135,14 @@ const person2 = Person({ name: 'Giulio', age: 42 })
   }
   const Person2 = Person.extend<Person2>({ surname: t.String })
 
+  // extend static function
+  type AgeUpTo14 = number;
+  interface Kid extends Person {
+    age: AgeUpTo14;
+  }
+  const AgeUpTo14 = t.refinement(t.Number, (n) => n < 14);
+  const Kid = t.struct.extend([Person, { age: AgeUpTo14 }]);
+
   // update function
   const person3 = Person.update(person1, {
     name: {$set: 'Guido'}
@@ -145,6 +153,53 @@ const person2 = Person({ name: 'Giulio', age: 42 })
   Person.meta.name;
   Person.meta.identity;
   Person.meta.props;
+  Person.meta.defaultProps;
+  Person.meta.strict;
+
+//
+// interface combinator
+//
+
+interface IPerson {
+  name: string;
+  age: number;
+}
+
+const IPerson = t.interface<IPerson>({
+  name: t.String,
+  age: t.Number
+}, 'IPerson');
+
+const person4 = IPerson({ name: 'Giulio', age: 42 });
+
+  // static members
+  IPerson.displayName;
+
+  // extend function
+  interface Person3 extends Person {
+    surname: string;
+  }
+  const Person3 = Person.extend<Person2>({ surname: t.String });
+
+  // extend static function
+  type AgeUpTo21 = number;
+  interface Teen extends Person {
+    age: AgeUpTo21;
+  }
+  const AgeUpTo21 = t.refinement(t.Number, (n) => n < 21);
+  const Teen = t.interface.extend([IPerson, { age: AgeUpTo21 }]);
+
+  // update function
+  const person5 = IPerson.update(person1, {
+    name: {$set: 'Guido'}
+  });
+
+  // meta object
+  IPerson.meta.kind;
+  IPerson.meta.name;
+  IPerson.meta.identity;
+  IPerson.meta.props;
+  IPerson.meta.strict;
 
 //
 // list combinator

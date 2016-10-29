@@ -82,7 +82,13 @@ declare module Tcomb {
   //
 
   type StructProps = {[key: string]: Constructor<any>};
+  type StructDefaultProps = {[key: string]: string};
   type StructMixin = StructProps | Struct<any> | Interface<any>;
+  type StructOptions = string | {
+    name?: string;
+    strict?: boolean;
+    defaultProps?: StructDefaultProps;
+  };
 
   interface Struct<T> extends Type<T> {
     new (value: T): T;
@@ -91,16 +97,26 @@ declare module Tcomb {
       name: string;
       identity: boolean;
       props: StructProps;
+      strict: boolean;
+      defaultProps: StructDefaultProps;
     };
     update: Update<T>;
-    extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
+    extend<E extends T>(mixins: StructMixin | Array<StructMixin>, options?: StructOptions): Struct<E>;
   }
 
-  export function struct<T>(props: StructProps, name?: string): Struct<T>;
+  export function struct<T>(props: StructProps, options?: StructOptions): Struct<T>;
+  namespace struct {
+    export function extend<E>(mixins: StructMixin | Array<StructMixin>, options?: StructOptions): Struct<E>;
+  }
 
   //
   // interface
   //
+
+  type InterfaceOptions = string | {
+    name?: string;
+    strict?: boolean;
+  };
 
   interface Interface<T> extends Type<T> {
     meta: {
@@ -108,12 +124,16 @@ declare module Tcomb {
       name: string;
       identity: boolean;
       props: StructProps;
+      strict: boolean;
     };
     update: Update<T>;
-    extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
+    extend<E extends T>(mixins: StructMixin | Array<StructMixin>, options?: InterfaceOptions): Struct<E>;
   }
 
-  export function interface<T>(props: StructProps, name?: string): Interface<T>;
+  export function interface<T>(props: StructProps, options?: InterfaceOptions): Interface<T>;
+  namespace interface {
+    export function extend<E>(mixins: StructMixin | Array<StructMixin>, options?: InterfaceOptions): Struct<E>;
+  }
 
   //
   // list
