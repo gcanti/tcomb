@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.16
+
+- **Bug Fix**
+  - strict structs with additional methods should not throw on updating, fix #267 (@gcanti)
+
 # v3.2.15
 
 - **New Feature**
