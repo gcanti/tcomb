@@ -14,6 +14,20 @@ describe('t.update(instance, patch)', function () {
     y: t.Number
   });
 
+  it('strict structs with additional methods should not throw on updating', function () {
+    var Rectangle = t.struct({
+      width: t.Number,
+      height: t.Number
+    }, {strict: true});
+
+    Rectangle.prototype.getArea = function () {
+      return this.width * this.height;
+    };
+
+    var r = Rectangle({width: 10, height: 10});
+    assert.equal(Rectangle.update(r, {width: {$set: 20}}).width, 20);
+  });
+
   it('should throw if patch is invalid', function () {
     throwsWithMessage(function () {
       t.update({});
