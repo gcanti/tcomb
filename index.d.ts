@@ -38,6 +38,7 @@ declare module Tcomb {
   export var Nil: Irreducible<void>;
   export var String: Irreducible<string>;
   export var Number: Irreducible<number>;
+  export var Integer: Irreducible<number>;
   export var Boolean: Irreducible<boolean>;
   export var Array: Irreducible<Array<any>>;
   export var Object: Irreducible<Object>; // FIXME restrict to POJOs
