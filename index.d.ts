@@ -241,7 +241,7 @@ declare module Tcomb {
 
   interface Declare<T> extends Type<T> {
     update: Update<T>;
-    define<T>(type: Struct<T> | Tuple<T>): void;
+    define(type: Type<any>): void;
   }
 
   export function declare<T>(name?: string): Declare<T>;
