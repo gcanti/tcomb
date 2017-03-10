@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.19
+
+- **Polish**
+  - add `strict` (struct, interface) in typescript definition (@gcanti)
+
 # v3.2.18
 
 - **Bug Fix**

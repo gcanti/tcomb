@@ -92,6 +92,7 @@ declare module Tcomb {
       name: string;
       identity: boolean;
       props: StructProps;
+      strict: boolean;
     };
     update: Update<T>;
     extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
@@ -109,6 +110,7 @@ declare module Tcomb {
       name: string;
       identity: boolean;
       props: StructProps;
+      strict: boolean;
     };
     update: Update<T>;
     extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
