@@ -98,7 +98,12 @@ declare module Tcomb {
     extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
   }
 
-  export function struct<T>(props: StructProps, name?: string): Struct<T>;
+  type StructOptions = {
+    name?: string,
+    strict?: boolean
+  };
+
+  export function struct<T>(props: StructProps, name?: string | StructOptions): Struct<T>;
 
   //
   // interface
@@ -116,7 +121,7 @@ declare module Tcomb {
     extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
   }
 
-  export function interface<T>(props: StructProps, name?: string): Interface<T>;
+  export function interface<T>(props: StructProps, name?: string | StructOptions): Interface<T>;
 
   //
   // list

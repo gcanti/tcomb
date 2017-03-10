@@ -12,10 +12,15 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.20
+
+- **Polish**
+  - add `options` (struct, interface) to typescript definition (@gcanti)
+
 # v3.2.19
 
 - **Polish**
-  - add `strict` (struct, interface) in typescript definition (@gcanti)
+  - add `strict` (struct, interface) to typescript definition (@gcanti)
 
 # v3.2.18
 
