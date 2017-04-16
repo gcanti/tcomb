@@ -60,7 +60,8 @@ describe('irreducibles types', function () {
     {T: t.Function, x: noop},
     {T: t.Error, x: new Error()},
     {T: t.RegExp, x: /a/},
-    {T: t.Date, x: new Date()}
+    {T: t.Date, x: new Date()},
+    {T: t.Promise, x: { then: function() {} }}
   ].forEach(function (o) {
 
     var T = o.T;
@@ -363,6 +364,37 @@ describe('t.Type', function () {
     it('should return true if x is a tcomb type', function () {
       assert.equal(t.Type.is(t.String), true);
       assert.equal(t.Type.is(1), false);
+    });
+
+  });
+
+});
+
+
+describe('t.Promise', function () {
+
+  describe('#is(x)', function () {
+
+    it('should return true when x is a Promise', function () {
+      assert.ok(t.Promise.is(Promise.resolve()));
+      assert.ok(t.Promise.is(new Promise(function() {})));
+      assert.ok(t.Promise.is({ then: function() {} }));
+    });
+
+    it('should return false when x is not a function', function () {
+      ko(t.Promise.is(null));
+      ko(t.Promise.is(undefined));
+      ko(t.Promise.is(0));
+      ko(t.Promise.is(''));
+      ko(t.Promise.is([]));
+      ko(t.Promise.is({}));
+      ko(t.Promise.is(new String('1'))); // eslint-disable-line
+      ko(t.Promise.is(new Number(1))); // eslint-disable-line
+      ko(t.Promise.is(new Boolean())); // eslint-disable-line
+      ko(t.Promise.is(/a/));
+      ko(t.Promise.is(new RegExp('a')));
+      ko(t.Promise.is(new Error()));
+      ko(t.Promise.is(new Date()));
     });
 
   });

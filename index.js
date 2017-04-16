@@ -23,6 +23,7 @@ t.Number = require('./lib/Number');
 t.Integer = require('./lib/Integer');
 t.IntegerT = t.Integer;
 t.Object = require('./lib/Object');
+t.Promise = require('./lib/Promise');
 t.RegExp = require('./lib/RegExp');
 t.String = require('./lib/String');
 t.Type = require('./lib/Type');
