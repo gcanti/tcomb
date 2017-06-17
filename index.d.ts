@@ -25,10 +25,11 @@ declare module Tcomb {
       name: string;
       identity: boolean;
       predicate: TypeGuardPredicate<T>;
+      args: any;
     };
   }
 
-  export function irreducible<T>(name: string, predicate: Predicate<any>): Irreducible<T>;
+  export function irreducible<T>(name: string, predicate: Predicate<any>, args?: any): Irreducible<T>;
 
   //
   // basic types
@@ -72,11 +73,12 @@ declare module Tcomb {
       identity: boolean;
       type: Constructor<T>;
       predicate: TypeGuardPredicate<T>;
+      args: any;   
     };
     update: Update<T>;
   }
 
-  export function refinement<T>(type: Constructor<T>, predicate: Predicate<T>, name?: string): Refinement<T>;
+  export function refinement<T>(type: Constructor<T>, predicate: Predicate<T>, name?: string, args?: any): Refinement<T>;
 
   //
   // struct
