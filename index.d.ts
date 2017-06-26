@@ -35,7 +35,7 @@ declare module Tcomb {
   //
 
   export var Any: Irreducible<any>;
-  export var Nil: Irreducible<void>;
+  export var Nil: Irreducible<void | null>;
   export var String: Irreducible<string>;
   export var Number: Irreducible<number>;
   export var Integer: Irreducible<number>;
