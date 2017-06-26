@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.21
+
+- **Bug Fix**
+  - TypeScript definition file: `Nil` should be `void | null` (@francescogior)
+
 # v3.2.20
 
 - **Polish**
