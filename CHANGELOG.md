@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.22
+
+- **Polish**
+  - Update TypeScript definitions to allow module augmentation (@RedRoserade)
+
 # v3.2.21
 
 - **Bug Fix**
