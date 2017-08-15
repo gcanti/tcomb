@@ -123,7 +123,7 @@ where `spec` is an object containing *commands*. The following commands are comp
 * `$apply`
 * `$merge`
 
-See [Updating immutable instances](docs/GUIDE.md#updating-immutable-instances) for details.
+See [Updating immutable instances](docs/API.md#updating-immutable-instances) for details.
 
 **Speed**
 
