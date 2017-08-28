@@ -216,6 +216,7 @@ Will output 2 files:
 * [tcomb-form](https://github.com/gcanti/tcomb-form) Forms library for react
 * [tcomb-form-types](https://github.com/Industrial/tcomb-form-types) Adds Types/Validations to tcomb-form
 * [tcomb-form-native](https://github.com/gcanti/tcomb-form-native) Forms library for react-native
+* [tcomb-generate](https://github.com/typeetfunc/tcomb-generate) Generates random data by tcomb type for property-based testing
 
 # Similar projects
 
