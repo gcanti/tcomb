@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.23
+
+- **Bug Fix**
+  - declare: remove unnecessary limitation, fix #291 (@gcanti)
+
 # v3.2.22
 
 - **Polish**
