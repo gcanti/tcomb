@@ -695,7 +695,7 @@ When 2 structs share a subset of their fields you can use [mixins](https://githu
 import User from './User'
 
 // every field of User plus an id
-export default User.extends({ id: t.String }, 'IdentifiedUser')
+export default User.extend({ id: t.String }, 'IdentifiedUser')
 ```
 
 ## 3. Narrowing down the type and/or automatically sync using runtime type introspection
