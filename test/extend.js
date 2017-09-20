@@ -257,7 +257,9 @@ describe('extend(combinator, mixins, [name])', function () {
       };
       var RoleStrict = t.refinement(Role, atLeastOne$);
 
-      var CompanyContact = t.struct.extend([PersonContactStrict, mixin]);
+      var CompanyContact = t.struct.extend([PersonContactStrict, mixin], 'CompanyContact');
+      assert.strictEqual(CompanyContact.displayName, 'CompanyContact');
+      assert.strictEqual(CompanyContact.meta.name, 'CompanyContact');
       assert.strictEqual(CompanyContact.meta.kind, 'subtype');
       assert.strictEqual(CompanyContact.meta.predicate, atLeastOne);
       assert.strictEqual(CompanyContact.meta.type.meta.kind, 'struct');
