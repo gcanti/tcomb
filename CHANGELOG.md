@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.24
+
+- **Bug Fix**
+  - Struct extension of a refinement of a struct now use the correct displayName, fix #297 (@gcanti)
+
 # v3.2.23
 
 - **Bug Fix**
