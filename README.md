@@ -1,7 +1,6 @@
 [![build status](https://img.shields.io/travis/gcanti/tcomb/master.svg?style=flat-square)](https://travis-ci.org/gcanti/tcomb)
 [![dependency status](https://img.shields.io/david/gcanti/tcomb.svg?style=flat-square)](https://david-dm.org/gcanti/tcomb)
 ![npm downloads](https://img.shields.io/npm/dm/tcomb.svg)
-[![Join the chat at https://gitter.im/gcanti/tcomb](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gcanti/tcomb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 > "Si vis pacem, para bellum" - (Vegetius 5th century)
 
