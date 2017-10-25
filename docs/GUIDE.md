@@ -411,7 +411,7 @@ const Country = t.enums({
 
 # Optional values, the `maybe` combinator
 
-Prolem. So far the values were always required, but what if I must handle optional values?
+Problem. So far the values were always required, but what if I must handle optional values?
 
 Solution. There is the `maybe` combinator and it can be composed with every other combinator:
 
