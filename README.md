@@ -221,6 +221,7 @@ Will output 2 files:
 * [tcomb-form-native](https://github.com/gcanti/tcomb-form-native) Forms library for react-native
 * [tcomb-generate](https://github.com/typeetfunc/tcomb-generate) Generates random data by tcomb type for property-based testing
 * [tcomb-additional-types](http://github.com/eserozvataf/tcomb-additional-types) Provides additional predefined types for your existing tcomb setup
+* [tcomb-builder](https://github.com/cadre/tcomb-builder) An immutable syntax for defining tcomb types and forms
 
 # Similar projects
 
