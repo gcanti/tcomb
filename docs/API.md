@@ -227,6 +227,21 @@ const Point = t.struct({
 
 // point is immutable, the new keyword is optional
 const point = Point({ x: 1, y: 2 });
+
+const Point3D = t.struct({
+  x: t.Number,
+  y: t.Number,
+  z: t.Number
+}, {
+  name: 'Point3D',
+  defaultProps: {
+    y: 2,
+    z: function() { return 3; }    
+  }
+})
+
+// point now have the values {x: 1, y: 2, z: 3}
+const point = Point({ x: 1 });
 ```
 
 **Note**. `Point.is` internally uses `instanceof`.

@@ -98,7 +98,8 @@ interface Struct<T> extends Type<T> {
 
 type StructOptions = {
   name?: string,
-  strict?: boolean
+  strict?: boolean,
+  defaultProps?: Object
 };
 
 export function struct<T>(props: StructProps, name?: string | StructOptions): Struct<T>;

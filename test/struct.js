@@ -164,8 +164,9 @@ describe('t.struct(props, [name])', function () {
     it('should handle the defaultProps option', function () {
       var T = t.struct({
         name: t.String,
-        surname: t.String
-      }, { defaultProps: { surname: 'Canti' } });
+        surname: t.String,
+        number: t.Number
+      }, { defaultProps: { surname: 'Canti', number: function() { return 1; }} });
       assert.doesNotThrow(function () {
         T({ name: 'Giulio' });
       });
