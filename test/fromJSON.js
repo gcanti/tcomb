@@ -77,8 +77,30 @@ describe('fromJSON', function () {
   it('should handle struct', function () {
     var MyType = t.struct({
       name: t.String,
+      birthDate: MyDate
+    }, 'MyType');
+
+    util.throwsWithMessage(function () {
+      fromJSON(null, MyType);
+    }, '[tcomb] Invalid argument value null supplied to fromJSON(value, type) (expected an object for type MyType)');
+
+    var source = {
+      name: 'Giulio',
+      birthDate: date
+    };
+    var json = jsonify(source);
+    var actual = fromJSON(json, MyType);
+    assert.ok(actual instanceof MyType);
+    assert.deepEqual(actual, source);
+
+    util.throwsWithMessage(function () {
+      fromJSON({}, MyType);
+    }, '[tcomb] Invalid value undefined supplied to MyType/name: String');
+  });
+
+  it('should handle struct with options.defaultProps', function () {
+    var MyType = t.struct({
       surname: t.String,
-      birthDate: MyDate,
       number: t.Number
     }, {
       name: 'MyType',
@@ -90,28 +112,15 @@ describe('fromJSON', function () {
       }
     });
 
-    util.throwsWithMessage(function () {
-      fromJSON(null, MyType);
-    }, '[tcomb] Invalid argument value null supplied to fromJSON(value, type) (expected an object for type MyType)');
-
-    var source = {
-      name: 'Giulio',
-      birthDate: date
-    };
+    var source = {};
     var expected = {
-      name: 'Giulio',
       surname: 'Canti',
-      birthDate: date,
       number: 2
     };
     var json = jsonify(source);
     var actual = fromJSON(json, MyType);
     assert.ok(actual instanceof MyType);
     assert.deepEqual(actual, expected);
-
-    util.throwsWithMessage(function () {
-      fromJSON({}, MyType);
-    }, '[tcomb] Invalid value undefined supplied to MyType/name: String');
   });
 
   it('should handle interface', function () {
