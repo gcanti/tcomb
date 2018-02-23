@@ -77,8 +77,18 @@ describe('fromJSON', function () {
   it('should handle struct', function () {
     var MyType = t.struct({
       name: t.String,
-      birthDate: MyDate
-    }, 'MyType');
+      surname: t.String,
+      birthDate: MyDate,
+      number: t.Number
+    }, {
+      name: 'MyType',
+      defaultProps: {
+        surname: 'Canti',
+        get number() {
+          return 2;
+        }
+      }
+    });
 
     util.throwsWithMessage(function () {
       fromJSON(null, MyType);
@@ -88,10 +98,16 @@ describe('fromJSON', function () {
       name: 'Giulio',
       birthDate: date
     };
+    var expected = {
+      name: 'Giulio',
+      surname: 'Canti',
+      birthDate: date,
+      number: 2
+    };
     var json = jsonify(source);
     var actual = fromJSON(json, MyType);
     assert.ok(actual instanceof MyType);
-    assert.deepEqual(actual, source);
+    assert.deepEqual(actual, expected);
 
     util.throwsWithMessage(function () {
       fromJSON({}, MyType);
