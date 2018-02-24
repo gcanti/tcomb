@@ -98,6 +98,31 @@ describe('fromJSON', function () {
     }, '[tcomb] Invalid value undefined supplied to MyType/name: String');
   });
 
+  it('should handle struct with options.defaultProps', function () {
+    var MyType = t.struct({
+      surname: t.String,
+      number: t.Number
+    }, {
+      name: 'MyType',
+      defaultProps: {
+        surname: 'Canti',
+        get number() {
+          return 2;
+        }
+      }
+    });
+
+    var source = {};
+    var expected = {
+      surname: 'Canti',
+      number: 2
+    };
+    var json = jsonify(source);
+    var actual = fromJSON(json, MyType);
+    assert.ok(actual instanceof MyType);
+    assert.deepEqual(actual, expected);
+  });
+
   it('should handle interface', function () {
     var MyType = t.interface({
       name: t.String,
