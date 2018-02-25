@@ -55,8 +55,8 @@ describe('t.maybe(type, [name])', function () {
 
     it('should hydrate the elements of the maybe', function () {
       var T = t.maybe(Point);
-      assert.deepEqual(T(null), null);
-      assert.deepEqual(T(undefined), null);
+      assert.strictEqual(T(null), null);
+      assert.strictEqual(T(undefined), undefined);
       assert.ok(Point.is(T({x: 0, y: 0})));
     });
 
