@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.25
+
+- **Bug Fix**
+  - fromJSON makes use of defaultProps while deserializing a struct, fix #312 (@rkmax)
+
 # v3.2.24
 
 - **Bug Fix**
