@@ -57,8 +57,7 @@ type Command = ApplyCommand | PushCommand | RemoveCommand | SetCommand | SpliceC
 type UpdatePatch = Command | { [key: string]: UpdatePatch };
 type Update<T> = (instance: T, spec: UpdatePatch) => T;
 
-type Con
-                            or<T> = Type<T> | Function;
+type Constructor<T> = Type<T> | Function;
 
 //
 // refinement
