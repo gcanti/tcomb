@@ -57,7 +57,8 @@ type Command = ApplyCommand | PushCommand | RemoveCommand | SetCommand | SpliceC
 type UpdatePatch = Command | { [key: string]: UpdatePatch };
 type Update<T> = (instance: T, spec: UpdatePatch) => T;
 
-type Constructor<T> = Type<T> | Function;
+type Con
+                            or<T> = Type<T> | Function;
 
 //
 // refinement
@@ -91,14 +92,16 @@ interface Struct<T> extends Type<T> {
     identity: boolean;
     props: StructProps;
     strict: boolean;
+    defaultProps: object;
   };
   update: Update<T>;
-  extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
+  extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string | StructOptions): Struct<E>;
 }
 
 type StructOptions = {
   name?: string,
-  strict?: boolean
+  strict?: boolean,
+  defaultProps? object
 };
 
 export function struct<T>(props: StructProps, name?: string | StructOptions): Struct<T>;
