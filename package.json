@@ -1,6 +1,6 @@
 {
   "name": "tcomb",
-  "version": "3.2.25",
+  "version": "3.2.26",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
   "typings": "index.d.ts",

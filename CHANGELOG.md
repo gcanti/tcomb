@@ -12,6 +12,12 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.26
+
+- **Bug Fix**
+  - struct typescript extend signature, #317 (@lramel)
+  - defaultProps missing from StructOptions, #317 (@lramel)
+
 # v3.2.25
 
 - **Bug Fix**
