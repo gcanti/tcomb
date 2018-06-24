@@ -10,6 +10,13 @@ tcomb is a library for Node.js and the browser which allows you to **check the t
 
 You may want to check out [io-ts](https://github.com/gcanti/io-ts)
 
+# IMPORTANT: Running in production
+
+tcomb is supposed to be used in **development** and is **disabled in production**. 
+If you want type checks in production you may use 
+- [tcomb-validation](https://github.com/gcanti/tcomb-validation)
+- [io-ts](https://github.com/gcanti/io-ts)
+
 # Setup
 
 ```sh
