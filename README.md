@@ -141,7 +141,7 @@ See [Updating immutable instances](docs/API.md#updating-immutable-instances) for
 
 **Runtime type introspection**
 
-All models are inspectable at runtime. You can read and reuse the informations stored in your types (in the `meta` static member). See [The meta object](docs/GUIDE.md#the-meta-object) in the docs for details.
+All models are inspectable at runtime. You can read and reuse the information stored in your types (in the `meta` static member). See [The meta object](docs/GUIDE.md#the-meta-object) in the docs for details.
 
 Libraries exploiting tcomb's RTI:
 
@@ -149,7 +149,7 @@ Libraries exploiting tcomb's RTI:
 - [tcomb-form](https://github.com/gcanti/tcomb-form)
 - Blog post: [JSON API Validation In Node.js](https://gcanti.github.io/2014/09/15/json-api-validation-in-node.html)
 
-**Easy JSON serialization / deseralization**
+**Easy JSON serialization / deserialization**
 
 Encodes / decodes your domain models to / from JSON for free.
 - Blog post: [JSON Deserialization Into An Object Model](https://gcanti.github.io/2014/09/12/json-deserialization-into-an-object-model.html)
