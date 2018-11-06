@@ -61,6 +61,7 @@ describe('t.enums(map, [name])', function () {
     it('should return false when x is not an instance of the enum', function () {
       assert.strictEqual(Direction.is('North-East'), false);
       assert.strictEqual(Direction.is(2), false);
+      assert.strictEqual(Direction.is(['North']), false);
     });
 
   });
@@ -82,7 +83,6 @@ describe('t.enums(map, [name])', function () {
       assert.ok(Size.meta.map['10'] === '10');
       assert.ok(Size.meta.map[10] === '10');
     });
-
   });
 
 });
