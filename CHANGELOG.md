@@ -12,6 +12,11 @@
 **Note**: Gaps between patch versions are faulty/broken releases.
 **Note**: A feature tagged as Experimental is in a high state of flux, you're at risk of it changing without notice.
 
+# v3.2.28
+
+- **Bug Fix**
+  - Enums.is() with an array value should always be false, #327 (@phorsuedzie)
+
 # v3.2.27
 
 - **Bug Fix**
