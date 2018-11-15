@@ -110,6 +110,20 @@ const ARefinement = t.refinement<A>(A, () => true);
 ARefinement(new A())
 
 //
+// interface combinator
+//
+
+const MyCoolType = t.interface(
+  { isCool: t.Boolean },
+  { name: 'My cool type', strict: false }
+);
+
+const MySuperCoolType = MyCoolType.extend(
+  { isEvenCooler: t.Boolean },
+  { name: 'My super cool type', strict: false }
+);
+
+//
 // struct combinator
 //
 
@@ -134,6 +148,11 @@ const person2 = Person({ name: 'Giulio', age: 42 })
     surname: string;
   }
   const Person2 = Person.extend<Person2>({ surname: t.String })
+
+  const Person2b = Person.extend<Person2>(
+    { surname: t.String },
+    { name: 'Person 2b', strict: false }
+  )
 
   // update function
   const person3 = Person.update(person1, {
