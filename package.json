@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "lint": "eslint index.js lib test",
-    "test": "npm run lint && mocha",
+    "test": "npm run lint && mocha && npm run typescript",
+    "typescript": "tsc --noEmit tcomb-tests.ts",
     "dist": "webpack",
     "perf": "node ./perf/perf"
   },
@@ -29,6 +30,7 @@
     "benchmark": "2.1.0",
     "eslint": "1.10.3",
     "mocha": "2.3.4",
+    "typescript": "3.1.6",
     "webpack": "1.12.14"
   },
   "tags": [
