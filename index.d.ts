@@ -118,7 +118,7 @@ interface Interface<T> extends Type<T> {
     strict: boolean;
   };
   update: Update<T>;
-  extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string): Struct<E>;
+  extend<E extends T>(mixins: StructMixin | Array<StructMixin>, name?: string | StructOptions): Struct<E>;
 }
 
 export function interface<T>(props: StructProps, name?: string | StructOptions): Interface<T>;
