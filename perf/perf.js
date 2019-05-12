@@ -3,7 +3,7 @@
 //
 
 var Benchmark = require('benchmark');
-var t = require('../dist/tcomb.min');
+var t = require('../dist/tcomb');
 
 function getHz(bench) {
   var result = 1 / (bench.stats.mean + bench.stats.moe);

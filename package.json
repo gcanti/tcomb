@@ -3,18 +3,20 @@
   "version": "3.2.29",
   "description": "Type checking and DDD for JavaScript",
   "main": "index.js",
-  "typings": "index.d.ts",
+  "typings": "tcomb.d.ts",
+  "module": "dist/tcomb.module.js",
+  "umd:main": "dist/tcomb.umd.js",
   "files": [
     "index.js",
     "lib",
     "index.d.ts"
   ],
   "scripts": {
+    "build": "rimraf dist/ && bili",
+    "test": "npm run lint && mocha && npm run typescript && npm run perf",
     "lint": "eslint index.js lib test",
-    "test": "npm run lint && mocha && npm run typescript",
-    "typescript": "tsc --noEmit tcomb-tests.ts",
-    "dist": "webpack",
-    "perf": "node ./perf/perf"
+    "perf": "node ./perf/perf",
+    "typescript": "tsc --noEmit tcomb-tests.ts"
   },
   "repository": {
     "type": "git",
@@ -28,10 +30,11 @@
   "homepage": "https://github.com/gcanti/tcomb",
   "devDependencies": {
     "benchmark": "2.1.0",
+    "bili": "^4.7.4",
     "eslint": "1.10.3",
     "mocha": "2.3.4",
-    "typescript": "3.1.6",
-    "webpack": "1.12.14"
+    "rimraf": "^2.6.3",
+    "typescript": "3.1.6"
   },
   "tags": [
     "type",
