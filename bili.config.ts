@@ -5,7 +5,7 @@ const config: Config = {
     tcomb: "index.js"
   },
   output: {
-    format: ["cjs", "umd", "esm"],
+    format: ["cjs", "esm", "umd", "iife"],
     moduleName: "tcomb",
     sourceMap: true,
     sourceMapExcludeSources: true
@@ -15,14 +15,14 @@ const config: Config = {
     babelrc: false
   },
   extendConfig(config, { format }) {
-    config.env = {
-      NODE_ENV: "production"
-    };
-    if (format === "umd") {
-      config.output.minify = true;
-    }
     if (format === "esm") {
       config.output.fileName = "[name].module.js";
+    }
+    if (format === "umd" || format === "iife") {
+      config.env = {
+        NODE_ENV: "development"
+      };
+      config.output.minify = true;
     }
     return config;
   }
