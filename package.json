@@ -2,10 +2,10 @@
   "name": "tcomb",
   "version": "3.2.29",
   "description": "Type checking and DDD for JavaScript",
-  "main": "dist/tcomb.js",
+  "main": "index.js",
+  "typings": "tcomb.d.ts",
   "module": "dist/tcomb.module.js",
   "umd:main": "dist/tcomb.umd.js",
-  "typings": "tcomb.d.ts",
   "files": [
     "index.js",
     "lib",
